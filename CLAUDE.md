@@ -1,6 +1,6 @@
 # Express & Local
 
-Subway-themed drill for algorithms, NestJS and React. React 19 + TypeScript + Vite, no backend, progress in localStorage.
+Subway-themed drill for algorithms, NestJS, React and TypeScript. React 19 + TypeScript + Vite, no backend, progress in localStorage.
 
 ## Commands
 
@@ -13,14 +13,14 @@ Subway-themed drill for algorithms, NestJS and React. React 19 + TypeScript + Vi
 
 - `src/algorithms/`: **pure** game logic as small state machines (`init`, `want/should`, `step` returning `{ ok, state }`). No React, no DOM. Every file gets tests in `algorithms.test.ts`.
 - `src/engine/`: save data (`save.ts`, with `migrate()` for old saves), progression and scoring (`progression.ts`, where `finishTrip()` is pure and returns a new save). Tests in `engine.test.ts`.
-- `src/data/`: one file per division (`lines.ts` + `guide.ts` for algorithms, `nest.ts`, `react.ts`), merged by `index.ts` into `LINES` and `GUIDE`. Copy supports `` `code` `` and `**bold**`, rendered by `<Rich />`. `data.test.ts` validates the content.
+- `src/data/`: one file per division (`lines.ts` + `guide.ts` for algorithms, `nest.ts`, `react.ts`, `typescript.ts`), merged by `index.ts` into `LINES` and `GUIDE`. New divisions get **appended** to `LINES`: `save.dailyPick` stores an index, so inserting in the middle moves someone's Daily Ride. Copy supports `` `code` `` and `**bold**`, rendered by `<Rich />`. `data.test.ts` validates the content.
 - Lines declare a `division` (unlock order is per division) and a `kind`:
   - `game`: a hand-built component in `src/games/`, registered in `games/index.ts`
   - `quiz`: multiple choice drawn from `questions`, played by `QuizGame`
   - `flow`: put `steps` in order, played by `FlowGame`
-- `src/engine/questions.ts`: `DIVISIONS`, tier-aware `pickQuestions`/`pickFlows`, and the cram pool. Pure, tested.
+- `src/engine/questions.ts`: `DIVISIONS`, tier-aware `pickQuestions`/`pickFlows`, the cram pool, and per-question history (`qid`, `recordAnswers`, `shakyQuestions`). Pure, tested.
 - `src/games/`: one component per line, registered in `games/index.ts`. Games receive a `GameApi` (`say`, `correct`, `wrong`, `finish`, `tier`, `assist`, `over`) and render a `.board` and a `.side`. The play screen owns hearts, XP, and the clock.
-- `src/components/`: screens and shared UI. `App.tsx` is a small screen state machine: intro → play → quiz → result (or derailed), plus a cram run that scores through `finishCram` and never touches line progress.
+- `src/components/`: screens and shared UI. `App.tsx` is a small screen state machine: intro → play → quiz → result (or derailed), plus a cram run that scores through `finishCram`, a shaky drill built from `shakyQuestions`, and an out-loud rehearsal (`Rehearse.tsx` → `finishRehearsal`). None of those three touch line progress.
 - Styles: one stylesheet, `src/styles/app.css`, built on CSS custom properties with light and dark themes. Line colors are `--red`, `--blue`, etc., exposed to a line's subtree as `--c`.
 
 ## Conventions
@@ -44,4 +44,6 @@ A new division also needs an entry in `DIVISIONS` (`engine/questions.ts`).
 
 - Every question needs its answer among its options, at least two options, and a `why` that teaches rather than restates.
 - Tier 1 questions are the ones a junior should get. Tier 3 is the deep cut.
-- Keep claims checkable: NestJS and React answers follow the current docs, and version-specific behavior says which version.
+- Keep claims checkable: stack answers follow the current docs, and version-specific behavior says which version.
+- Options must not give the answer away by length. `data.test.ts` fails a question whose answer is 1.35x its distractors, or a line where the answer is the longest option more than half the time. Write every option as a parallel claim and put the nuance in `why`.
+- Non-algorithm lines need at least two `rehearse` prompts in their guide, written as a full spoken answer.

@@ -1,8 +1,8 @@
 # Express & Local
 
-**Learn it by doing it.** A subway-themed drill for the things I keep having to re-learn: algorithms, NestJS and React. You don't read about BFS here, you *are* BFS, clicking stations in order while the queue fills up next to you. Then the NestJS and React lines drill the same way a real interview does, one question at a time, with the reason spelled out when you miss.
+**Learn it by doing it.** A subway-themed drill for the things I keep having to re-learn: algorithms, NestJS, React and TypeScript. You don't read about BFS here, you *are* BFS, clicking stations in order while the queue fills up next to you. Then the stack lines drill the same way a real interview does, one question at a time, with the reason spelled out when you miss, and an out-loud round so you have said the answer before someone asks for it.
 
-![The map: three divisions, a cram drill at the bottom](docs/map.png)
+![The map: four divisions, a cram drill at the bottom](docs/map.png)
 
 ## Why this exists
 
@@ -52,12 +52,25 @@ Hand-built games. You play the algorithm step by step.
 | **F** | Memo Yard | memo, useMemo, useCallback, profiling |
 | **N** | Hook Junction | Hook rules and the React 19 APIs |
 
+### TypeScript
+
+| | Line | Topic |
+|---|---|---|
+| **T** | Narrow Gauge | Narrowing, guards, discriminated unions |
+| **G** | Generic Line | Generics, constraints, inference |
+| **U** | Utility Yard | Partial, Pick, Omit, Record, ReturnType |
+| **X** | Unknown Territory | any vs unknown, assertions, satisfies, strict |
+| **Y** | Shape Yard | Structural typing, interfaces vs types |
+| **Z** | Typed Components | Props, events, refs and hooks in React |
+
 ## What keeps you coming back
 
 - **Three tiers per line.** Local, Express, Rush Hour. Inputs get bigger, question pools get deeper, and Rush Hour takes the helpers away and adds a par time.
 - **Spaced repetition.** Clearing a line schedules a review (1, 3, 7, 14, then 30 days) with a Leitner box. Nail the review and the gap grows, stumble and it shrinks.
 - **Cram drill.** Twelve mixed questions from everything you have opened, five hearts, no tiers, filterable by division. Built for the morning of an interview.
-- **A field guide on every line.** Plain English, vocabulary, real code, and for the NestJS and React lines, the talking points to say out loud plus the gotcha people trip on.
+- **Weak spots come back.** Every question is tracked by id, so the ones you have missed are flagged as shaky, weighted into cram drills, and drillable on their own from the line or the map.
+- **Say it out loud.** The stack lines have rehearsal prompts: answer in full sentences, then check yourself against the model answer. Anything you call shaky is asked first next time. Reading an answer and saying one are different skills, and interviews test the second.
+- **A field guide on every line.** Plain English, vocabulary, real code, and for the stack lines, the talking points to say out loud plus the gotcha people trip on.
 - **Streaks, a daily ride, badges and personal bests.**
 
 ![Mid-ride on the BFS line](docs/bfs.png)
@@ -95,7 +108,7 @@ npm run build      # typecheck + production build into dist/
 ## Adding a line
 
 1. Add the id to `LineId` in `src/engine/types.ts`.
-2. Add the line to its division's data file (`src/data/nest.ts`, `react.ts`, or `lines.ts`) with `division`, `kind`, copy and content.
+2. Add the line to its division's data file (`src/data/nest.ts`, `react.ts`, `typescript.ts`, or `lines.ts`) with `division`, `kind`, copy and content.
 3. Add its field guide entry in the same file.
 4. For a `kind: 'game'` line, write the pure logic in `src/algorithms/` with tests and register the component in `src/games/index.ts`. Quiz and flow lines need no component.
 
@@ -103,7 +116,7 @@ Adding a whole division is the same, plus an entry in `DIVISIONS` in `src/engine
 
 ## Roadmap
 
-- [ ] **TypeScript division:** narrowing, generics, utility types, `unknown` vs `any`, `satisfies`
+- [x] **TypeScript division:** narrowing, generics, utility types, `unknown` vs `any`, `satisfies`
 - [ ] **Engineer's Cab:** after Rush Hour, write the algorithm yourself against in-browser tests
 - [ ] **Scenario mode:** read a real-world situation, pick the right algorithm or the right Nest building block
 - [ ] More lines: LRU cache, heaps, linked lists, SQL joins, Git as a train yard
