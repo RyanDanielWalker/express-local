@@ -1,4 +1,4 @@
-import { GUIDE } from '../data/guide';
+import { GUIDE } from '../data';
 import type { Line } from '../engine/types';
 import { lineStyle } from './Bullet';
 import { Rich } from './Rich';
@@ -35,18 +35,36 @@ export function FieldGuide({ line }: { line: Line }) {
           <pre className="code">{g.code.snippet}</pre>
           {g.code.note && <p className="hint" style={{ margin: 0 }}>{g.code.note}</p>}
         </div>
-        <div>
-          <div className="eyebrow">Reach for it when</div>
-          <ul className="rules">{g.when.map(x => <li key={x}>{x}</li>)}</ul>
-        </div>
-        <div>
-          <div className="eyebrow">Famous problems</div>
-          <ul className="rules">{g.famous.map(x => <li key={x}>{x}</li>)}</ul>
-        </div>
-        <div className="gwide">
-          <div className="eyebrow">Backstory</div>
-          <p>{g.lore}</p>
-        </div>
+        {g.when && (
+          <div>
+            <div className="eyebrow">Reach for it when</div>
+            <ul className="rules">{g.when.map(x => <li key={x}>{x}</li>)}</ul>
+          </div>
+        )}
+        {g.famous && (
+          <div>
+            <div className="eyebrow">Famous problems</div>
+            <ul className="rules">{g.famous.map(x => <li key={x}>{x}</li>)}</ul>
+          </div>
+        )}
+        {g.say && (
+          <div className="gwide">
+            <div className="eyebrow">If they ask, say this</div>
+            <ul className="say">{g.say.map(x => <li key={x}><Rich text={x} /></li>)}</ul>
+          </div>
+        )}
+        {g.gotcha && (
+          <div className="gwide hook">
+            <b>Gotcha</b>
+            <Rich text={g.gotcha} />
+          </div>
+        )}
+        {g.lore && (
+          <div className="gwide">
+            <div className="eyebrow">Backstory</div>
+            <p>{g.lore}</p>
+          </div>
+        )}
       </div>
     </section>
   );

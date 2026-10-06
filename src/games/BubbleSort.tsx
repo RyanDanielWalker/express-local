@@ -3,7 +3,7 @@ import { bubbleInit, bubbleShouldSwap, bubbleStep, type BubbleState } from '../a
 import { range, shuffle } from '../lib/random';
 import { useTimers } from '../hooks/useTimers';
 import { useKeys } from '../hooks/useKeys';
-import { LINES } from '../data/lines';
+import { LINES } from '../data';
 import { Rich } from '../components/Rich';
 import { Kbd, Panel } from './parts';
 import type { GameProps } from './types';

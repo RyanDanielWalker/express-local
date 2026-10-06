@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { binInit, binMaxChecks, binMid, binOver, binStep, type BinState } from '../algorithms/searching';
 import { range, rnd, shuffle } from '../lib/random';
 import { useTimers } from '../hooks/useTimers';
-import { LINES } from '../data/lines';
+import { LINES } from '../data';
 import { Rich } from '../components/Rich';
 import { Panel, plural } from './parts';
 import type { GameProps } from './types';

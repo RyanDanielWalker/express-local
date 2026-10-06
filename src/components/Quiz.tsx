@@ -10,7 +10,7 @@ const lastAsked: Partial<Record<string, QuizQuestion>> = {};
 export function Quiz({ line, onDone }: { line: Line; onDone: (correct: boolean) => void }) {
   const later = useTimers();
   const [{ q, opts }] = useState(() => {
-    const pool = line.quiz.filter(x => x !== lastAsked[line.id]);
+    const pool = (line.quiz ?? []).filter(x => x !== lastAsked[line.id]);
     const q = pool[Math.floor(Math.random() * pool.length)];
     lastAsked[line.id] = q;
     return { q, opts: shuffle([...q.opts]) };

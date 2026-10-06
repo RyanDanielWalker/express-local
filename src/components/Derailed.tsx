@@ -1,4 +1,4 @@
-import { GUIDE } from '../data/guide';
+import { GUIDE } from '../data';
 import type { Line } from '../engine/types';
 import { lineStyle } from './Bullet';
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { sqNext, sqPatterns, sqRemove, type SqMode, type SqOp } from '../algorithms/stackQueue';
 import { range, rnd, shuffle } from '../lib/random';
 import { useTimers } from '../hooks/useTimers';
-import { LINES } from '../data/lines';
+import { LINES } from '../data';
 import { Rich } from '../components/Rich';
 import { Panel } from './parts';
 import type { GameProps } from './types';

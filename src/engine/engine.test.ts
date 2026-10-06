@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DAY, dayKey, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
+import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN } from './questions';
+import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
 import type { SaveData } from './types';
 
@@ -31,7 +33,7 @@ describe('ranks and unlocks', () => {
     expect(rankFor(99999).next).toBeNull();
   });
 
-  it('opens lines in order and tiers one at a time', () => {
+  it('opens lines in order inside a division, and tiers one at a time', () => {
     const s = emptySave();
     expect(isUnlocked(s, 0)).toBe(true);
     expect(isUnlocked(s, 1)).toBe(false);
@@ -94,5 +96,40 @@ describe('finishing a trip', () => {
     expect(r1.ledger.some(([k]) => k === 'Daily Ride')).toBe(true);
     const r2 = finishTrip(r1.save, outcome, NOW);
     expect(r2.ledger.some(([k]) => k === 'Daily Ride')).toBe(false);
+  });
+});
+
+describe('question pools', () => {
+  const pool: Question[] = [1, 1, 2, 2, 3, 3, 1, 2, 3, 1, 2, 3].map((t, i) => ({
+    t: t as Tier, q: `q${i}`, opts: ['a', 'b'], a: 'a', why: 'because',
+  }));
+
+  it('only asks questions unlocked at the current tier', () => {
+    expect(pickQuestions(pool, 1).every(q => q.t === 1)).toBe(true);
+    expect(pickQuestions(pool, 2).every(q => q.t <= 2)).toBe(true);
+    expect(pickQuestions(pool, 3, 99).some(q => q.t === 3)).toBe(true);
+  });
+
+  it('asks more questions at higher tiers and never repeats one in a run', () => {
+    for (const tier of [1, 2, 3] as Tier[]) {
+      const run = pickQuestions(pool, tier);
+      expect(run.length).toBe(Math.min(QUESTIONS_PER_RUN[tier], pool.filter(q => q.t <= tier).length));
+      expect(new Set(run.map(q => q.q)).size).toBe(run.length);
+    }
+  });
+
+  it('does not mutate or drain the pool', () => {
+    const before = pool.map(q => q.q);
+    pickQuestions(pool, 3);
+    pickQuestions(pool, 3);
+    expect(pool.map(q => q.q)).toEqual(before);
+  });
+
+  it('walks a flow one step at a time and reports the end', () => {
+    const flow: Flow = { t: 1, title: 'a request', steps: ['one', 'two', 'three'], note: 'that is why' };
+    expect(nextStep(flow, [])).toBe('one');
+    expect(nextStep(flow, ['one', 'two'])).toBe('three');
+    expect(nextStep(flow, ['one', 'two', 'three'])).toBeNull();
+    expect(pickFlows([flow], 1)).toHaveLength(1);
   });
 });

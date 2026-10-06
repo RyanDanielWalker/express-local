@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { Tier } from '../engine/types';
+import type { Line, Tier } from '../engine/types';
 
 export type Tone = 'good' | 'bad' | '';
 
@@ -18,4 +18,6 @@ export interface GameApi {
 
 export interface GameProps {
   api: GameApi;
+  /** The line being played, so data-driven games can read their own pool. */
+  line: Line;
 }

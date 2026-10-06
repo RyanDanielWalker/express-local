@@ -1,7 +1,8 @@
-import { GUIDE } from '../data/guide';
+import { GUIDE } from '../data';
 import { fmtTime, TIERS, type TripResult } from '../engine/progression';
 import type { Line, Tier } from '../engine/types';
 import { lineStyle } from './Bullet';
+import { Rich } from './Rich';
 import type { RideStats } from './PlayScreen';
 import { BadgeCard } from './Badges';
 
@@ -18,8 +19,9 @@ interface Props {
 
 export function Results({ line, ride, result, nextName, onAgain, onNext, onTier, onMap }: Props) {
   const { ledger, total, badges, beatPar, newBest, unlockedTier, reviewInDays } = result;
-  const famous = GUIDE[line.id].famous;
-  const tryIt = famous[(ride.rideXp + ride.mistakes) % famous.length];
+  const g = GUIDE[line.id];
+  const prompts = g.famous ?? g.say ?? [];
+  const tryIt = prompts.length ? prompts[(ride.rideXp + ride.mistakes) % prompts.length] : null;
   const perfect = ride.mistakes === 0;
 
   return (
@@ -49,8 +51,8 @@ export function Results({ line, ride, result, nextName, onAgain, onNext, onTier,
         </div>
       )}
       {unlockedTier && <div className="daily">{TIERS[unlockedTier].name} is now open on this line. {TIERS[unlockedTier].blurb}</div>}
-      <div><span className="stamp">{line.bigO}</span></div>
-      <div className="hook"><b>Try it for real</b>{tryIt}</div>
+      {line.bigO && <div><span className="stamp">{line.bigO}</span></div>}
+      {tryIt && <div className="hook"><b>{g.famous ? 'Try it for real' : 'Say this out loud'}</b><Rich text={tryIt} /></div>}
       <p className="hint" style={{ margin: 0 }}>
         Next review in {reviewInDays} day{reviewInDays === 1 ? '' : 's'}. Come back when the map says <b>Review</b>. Riding it again right before you forget is what makes it stick.
       </p>

@@ -1,13 +1,15 @@
 import type { Line } from '../engine/types';
 
 /**
- * Every line on the map, in unlock order.
+ * The algorithms division, in unlock order.
  * Copy supports `inline code` and **bold** (rendered by <Rich />).
  * `par` is the Rush Hour par time in seconds.
  */
-export const LINES: Line[] = [
+export const ALGO_LINES: Line[] = [
   {
     id: 'sq',
+    division: 'algos',
+    kind: 'game',
     bullet: 'Q',
     color: '--orange',
     short: 'Stack/Queue',
@@ -55,6 +57,8 @@ q.shift();
   },
   {
     id: 'bfs',
+    division: 'algos',
+    kind: 'game',
     bullet: 'B',
     color: '--red',
     short: 'BFS',
@@ -103,6 +107,8 @@ q.shift();
   },
   {
     id: 'dfs',
+    division: 'algos',
+    kind: 'game',
     bullet: 'D',
     color: '--blue',
     short: 'DFS',
@@ -151,6 +157,8 @@ q.shift();
   },
   {
     id: 'bin',
+    division: 'algos',
+    kind: 'game',
     bullet: 'S',
     color: '--yellow',
     darkText: true,
@@ -195,6 +203,8 @@ else hi = mid - 1;`,
   },
   {
     id: 'bub',
+    division: 'algos',
+    kind: 'game',
     bullet: 'W',
     color: '--green',
     short: 'Bubble sort',
@@ -238,6 +248,8 @@ else hi = mid - 1;`,
   },
   {
     id: 'rec',
+    division: 'algos',
+    kind: 'game',
     bullet: 'R',
     color: '--purple',
     short: 'Recursion',
@@ -282,6 +294,8 @@ else hi = mid - 1;`,
   },
   {
     id: 'hash',
+    division: 'algos',
+    kind: 'game',
     bullet: 'H',
     color: '--brown',
     short: 'Hash tables',
@@ -325,6 +339,8 @@ for (const x of nums) {
   },
   {
     id: 'merge',
+    division: 'algos',
+    kind: 'game',
     bullet: 'M',
     color: '--lime',
     darkText: true,
@@ -372,6 +388,8 @@ return out.concat(left.slice(___), right.slice(j));`,
   },
   {
     id: 'quick',
+    division: 'algos',
+    kind: 'game',
     bullet: 'P',
     color: '--magenta',
     short: 'Quicksort',
@@ -417,6 +435,8 @@ quickSort(a, ___, hi);`,
   },
   {
     id: 'two',
+    division: 'algos',
+    kind: 'game',
     bullet: '2',
     color: '--teal',
     short: 'Two pointers',
@@ -461,6 +481,8 @@ while (lo ___ hi) {
   },
   {
     id: 'dij',
+    division: 'algos',
+    kind: 'game',
     bullet: 'J',
     color: '--slate',
     short: 'Dijkstra',

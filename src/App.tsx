@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LINES } from './data/lines';
+import { LINES } from './data';
 import { dailyDone, ensureDailyPick, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
 import { loadSave, persistSave } from './engine/save';
 import type { SaveData, Tier } from './engine/types';
@@ -62,14 +62,22 @@ export default function App() {
     setScreen({ kind: 'intro' });
   };
 
-  const onArrive = useCallback((ride: RideStats) => setScreen({ kind: 'quiz', ride }), []);
-  const onDerail = useCallback(() => setScreen({ kind: 'derailed' }), []);
+  /** Score the run, bank the new save, show the results screen. */
+  const finish = useCallback(
+    (ride: RideStats, quizOk: boolean) => {
+      const result = finishTrip(save, { lineIdx: current, quizOk, ...ride });
+      setSave(result.save);
+      setScreen({ kind: 'result', ride, result });
+    },
+    [current, save],
+  );
 
-  function onQuizDone(ride: RideStats, quizOk: boolean) {
-    const result = finishTrip(save, { lineIdx: current, quizOk, ...ride });
-    setSave(result.save);
-    setScreen({ kind: 'result', ride, result });
-  }
+  // Algorithm lines end with a code check. Quiz and flow lines already asked their questions.
+  const onArrive = useCallback(
+    (ride: RideStats) => (LINES[current].quiz?.length ? setScreen({ kind: 'quiz', ride }) : finish(ride, false)),
+    [current, finish],
+  );
+  const onDerail = useCallback(() => setScreen({ kind: 'derailed' }), []);
 
   let stage;
   switch (screen.kind) {
@@ -98,7 +106,7 @@ export default function App() {
       );
       break;
     case 'quiz':
-      stage = <Quiz line={line} onDone={ok => onQuizDone(screen.ride, ok)} />;
+      stage = <Quiz line={line} onDone={ok => finish(screen.ride, ok)} />;
       break;
     case 'result':
       stage = (

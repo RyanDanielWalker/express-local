@@ -1,4 +1,4 @@
-import { LINES } from '../data/lines';
+import { LINES } from '../data';
 import { DAY, fmtTime, isUnlocked, maxTier, TIERS } from '../engine/progression';
 import type { SaveData, Tier } from '../engine/types';
 import { Bullet, lineStyle } from './Bullet';

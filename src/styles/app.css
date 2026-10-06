@@ -271,3 +271,27 @@ code{font-family:var(--mono); font-size:.92em}
 .transfer textarea{width:100%; min-height:90px; font-family:var(--mono); font-size:12px; border:1px solid var(--rule); border-radius:8px; background:var(--tile); color:var(--ink); padding:10px}
 .footer{display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; color:var(--muted); font-size:13px; border-top:1px solid var(--rule); padding-top:14px}
 .footer .link{background:none; border:0; padding:0; text-decoration:underline; color:var(--ink); font-size:13px}
+
+/* quiz + flow lines (NestJS, React) */
+.qcard{display:flex; flex-direction:column; gap:14px}
+.qcard .q{font-size:18px; margin:0; max-width:70ch}
+.qcard pre.code{font-size:13px}
+.opts.stack{flex-direction:column; align-items:stretch}
+.opts.stack button{text-align:left; font-family:var(--body); font-weight:400; font-size:15.5px; line-height:1.4}
+.progress{display:flex; gap:4px}
+.progress i{flex:1; height:6px; border-radius:3px; background:var(--rule)}
+.progress i.ok{background:var(--good)} .progress i.no{background:var(--bad)} .progress i.now{background:var(--ink)}
+.why{border-left:6px solid var(--c); background:var(--tile); padding:10px 14px; border-radius:0 8px 8px 0; max-width:70ch}
+.why b{display:block; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+.scenario{font-size:17px; margin:0; max-width:68ch}
+.flow{display:flex; flex-direction:column; gap:8px}
+.flow .slot{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; border:2px solid var(--rule); background:var(--tile); font-family:var(--mono); font-size:14px}
+.flow .slot.done{border-color:var(--c); background:color-mix(in srgb, var(--c) 12%, var(--panel))}
+.flow .n{display:inline-grid; place-items:center; width:24px; height:24px; border-radius:50%; background:var(--ink); color:var(--bg); font-size:12px; font-weight:700; flex:none}
+.flow .slot.done .n{background:var(--c)}
+.steps{display:flex; flex-wrap:wrap; gap:8px}
+.steps button{font-family:var(--mono); font-size:14px; padding:10px 14px; border-radius:8px; border:2px solid var(--rule); background:var(--tile); text-align:left}
+.steps button:hover:not(:disabled){border-color:var(--ink)}
+.steps button:disabled{opacity:.25; cursor:default}
+.say{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px}
+.say li::marker{color:var(--c)}

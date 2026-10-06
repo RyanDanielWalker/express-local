@@ -1,4 +1,4 @@
-import { LINES } from '../data/lines';
+import { LINES } from '../data';
 import { emptyProgress } from './save';
 import type { LineProgress, SaveData, Tier } from './types';
 
@@ -44,7 +44,15 @@ export function rankFor(xp: number) {
 
 export const progressOf = (save: SaveData, idx: number): LineProgress | undefined => save.levels[LINES[idx].id];
 
-export const isUnlocked = (save: SaveData, idx: number): boolean => idx === 0 || !!progressOf(save, idx - 1)?.cleared;
+/**
+ * Lines unlock in order inside their own division, so starting NestJS does not
+ * mean finishing every sorting line first.
+ */
+export const isUnlocked = (save: SaveData, idx: number): boolean => {
+  const prev = LINES[idx - 1];
+  if (!prev || prev.division !== LINES[idx].division) return true;
+  return !!progressOf(save, idx - 1)?.cleared;
+};
 
 export const isDue = (p: LineProgress | undefined, now = Date.now()): boolean => !!p && p.cleared && now >= p.due;
 

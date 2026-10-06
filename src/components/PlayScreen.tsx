@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { GUIDE } from '../data/guide';
+import { GUIDE } from '../data';
 import { GAMES } from '../games';
+import { QuizGame } from '../games/QuizGame';
+import { FlowGame } from '../games/FlowGame';
 import type { GameApi, Tone } from '../games/types';
 import { fmtTime, TIERS } from '../engine/progression';
-import type { Line, Tier } from '../engine/types';
+import type { AlgoLineId, Line, Tier } from '../engine/types';
 import { useTimers } from '../hooks/useTimers';
 import { Bullet, lineStyle } from './Bullet';
 import { Words } from './FieldGuide';
@@ -76,7 +78,7 @@ export function PlayScreen({ line, tier, firstTime, onArrive, onDerail }: Props)
     };
   }, [tier, later, onArrive, onDerail]);
 
-  const Game = GAMES[line.id];
+  const Game = line.kind === 'quiz' ? QuizGame : line.kind === 'flow' ? FlowGame : GAMES[line.id as AlgoLineId];
   const g = GUIDE[line.id];
 
   return (
@@ -103,7 +105,7 @@ export function PlayScreen({ line, tier, firstTime, onArrive, onDerail }: Props)
       </details>
       <div className={`status ${status.tone}`} aria-live="polite">{status.msg}</div>
       <div className="play">
-        <Game api={api} />
+        <Game api={api} line={line} />
       </div>
     </div>
   );

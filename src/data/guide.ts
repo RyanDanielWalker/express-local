@@ -1,7 +1,7 @@
-import type { Guide, LineId } from '../engine/types';
+import type { AlgoLineId, Guide } from '../engine/types';
 
-/** The field guide shown under each line's intro and in the in-ride "What's going on here?" panel. */
-export const GUIDE: Record<LineId, Guide> = {
+/** Field guide for the algorithms division. */
+export const ALGO_GUIDE: Record<AlgoLineId, Guide> = {
   sq: {
     plain: 'A stack and a queue are both just a list with a rule about which end you take from. A stack adds and removes at the same end, so the newest item leaves first. A queue adds at the back and removes from the front, so the oldest item leaves first. That one difference decides how BFS, DFS, undo buttons, and the JavaScript event loop behave.',
     words: [

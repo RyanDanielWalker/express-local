@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
-import { LINES } from '../data/lines';
+import { LINES } from '../data';
 import { isDue, isUnlocked } from '../engine/progression';
 import type { SaveData } from '../engine/types';
 import { Bullet } from './Bullet';
