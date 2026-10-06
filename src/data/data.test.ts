@@ -50,6 +50,23 @@ describe('line data', () => {
     }
   });
 
+  it('does not let option length give the answer away', () => {
+    // Picking the longest option should not be a winning strategy.
+    const questions = LINES.flatMap(l => l.questions ?? []);
+    let longest = 0;
+    for (const q of questions) {
+      const others = q.opts.filter(o => o !== q.a).map(o => o.length);
+      const avgOther = others.reduce((a, b) => a + b, 0) / others.length;
+      const ratio = q.a.length / avgOther;
+      expect(ratio, `answer is ${ratio.toFixed(2)}x the distractors: ${q.q.slice(0, 60)}`).toBeLessThan(1.35);
+      const lens = q.opts.map(o => o.length);
+      const max = Math.max(...lens);
+      if (q.a.length === max && lens.filter(x => x === max).length === 1) longest++;
+    }
+    // With three options, chance alone would be about a third.
+    expect(longest / questions.length).toBeLessThan(0.55);
+  });
+
   it('keeps em dashes out of player-facing copy', () => {
     const copy = LINES.flatMap(l => [l.pitch, l.hook, ...l.rules, ...(l.questions ?? []).flatMap(q => [q.q, q.why, ...q.opts])]);
     expect(copy.filter(t => t.includes('—'))).toEqual([]);
