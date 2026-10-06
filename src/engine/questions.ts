@@ -29,6 +29,16 @@ export function pickFlows(pool: Flow[], tier: Tier, count = FLOWS_PER_RUN[tier])
 /** The step that should be clicked next, or null when the flow is finished. */
 export const nextStep = (flow: Flow, placed: string[]): string | null => flow.steps[placed.length] ?? null;
 
+/**
+ * Whether a miss should name the step you were looking for.
+ *
+ * Being told converts the best moment for learning, the one right after you
+ * find a gap in your own model, into reading. So the answer stays hidden, with
+ * one exception: on Local a second miss on the same slot names it, because
+ * being stuck with no way forward teaches nothing either.
+ */
+export const revealAfterMiss = (tier: Tier, misses: number): boolean => tier === 1 && misses >= 2;
+
 /** How many questions a cram drill asks. */
 export const CRAM_SIZE = 12;
 

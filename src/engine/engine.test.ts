@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DAY, dayKey, DERAIL_COST, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isUnlocked, lineReadiness, maxTier, rankFloor, rankFor, RANKS, readinessOf } from './progression';
 import { cramPool, cramQuestions, CRAM_SIZE, qid, recordAnswers, shakyQuestions } from './questions';
 import { GUIDE, LINES } from '../data';
-import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN } from './questions';
+import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss } from './questions';
 import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
 import type { SaveData } from './types';
@@ -325,5 +325,17 @@ describe('derailing', () => {
     // and sitting exactly on a floor costs nothing at all
     expect(finishDerail({ ...emptySave(), xp: at }, { drill: false }).cost).toBe(0);
     expect(finishDerail(emptySave(), { drill: false }).save.xp).toBe(0);
+  });
+});
+
+describe('flow hints', () => {
+  it('stays quiet on a first miss at every tier', () => {
+    for (const t of [1, 2, 3] as Tier[]) expect(revealAfterMiss(t, 1)).toBe(false);
+  });
+
+  it('names the step on a second miss, but only on Local', () => {
+    expect(revealAfterMiss(1, 2)).toBe(true);
+    expect(revealAfterMiss(2, 2)).toBe(false);
+    expect(revealAfterMiss(3, 9)).toBe(false);
   });
 });

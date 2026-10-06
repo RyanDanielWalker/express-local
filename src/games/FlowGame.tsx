@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { nextStep, pickFlows } from '../engine/questions';
+import { nextStep, pickFlows, revealAfterMiss } from '../engine/questions';
 import type { Flow } from '../engine/types';
 import { useTimers } from '../hooks/useTimers';
 import { Rich } from '../components/Rich';
@@ -14,7 +14,7 @@ const given = (flow?: Flow): string[] => flow?.steps.slice(0, flow.start ?? 0) ?
 const trayFor = (flow?: Flow): string[] =>
   shuffle([...(flow?.steps.slice(flow.start ?? 0) ?? []), ...(flow?.decoys ?? [])]);
 
-/** Put the steps of a process back in order. One wrong guess names the right step. */
+/** Put the steps of a process back in order. A miss says only that it was a miss. */
 export function FlowGame({ api, line }: GameProps) {
   const later = useTimers();
   const [flows] = useState<Flow[]>(() => pickFlows(line.flows ?? [], api.tier));
@@ -22,21 +22,29 @@ export function FlowGame({ api, line }: GameProps) {
   const [placed, setPlaced] = useState<string[]>(() => given(flows[0]));
   const [tray, setTray] = useState<string[]>(() => trayFor(flows[0]));
   const [done, setDone] = useState(false);
+  /** Misses per slot, keyed by the step that was wanted. Drives the hint and the recap. */
+  const [misses, setMisses] = useState<Record<string, number>>({});
   useEffect(() => api.say('Click the stages in the order they actually run.'), [api]);
 
   const flow = flows[i];
   if (!flow) return null;
   const head = flow.start ?? 0;
+  // The teaching moved here from the moment of the miss: struggle during, explain after.
+  const fumbled = Object.keys(misses);
 
   function pick(step: string) {
     if (api.over || done) return;
     const want = nextStep(flow, placed);
-    // A decoy has no place in this run at all, so say that rather than "not yet".
     if (step !== want) {
+      // One message for every miss. Saying "not yet" would give away that the
+      // step happens later, and naming the decoy would give away that it never
+      // does. Which kind of wrong you were is the thing being drilled.
+      const n = (misses[want ?? ''] ?? 0) + 1;
+      setMisses(m => ({ ...m, [want ?? '']: n }));
       return api.wrong(
-        flow.decoys?.includes(step)
-          ? <><b>{step}</b> does not happen here. <b>{want}</b> is next.</>
-          : <>Not yet. <b>{want}</b> comes next here.</>,
+        revealAfterMiss(api.tier, n)
+          ? <>Not that one. <b>{want}</b> comes next.</>
+          : 'Not that one.',
       );
     }
     const next = [...placed, step];
@@ -52,6 +60,7 @@ export function FlowGame({ api, line }: GameProps) {
       setI(i + 1);
       setPlaced(given(n));
       setTray(trayFor(n));
+      setMisses({});
       setDone(false);
     }, 3600);
   }
@@ -77,7 +86,15 @@ export function FlowGame({ api, line }: GameProps) {
               <button key={s} disabled={placed.includes(s)} onClick={() => pick(s)}>{s}</button>
             ))}
           </div>
-          {done && <div className="why"><b>Why that order</b><Rich text={flow.note} /></div>}
+          {done && (
+            <div className="why">
+              <b>Why that order</b>
+              <Rich text={flow.note} />
+              {fumbled.length > 0 && (
+                <p className="fumbled">Worth saying out loud before you move on: <em>{fumbled.join(', ')}</em>.</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
       <div className="side">
