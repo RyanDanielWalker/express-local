@@ -61,7 +61,7 @@ export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard }: Props) 
             {locked ? (
               <>
                 <button className="btn big" disabled>Locked</button>
-                <span className="hint">Clear {LINES[idx - 1].name} to open this line.</span>
+                <span className="hint">Clear {LINES[idx - 1]?.name} to open this line.</span>
               </>
             ) : (
               <>

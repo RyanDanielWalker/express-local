@@ -7,7 +7,7 @@ export function Header({ save }: { save: SaveData }) {
     <header className="top">
       <div className="brand">
         <h1>Express &amp; Local</h1>
-        <p>You're the train. Ride each algorithm stop by stop until it's muscle memory.</p>
+        <p>Learn it by doing it. Ride each line until it's muscle memory, then keep it there.</p>
       </div>
       <div className="card" aria-live="polite">
         <div>

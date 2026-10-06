@@ -295,3 +295,11 @@ code{font-family:var(--mono); font-size:.92em}
 .steps button:disabled{opacity:.25; cursor:default}
 .say{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px}
 .say li::marker{color:var(--c)}
+
+/* divisions */
+.divisions{display:flex; flex-direction:column; gap:18px}
+.division{display:flex; flex-direction:column; gap:6px}
+.dhead{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; border-bottom:3px solid var(--ink); padding-bottom:4px}
+.dhead h3{font-family:var(--display); font-weight:900; font-size:24px; line-height:1; text-transform:uppercase; letter-spacing:.02em; margin:0}
+.dhead span{font-size:13px; color:var(--muted)}
+.dhead .xp{margin-left:auto}
