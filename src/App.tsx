@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LINES } from './data';
-import { dailyDone, ensureDailyPick, finishCram, finishRehearsal, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
+import { dailyDone, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
 import { cramPool, cramQuestions, CRAM_SIZE, recordAnswers, shakyQuestions } from './engine/questions';
 import { loadSave, persistSave } from './engine/save';
 import type { Division, Line, Question, SaveData, Tier } from './engine/types';
@@ -24,7 +24,7 @@ type Screen =
   | { kind: 'play'; tier: Tier; run: number }
   | { kind: 'quiz'; ride: RideStats }
   | { kind: 'result'; ride: RideStats; result: TripResult; mode?: 'line' | 'cram' | 'rehearsal' }
-  | { kind: 'derailed'; ride?: RideStats };
+  | { kind: 'derailed'; ride?: RideStats; cost: number };
 
 /** Open on whatever needs attention: a due review, then the next new line. */
 function startingLine(save: SaveData): number {
@@ -86,12 +86,14 @@ export default function App() {
     [current, finish],
   );
   const onDerail = useCallback(
-    (ride: RideStats) => {
+    (ride: RideStats, drill = false) => {
       // A run can end out of hearts and still teach: keep the misses.
-      setSave(s => recordAnswers(s, ride.answers.map(a => ({ lineId: a.question.from ?? LINES[current].id, question: a.question, correct: a.correct }))));
-      setScreen({ kind: 'derailed', ride });
+      const withStats = recordAnswers(save, ride.answers.map(a => ({ lineId: a.question.from ?? LINES[current].id, question: a.question, correct: a.correct })));
+      const { save: next, cost } = finishDerail(withStats, { drill });
+      setSave(next);
+      setScreen({ kind: 'derailed', ride, cost });
     },
-    [current],
+    [current, save],
   );
 
   /* ---------- cram drill: mixed questions, no line progress ---------- */
@@ -159,7 +161,7 @@ export default function App() {
           hearts={5}
           firstTime={false}
           onArrive={ride => onCramDone(ride, screen.line.questions?.length ?? CRAM_SIZE)}
-          onDerail={onDerail}
+          onDerail={ride => onDerail(ride, true)}
         />
       );
       break;
@@ -200,6 +202,7 @@ export default function App() {
       stage = (
         <Derailed
           line={line}
+          cost={screen.cost}
           missed={(screen.ride?.answers ?? []).filter(a => !a.correct).map(a => a.question)}
           onAgain={() => board()}
           onMap={toIntro}

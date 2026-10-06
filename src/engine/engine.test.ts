@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DAY, dayKey, ensureDailyPick, finishCram, finishRehearsal, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
+import { DAY, dayKey, DERAIL_COST, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isUnlocked, lineReadiness, maxTier, rankFloor, rankFor, RANKS, readinessOf } from './progression';
 import { cramPool, cramQuestions, CRAM_SIZE, qid, recordAnswers, shakyQuestions } from './questions';
 import { GUIDE, LINES } from '../data';
 import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN } from './questions';
@@ -31,8 +31,17 @@ describe('save data', () => {
 
 describe('ranks and unlocks', () => {
   it('reports progress toward the next rank', () => {
-    expect(rankFor(0)).toMatchObject({ name: 'Straphanger', next: 'Conductor', toNext: 250 });
-    expect(rankFor(99999).next).toBeNull();
+    expect(rankFor(0)).toMatchObject({ name: 'Straphanger', next: 'Conductor', toNext: RANKS[1][0] });
+    expect(rankFor(999999).next).toBeNull();
+  });
+
+  it('keeps the rank ladder pegged to the content', () => {
+    // One line at all three tiers is roughly 830 XP. The top rank should not
+    // arrive before most of the map is behind you.
+    const perLine = 830;
+    const top = RANKS[RANKS.length - 1][0];
+    expect(top / perLine).toBeGreaterThan(LINES.length * 0.6);
+    for (let i = 1; i < RANKS.length; i++) expect(RANKS[i][0]).toBeGreaterThan(RANKS[i - 1][0]);
   });
 
   it('opens lines in order inside a division, and tiers one at a time', () => {
@@ -253,5 +262,68 @@ describe('rehearsal content', () => {
         expect(p.answer.includes('—'), line.id).toBe(false);
       }
     }
+  });
+});
+
+describe('readiness', () => {
+  const cleared = (over: Partial<SaveData['levels'][keyof SaveData['levels']]> = {}) => {
+    const save = emptySave();
+    save.levels[LINES[0].id] = { cleared: true, box: 0, due: NOW + DAY, trips: 1, tier: 1, best: {}, ...over };
+    return save;
+  };
+
+  it('is zero for a line you have not cleared', () => {
+    expect(lineReadiness(LINES[0], emptySave(), NOW)).toBe(0);
+  });
+
+  it('rises with tier and with the review box', () => {
+    const basic = lineReadiness(LINES[0], cleared(), NOW);
+    const harder = lineReadiness(LINES[0], cleared({ tier: 3 }), NOW);
+    const deeper = lineReadiness(LINES[0], cleared({ box: 4, due: NOW + 30 * DAY }), NOW);
+    expect(basic).toBeGreaterThan(0);
+    expect(harder).toBeGreaterThan(basic);
+    expect(deeper).toBeGreaterThan(basic);
+    expect(lineReadiness(LINES[0], cleared({ tier: 3, box: 4, due: NOW + 30 * DAY }), NOW)).toBeLessThanOrEqual(1);
+  });
+
+  it('slides as a review goes overdue, but never to zero', () => {
+    const save = cleared({ box: 1, due: NOW });
+    const fresh = lineReadiness(LINES[0], save, NOW);
+    const late = lineReadiness(LINES[0], save, NOW + 2 * DAY);
+    const ancient = lineReadiness(LINES[0], save, NOW + 400 * DAY);
+    expect(late).toBeLessThan(fresh);
+    expect(ancient).toBeLessThan(late);
+    // You get rusty, you do not wipe. Half of what you proved survives.
+    expect(ancient).toBeCloseTo(fresh / 2, 5);
+  });
+
+  it('reports a whole division as a percentage', () => {
+    expect(readinessOf(LINES, emptySave(), NOW)).toBe(0);
+    expect(readinessOf([LINES[0]], cleared({ tier: 3, box: 4, due: NOW + 30 * DAY }), NOW)).toBeGreaterThan(50);
+  });
+});
+
+describe('derailing', () => {
+  it('costs XP on a line ride', () => {
+    const save = { ...emptySave(), xp: 2000 };
+    expect(finishDerail(save, { drill: false })).toMatchObject({ cost: DERAIL_COST });
+    expect(finishDerail(save, { drill: false }).save.xp).toBe(2000 - DERAIL_COST);
+  });
+
+  it('costs nothing on a drill', () => {
+    const save = { ...emptySave(), xp: 2000 };
+    expect(finishDerail(save, { drill: true })).toMatchObject({ cost: 0 });
+    expect(finishDerail(save, { drill: true }).save.xp).toBe(2000);
+  });
+
+  it('never demotes you below the rank you hold', () => {
+    const at = RANKS[2][0];
+    expect(rankFloor(at + 10)).toBe(at);
+    const { save, cost } = finishDerail({ ...emptySave(), xp: at + 10 }, { drill: false });
+    expect(cost).toBe(10);
+    expect(save.xp).toBe(at);
+    // and sitting exactly on a floor costs nothing at all
+    expect(finishDerail({ ...emptySave(), xp: at }, { drill: false }).cost).toBe(0);
+    expect(finishDerail(emptySave(), { drill: false }).save.xp).toBe(0);
   });
 });

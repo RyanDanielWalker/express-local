@@ -7,15 +7,18 @@ interface Props {
   line: Line;
   /** Questions missed during the run, shown so the ending is still a study moment. */
   missed?: Question[];
+  /** XP this run cost you. 0 on a drill, or when you are sitting on a rank floor. */
+  cost?: number;
   onAgain: () => void;
   onMap: () => void;
 }
 
-export function Derailed({ line, missed = [], onAgain, onMap }: Props) {
+export function Derailed({ line, missed = [], cost = 0, onAgain, onMap }: Props) {
   return (
     <div className="result" style={lineStyle(line)}>
       <div className="eyebrow">Out of hearts</div>
       <h2>Service suspended</h2>
+      {cost > 0 && <p className="cost">The ride cost you <b>{cost} XP</b>. Clearing it once pays that back several times over.</p>}
       <p>Mistakes are the fastest teacher. Here's the idea to lock in before you ride again:</p>
       {GUIDE[line.id] && <div className="hook"><b>In plain English</b>{GUIDE[line.id].plain}</div>}
       {missed.length > 0 && (

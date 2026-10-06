@@ -1,6 +1,7 @@
 import { LINES } from '../data';
+import { qid } from './questions';
 import { emptyProgress } from './save';
-import type { LineProgress, SaveData, Tier } from './types';
+import type { Line, LineProgress, SaveData, Tier } from './types';
 
 export const DAY = 864e5;
 /** Leitner boxes: days until the next review after each successful one. */
@@ -12,14 +13,34 @@ export const TIERS: Record<Tier, { name: string; mult: number; blurb: string }> 
   3: { name: 'Rush Hour', mult: 2, blurb: 'Biggest inputs, fewer helpers, and a par time to beat. ×2 XP.' },
 };
 
+/**
+ * Pegged to the content, not to a guess. Clearing one line at all three tiers
+ * is about 830 XP, and there are 29 lines, so the map alone holds roughly
+ * 24,000 before any reviews, drills or rehearsals. The old ladder topped out at
+ * 5,500, which arrived after about seven lines.
+ */
 export const RANKS: [number, string][] = [
   [0, 'Straphanger'],
-  [250, 'Conductor'],
-  [700, 'Dispatcher'],
-  [1500, 'Signal Engineer'],
-  [3000, 'Chief of Operations'],
-  [5500, 'Transit Legend'],
+  [300, 'Conductor'],
+  [800, 'Dispatcher'],
+  [1600, 'Signal Engineer'],
+  [2800, 'Yardmaster'],
+  [4500, 'Line Supervisor'],
+  [6800, 'Chief of Operations'],
+  [10000, 'System Architect'],
+  [14000, 'Transit Authority'],
+  [19000, 'Transit Legend'],
 ];
+
+/** XP floor of the rank you currently hold. A bad run cannot drop you below it. */
+export function rankFloor(xp: number): number {
+  let lo = 0;
+  for (const [at] of RANKS) if (xp >= at) lo = at;
+  return lo;
+}
+
+/** What a derailed ride costs. Drills are exempt: being wrong there is the point. */
+export const DERAIL_COST = 50;
 
 /** Local calendar day as YYYY-MM-DD. */
 export function dayKey(t = Date.now()): string {
@@ -82,6 +103,59 @@ export function ensureDailyPick(save: SaveData, now = Date.now()): number {
 }
 
 export const dailyDone = (save: SaveData, now = Date.now()): boolean => save.daily === dayKey(now);
+
+/* ---------- readiness ---------- */
+
+/**
+ * Share of a line's questions you have answered and are not currently shaky on.
+ * `null` when the line has no pool to measure (the algorithm games), so the
+ * caller can weigh the other signals instead of inventing a number.
+ */
+function recallOf(line: Line, save: SaveData): number | null {
+  const pool = line.questions ?? [];
+  if (!pool.length) return null;
+  let solid = 0;
+  for (const q of pool) {
+    const stat = save.questions[qid(line.id, q)];
+    if (stat && stat.missed === 0) solid++;
+  }
+  // Measured against the whole pool, so full marks need full coverage.
+  return solid / pool.length;
+}
+
+/**
+ * How ready one line is right now, 0 to 1. Unlike XP this is a state, not a
+ * total: it reflects what you would recall today, so it slides on its own as a
+ * review goes overdue and climbs again when you ride.
+ */
+export function lineReadiness(line: Line, save: SaveData, now = Date.now()): number {
+  const p = save.levels[line.id];
+  if (!p?.cleared) return 0;
+  const tier = (p.tier - 1) / 2;
+  const depth = p.box / (BOX_DAYS.length - 1);
+  const recall = recallOf(line, save);
+  // What you have proven. Both forms top out at 1.
+  const proven = recall === null
+    ? 0.5 + 0.25 * tier + 0.25 * depth
+    : 0.45 + 0.2 * tier + 0.2 * depth + 0.15 * recall;
+  // Going stale costs you half of it, never all of it. You do not forget a line
+  // you once cleared, you just would not want to be asked about it cold.
+  const late = Math.max(0, now - p.due) / (BOX_DAYS[p.box] * DAY);
+  return proven * (1 - 0.5 * Math.min(1, late));
+}
+
+/** Readiness across a set of lines, as a percentage. Lines you have not opened count as zero. */
+export const readinessOf = (lines: Line[], save: SaveData, now = Date.now()): number =>
+  lines.length ? Math.round((lines.reduce((a, l) => a + lineReadiness(l, save, now), 0) / lines.length) * 100) : 0;
+
+/** Readiness per division id, plus `all` across the whole map. */
+export function readinessReport(save: SaveData, now = Date.now()): Record<string, number> {
+  const out: Record<string, number> = { all: readinessOf(LINES, save, now) };
+  for (const d of new Set(LINES.map(l => l.division))) {
+    out[d] = readinessOf(LINES.filter(l => l.division === d), save, now);
+  }
+  return out;
+}
 
 /* ---------- badges ---------- */
 
@@ -192,6 +266,18 @@ export function finishRehearsal(prev: SaveData, o: { lineId: string; nailed: str
   return { save, ledger, total: xp, badges, beatPar: false, newBest: false, unlockedTier: null, reviewInDays: 0 };
 }
 
+/**
+ * Running out of hearts on a line. You already lose the stops you rode, the
+ * clear and the review credit; this is the extra sting on top. It never drops
+ * you below the rank you hold, because a rank is something you did and
+ * readiness is the number that tells the truth about today.
+ */
+export function finishDerail(prev: SaveData, o: { drill: boolean }): { save: SaveData; cost: number } {
+  if (o.drill) return { save: prev, cost: 0 };
+  const cost = Math.min(DERAIL_COST, Math.max(0, prev.xp - rankFloor(prev.xp)));
+  return { save: cost ? { ...prev, xp: prev.xp - cost } : prev, cost };
+}
+
 /* ---------- finishing a trip ---------- */
 
 export interface TripOutcome {
@@ -232,7 +318,11 @@ export function finishTrip(prev: SaveData, o: TripOutcome, now = Date.now()): Tr
   const isDaily = ensureDailyPick(save, now) === o.lineIdx && !dailyDone(save, now);
   const beatPar = o.tier === 3 && o.time <= line.par;
 
+  // Worth more when you are working on something you have not locked in, so
+  // replaying a mastered line is never the best XP on the board.
+  const weak = lineReadiness(line, prev, now) < 0.5;
   const ledger: [string, number][] = [['Stops ridden', o.rideXp], ['Line cleared', 50]];
+  if (weak) ledger.push(['Needed the work', 40]);
   if (o.mistakes === 0) ledger.push(['Perfect trip', 50]);
   if (o.quizOk) ledger.push(['Code check', 30]);
   if (wasDue) ledger.push(['On-time review', 40]);

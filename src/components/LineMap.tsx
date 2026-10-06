@@ -1,7 +1,7 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { LINES } from '../data';
 import { DIVISIONS } from '../engine/questions';
-import { isDue, isUnlocked } from '../engine/progression';
+import { isDue, isUnlocked, readinessOf } from '../engine/progression';
 import type { SaveData } from '../engine/types';
 import { Bullet } from './Bullet';
 
@@ -30,12 +30,13 @@ export function LineMap({ save, current, dailyIdx, onSelect }: Props) {
     <div className="divisions" ref={box}>
       {groups.map(({ division, lines }) => {
         const cleared = lines.filter(x => save.levels[x.line.id]?.cleared).length;
+        const ready = readinessOf(lines.map(x => x.line), save);
         return (
           <section className="division" key={division.id} aria-label={`${division.name} lines`}>
             <div className="dhead">
               <h3>{division.name}</h3>
               <span>{division.blurb}</span>
-              <span className="xp">{cleared} / {lines.length}</span>
+              <span className="xp" title="How ready this division is right now">{ready}% ready · {cleared}/{lines.length}</span>
             </div>
             <nav className="mapbox">
               <div className="map" style={{ '--n': lines.length } as CSSProperties}>
