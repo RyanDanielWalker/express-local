@@ -47,3 +47,4 @@ A new division also needs an entry in `DIVISIONS` (`engine/questions.ts`).
 - Keep claims checkable: stack answers follow the current docs, and version-specific behavior says which version.
 - Options must not give the answer away by length. `data.test.ts` fails a question whose answer is 1.35x its distractors, or a line where the answer is the longest option more than half the time. Write every option as a parallel claim and put the nuance in `why`.
 - Non-algorithm lines need at least two `rehearse` prompts in their guide, written as a full spoken answer.
+- Flow lines: the side panel shows `drill` (how to reason it out), never `hook` (which is the answer). Use `start` to open a puzzle mid-flight and `decoys` for steps that do not happen in that run, so the player has to decide what gets skipped. Tier 1 flows must not all open the same way, or the first clicks are muscle memory.

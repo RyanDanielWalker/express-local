@@ -41,7 +41,11 @@ describe('line data', () => {
       }
       for (const f of line.flows ?? []) {
         expect(new Set(f.steps).size, `${line.id}: ${f.title}`).toBe(f.steps.length);
-        expect(f.steps.length, `${line.id}: ${f.title}`).toBeGreaterThan(2);
+        // What makes a flow a puzzle is choices against options, not length: a
+        // two-step run surrounded by decoys is harder than a four-step run alone.
+        expect(f.steps.length - (f.start ?? 0), `${line.id}: ${f.title}`).toBeGreaterThan(1);
+        const tray = f.steps.length - (f.start ?? 0) + (f.decoys?.length ?? 0);
+        expect(tray, `${line.id}: ${f.title} is too small to be a puzzle`).toBeGreaterThan(3);
       }
       for (const q of line.quiz ?? []) {
         expect(q.opts, `${line.id} code check`).toContain(q.a);
@@ -65,6 +69,24 @@ describe('line data', () => {
     }
     // With three options, chance alone would be about a third.
     expect(longest / questions.length).toBeLessThan(0.55);
+  });
+
+  it('keeps flow puzzles solvable and varied', () => {
+    for (const line of LINES.filter(l => l.kind === 'flow')) {
+      for (const f of line.flows ?? []) {
+        if (f.start !== undefined) {
+          expect(f.start, `${line.id}: ${f.title}`).toBeGreaterThan(0);
+          // A mid-flight start still has to leave a puzzle behind.
+          expect(f.steps.length - f.start, `${line.id}: ${f.title}`).toBeGreaterThanOrEqual(3);
+        }
+        for (const d of f.decoys ?? []) {
+          expect(f.steps, `${line.id}: ${d} is both a step and a decoy`).not.toContain(d);
+        }
+      }
+      // If every run opens the same way, the first clicks are muscle memory, not recall.
+      const openings = (line.flows ?? []).filter(f => f.t === 1).map(f => f.steps.slice(0, 2).join(' > '));
+      expect(new Set(openings).size, `${line.id} tier 1 flows all open the same way`).toBeGreaterThan(1);
+    }
   });
 
   it('does not hand a flow line its own answer', () => {

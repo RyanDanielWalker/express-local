@@ -34,6 +34,16 @@ export interface Flow {
   title: string;
   steps: string[];
   note: string;
+  /**
+   * How many steps are already on the board when the puzzle opens, so it starts
+   * mid-flight: "we just did these, now what?" instead of "what runs first?".
+   */
+  start?: number;
+  /**
+   * Tray options that do not happen in this run. They are how a short flow
+   * stays a real test: knowing a step is skipped is the thing being drilled.
+   */
+  decoys?: string[];
 }
 
 export interface QuizQuestion {

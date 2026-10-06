@@ -290,6 +290,9 @@ code{font-family:var(--mono); font-size:.92em}
 .flow .slot.done{border-color:var(--good); background:color-mix(in srgb, var(--good) 13%, var(--panel))}
 .flow .n{display:inline-grid; place-items:center; width:24px; height:24px; border-radius:50%; background:var(--ink); color:var(--bg); font-size:12px; font-weight:700; flex:none}
 .flow .slot.done .n{background:var(--good); color:var(--on-accent)}
+/* Steps the puzzle handed you. Green is for the ones you placed. */
+.flow .slot.given{border-color:var(--rule); background:var(--tile); color:var(--muted)}
+.flow .slot.given .n{background:var(--muted); color:var(--panel)}
 .steps{display:flex; flex-wrap:wrap; gap:8px}
 .steps button{font-family:var(--mono); font-size:14px; padding:10px 14px; border-radius:8px; border:2px solid var(--rule); background:var(--tile); text-align:left}
 .steps button:hover:not(:disabled){border-color:var(--ink)}
