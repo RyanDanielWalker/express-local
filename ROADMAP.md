@@ -35,6 +35,10 @@ Lines are data, so most of this is writing rather than building.
 - [ ] **GraphQL.** Schema design, resolvers, the N+1 problem again from the other side.
 - [ ] **Git as a train yard.** Rebase vs merge, what a detached HEAD actually is.
 
+## Known gaps
+
+- [ ] **Every quiz line is short at tier 1.** A Local run is meant to ask 6 questions, but no line has more than 4 questions tagged `t: 1`, so Local asks 2 to 4 and clearing it is thin evidence of knowing anything. Tier 2 asks 8 against pools of 6 to 9, tier 3 asks 10 against 8 to 12. The fix is mostly writing: about three more tier 1 questions per line, roughly 50 in all. A test should fail a line that cannot fill a run at any tier.
+
 ## Engine ideas
 
 - [ ] **Diminishing returns.** The fourth ride of the same line in one day should pay less. Needs a new save field (rides per line per day), so it was left out rather than quietly changing the save format.
@@ -82,3 +86,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-06** Flow puzzles got mid-flight starts, decoy steps, and openings that differ
 - **2026-10-06** Readiness replaced XP as the headline, ranks re-pegged, derailing costs XP
 - **2026-10-06** Flow misses stopped naming the answer, with hints that fade by tier
+- **2026-10-06** Drills advance on a click, not a timer, with keyboard shortcuts and a clock that holds while you read
