@@ -1,12 +1,13 @@
 export type AlgoLineId = 'sq' | 'bfs' | 'dfs' | 'bin' | 'bub' | 'rec' | 'hash' | 'merge' | 'quick' | 'two' | 'dij';
 export type NestLineId = 'life' | 'di' | 'route' | 'dto' | 'block' | 'err';
 export type ReactLineId = 'render' | 'effect' | 'state' | 'lists' | 'perf' | 'hooks';
+export type TsLineId = 'narrow' | 'generics' | 'utility' | 'unknown' | 'shapes' | 'reactts';
 /** Every line on the map. Each division adds its ids here. */
-export type LineId = AlgoLineId | NestLineId | ReactLineId;
+export type LineId = AlgoLineId | NestLineId | ReactLineId | TsLineId;
 export type Tier = 1 | 2 | 3;
 
 /** Lines are grouped into divisions on the map, and each division unlocks on its own. */
-export type Division = 'algos' | 'nest' | 'react';
+export type Division = 'algos' | 'nest' | 'react' | 'ts';
 
 /** How a line is played. */
 export type LineKind =
