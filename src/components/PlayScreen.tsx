@@ -20,20 +20,22 @@ export interface RideStats {
 interface Props {
   line: Line;
   tier: Tier;
+  /** Hearts for this run. Lines get 3, the cram drill gets 5. */
+  hearts?: number;
   firstTime: boolean;
   onArrive: (stats: RideStats) => void;
   onDerail: () => void;
 }
 
-const HEARTS = 3;
+const DEFAULT_HEARTS = 3;
 
-export function PlayScreen({ line, tier, firstTime, onArrive, onDerail }: Props) {
+export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, firstTime, onArrive, onDerail }: Props) {
   const later = useTimers();
   const [status, setStatus] = useState<{ msg: ReactNode; tone: Tone }>({ msg: null, tone: '' });
-  const [hearts, setHearts] = useState(HEARTS);
+  const [hearts, setHearts] = useState(maxHearts);
   const [xp, setXp] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const run = useRef({ over: false, xp: 0, mistakes: 0, hearts: HEARTS, t0: Date.now() });
+  const run = useRef({ over: false, xp: 0, mistakes: 0, hearts: maxHearts, t0: Date.now() });
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -79,7 +81,7 @@ export function PlayScreen({ line, tier, firstTime, onArrive, onDerail }: Props)
   }, [tier, later, onArrive, onDerail]);
 
   const Game = line.kind === 'quiz' ? QuizGame : line.kind === 'flow' ? FlowGame : GAMES[line.id as AlgoLineId];
-  const g = GUIDE[line.id];
+  const g = GUIDE[line.id] as typeof GUIDE[keyof typeof GUIDE] | undefined;
 
   return (
     <div style={lineStyle(line)}>
@@ -87,22 +89,24 @@ export function PlayScreen({ line, tier, firstTime, onArrive, onDerail }: Props)
         <div className="l">
           <Bullet line={line} size="sm" />
           <h2>{line.name}</h2>
-          <span className="tchip">{TIERS[tier].name}</span>
+          {!line.preset && <span className="tchip">{TIERS[tier].name}</span>}
         </div>
         <div className="row">
           <span className="clock" aria-label="Elapsed time">{fmtTime(elapsed)}</span>
-          {tier === 3 && <span className="hint" style={{ margin: 0 }}>par {fmtTime(line.par)}</span>}
+          {tier === 3 && !line.preset && <span className="hint" style={{ margin: 0 }}>par {fmtTime(line.par)}</span>}
           <span className="xp">+{xp} XP</span>
-          <div className="hearts" aria-label={`${hearts} of ${HEARTS} hearts left`}>
-            {Array.from({ length: HEARTS }, (_, i) => <span key={i} className={i < hearts ? '' : 'gone'}>♥</span>)}
+          <div className="hearts" aria-label={`${hearts} of ${maxHearts} hearts left`}>
+            {Array.from({ length: maxHearts }, (_, i) => <span key={i} className={i < hearts ? '' : 'gone'}>♥</span>)}
           </div>
         </div>
       </div>
-      <details className="explain" open={firstTime}>
-        <summary>What's going on here?</summary>
-        <p>{g.plain}</p>
-        <Words words={g.words} />
-      </details>
+      {g && (
+        <details className="explain" open={firstTime}>
+          <summary>What's going on here?</summary>
+          <p>{g.plain}</p>
+          <Words words={g.words} />
+        </details>
+      )}
       <div className={`status ${status.tone}`} aria-live="polite">{status.msg}</div>
       <div className="play">
         <Game api={api} line={line} />

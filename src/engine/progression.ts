@@ -106,6 +106,7 @@ export const BADGES: Badge[] = [
   { id: 'pass7', name: 'Weekly Pass', how: 'Ride 7 days in a row.' },
   { id: 'fullmap', name: 'Full Map', how: 'Clear every line.' },
   { id: 'master', name: 'Line Master', how: 'Clear Rush Hour on 5 different lines.' },
+  { id: 'cram', name: 'Night Before', how: 'Finish a cram drill.' },
 ];
 
 interface BadgeContext {
@@ -134,6 +135,8 @@ export function awardBadges(save: SaveData, ctx: BadgeContext, now = Date.now())
     pass7: () => save.streak.count >= 7,
     fullmap: () => LINES.every(l => has(l.id)),
     master: () => atTier(3) >= 5,
+    // granted by finishCram, not by clearing a line
+    cram: () => false,
   };
   const got: Badge[] = [];
   for (const b of BADGES) {
@@ -143,6 +146,25 @@ export function awardBadges(save: SaveData, ctx: BadgeContext, now = Date.now())
     }
   }
   return got;
+}
+
+/** A cram drill: XP and the daily streak, but no line progress or reviews. */
+export function finishCram(prev: SaveData, o: { right: number; asked: number; time: number }, now = Date.now()): TripResult {
+  const save: SaveData = structuredClone(prev);
+  const today = dayKey(now);
+  const ledger: [string, number][] = [['Right answers', o.right * 10]];
+  if (o.asked > 0 && o.right === o.asked) ledger.push(['Clean sweep', 50]);
+  if (save.streak.last !== today) {
+    save.streak.count = save.streak.last === dayKey(now - DAY) ? save.streak.count + 1 : 1;
+    save.streak.last = today;
+    ledger.push([`Day ${save.streak.count} of your streak`, 10 * Math.min(save.streak.count, 7)]);
+  }
+  const total = ledger.reduce((a, [, v]) => a + v, 0);
+  save.xp += total;
+  save.stats.trips++;
+  save.badges.cram ??= today;
+  const badges = BADGES.filter(b => b.id === 'cram' && !prev.badges.cram);
+  return { save, ledger, total, badges, beatPar: false, newBest: false, unlockedTier: null, reviewInDays: 0 };
 }
 
 /* ---------- finishing a trip ---------- */

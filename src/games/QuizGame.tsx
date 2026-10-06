@@ -10,7 +10,7 @@ import type { GameProps } from './types';
 /** Multiple choice drill. Wrong costs a heart, and always shows why. */
 export function QuizGame({ api, line }: GameProps) {
   const later = useTimers();
-  const [items] = useState<Question[]>(() => pickQuestions(line.questions ?? [], api.tier));
+  const [items] = useState<Question[]>(() => (line.preset ? (line.questions ?? []) : pickQuestions(line.questions ?? [], api.tier)));
   const [i, setI] = useState(0);
   const [opts, setOpts] = useState<string[]>(() => shuffle([...(items[0]?.opts ?? [])]));
   const [picked, setPicked] = useState<string | null>(null);

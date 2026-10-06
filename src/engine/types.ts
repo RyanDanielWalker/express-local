@@ -64,6 +64,8 @@ export interface Line {
   quiz?: QuizQuestion[];
   /** Question pool for `kind: 'quiz'` lines. */
   questions?: Question[];
+  /** Ask `questions` exactly as given instead of drawing a tier-filtered sample (cram drills). */
+  preset?: boolean;
   /** Ordering puzzles for `kind: 'flow'` lines. */
   flows?: Flow[];
 }

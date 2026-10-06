@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LINES } from './data';
-import { dailyDone, ensureDailyPick, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
+import { dailyDone, ensureDailyPick, finishCram, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
+import { cramPool, cramQuestions, CRAM_SIZE } from './engine/questions';
 import { loadSave, persistSave } from './engine/save';
-import type { SaveData, Tier } from './engine/types';
+import type { Division, Line, SaveData, Tier } from './engine/types';
 import { Header } from './components/Header';
 import { LineMap } from './components/LineMap';
 import { Intro } from './components/Intro';
@@ -12,12 +13,14 @@ import { Results } from './components/Results';
 import { Derailed } from './components/Derailed';
 import { Badges } from './components/Badges';
 import { SaveTransfer } from './components/SaveTransfer';
+import { CramBand } from './components/CramBand';
 
 type Screen =
   | { kind: 'intro' }
+  | { kind: 'cram'; line: Line; run: number }
   | { kind: 'play'; tier: Tier; run: number }
   | { kind: 'quiz'; ride: RideStats }
-  | { kind: 'result'; ride: RideStats; result: TripResult }
+  | { kind: 'result'; ride: RideStats; result: TripResult; cram?: boolean }
   | { kind: 'derailed' };
 
 /** Open on whatever needs attention: a due review, then the next new line. */
@@ -37,6 +40,7 @@ export default function App() {
   const [current, setCurrent] = useState(() => startingLine(save));
   const [screen, setScreen] = useState<Screen>({ kind: 'intro' });
   const [picked, setPicked] = useState<Partial<Record<string, Tier>>>({});
+  const [cramDivisions, setCramDivisions] = useState<Division[]>([]);
 
   useEffect(() => persistSave(save), [save]);
 
@@ -79,6 +83,24 @@ export default function App() {
   );
   const onDerail = useCallback(() => setScreen({ kind: 'derailed' }), []);
 
+  /* ---------- cram drill: mixed questions, no line progress ---------- */
+  const pool = cramPool(LINES, (_, i) => isUnlocked(save, i), cramDivisions);
+  const startCram = () => {
+    const questions = cramQuestions(pool);
+    const line: Line = {
+      id: 'cram' as Line['id'], division: 'algos', kind: 'quiz', bullet: '\u2605', color: '--ink',
+      short: 'Cram', name: 'Cram Drill', topic: `${questions.length} mixed questions`,
+      pitch: '', rules: [], hook: 'Mixed drill. Answer out loud before you click.', par: 0, questions, preset: true,
+    };
+    setScreen({ kind: 'cram', line, run: Date.now() });
+  };
+  const onCramDone = (ride: RideStats, asked: number) => {
+    const right = Math.max(0, asked - ride.mistakes);
+    const result = finishCram(save, { right, asked, time: ride.time });
+    setSave(result.save);
+    setScreen({ kind: 'result', ride, result, cram: true });
+  };
+
   let stage;
   switch (screen.kind) {
     case 'intro':
@@ -90,6 +112,19 @@ export default function App() {
           isDaily={current === dailyIdx && isUnlocked(save, current)}
           onPickTier={t => setPicked(p => ({ ...p, [line.id]: t }))}
           onBoard={() => board()}
+        />
+      );
+      break;
+    case 'cram':
+      stage = (
+        <PlayScreen
+          key={screen.run}
+          line={screen.line}
+          tier={1}
+          hearts={5}
+          firstTime={false}
+          onArrive={ride => onCramDone(ride, screen.line.questions?.length ?? CRAM_SIZE)}
+          onDerail={onDerail}
         />
       );
       break;
@@ -111,7 +146,8 @@ export default function App() {
     case 'result':
       stage = (
         <Results
-          line={line}
+          cram={screen.cram}
+          line={screen.cram ? { ...line, bigO: undefined } : line}
           ride={screen.ride}
           result={screen.result}
           nextName={LINES[current + 1]?.name ?? null}
@@ -131,6 +167,14 @@ export default function App() {
     <div className="wrap">
       <Header save={save} />
       <LineMap save={save} current={current} dailyIdx={dailyIdx} onSelect={select} />
+      {screen.kind === 'intro' && (
+        <CramBand
+          divisions={cramDivisions}
+          poolSize={pool.length}
+          onToggle={d => setCramDivisions(ds => (ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d]))}
+          onStart={startCram}
+        />
+      )}
       <main className="stage" ref={stageRef}>{stage}</main>
       <Badges save={save} />
       <SaveTransfer save={save} onImport={s => { ensureDailyPick(s); setSave(s); select(startingLine(s)); }} />

@@ -7,6 +7,7 @@ import type { RideStats } from './PlayScreen';
 import { BadgeCard } from './Badges';
 
 interface Props {
+  cram?: boolean;
   line: Line;
   ride: RideStats;
   result: TripResult;
@@ -17,10 +18,10 @@ interface Props {
   onMap: () => void;
 }
 
-export function Results({ line, ride, result, nextName, onAgain, onNext, onTier, onMap }: Props) {
+export function Results({ cram, line, ride, result, nextName, onAgain, onNext, onTier, onMap }: Props) {
   const { ledger, total, badges, beatPar, newBest, unlockedTier, reviewInDays } = result;
-  const g = GUIDE[line.id];
-  const prompts = g.famous ?? g.say ?? [];
+  const g = GUIDE[line.id] as typeof GUIDE[keyof typeof GUIDE] | undefined;
+  const prompts = (g?.famous ?? g?.say ?? []) as string[];
   const tryIt = prompts.length ? prompts[(ride.rideXp + ride.mistakes) % prompts.length] : null;
   const perfect = ride.mistakes === 0;
 
@@ -51,16 +52,22 @@ export function Results({ line, ride, result, nextName, onAgain, onNext, onTier,
         </div>
       )}
       {unlockedTier && <div className="daily">{TIERS[unlockedTier].name} is now open on this line. {TIERS[unlockedTier].blurb}</div>}
-      {line.bigO && <div><span className="stamp">{line.bigO}</span></div>}
-      {tryIt && <div className="hook"><b>{g.famous ? 'Try it for real' : 'Say this out loud'}</b><Rich text={tryIt} /></div>}
-      <p className="hint" style={{ margin: 0 }}>
-        Next review in {reviewInDays} day{reviewInDays === 1 ? '' : 's'}. Come back when the map says <b>Review</b>. Riding it again right before you forget is what makes it stick.
-      </p>
+      {!cram && line.bigO && <div><span className="stamp">{line.bigO}</span></div>}
+      {tryIt && <div className="hook"><b>{g?.famous ? 'Try it for real' : 'Say this out loud'}</b><Rich text={tryIt} /></div>}
+      {cram ? (
+        <p className="hint" style={{ margin: 0 }}>
+          Cram drills do not change line progress or review dates. They keep your streak alive and show you what is shaky.
+        </p>
+      ) : (
+        <p className="hint" style={{ margin: 0 }}>
+          Next review in {reviewInDays} day{reviewInDays === 1 ? '' : 's'}. Come back when the map says <b>Review</b>. Riding it again right before you forget is what makes it stick.
+        </p>
+      )}
       <div className="row">
-        {unlockedTier && <button className="btn big" onClick={() => onTier(unlockedTier)}>Ride {TIERS[unlockedTier].name}</button>}
-        {nextName && !unlockedTier && <button className="btn big" onClick={onNext}>Next line: {nextName}</button>}
+        {!cram && unlockedTier && <button className="btn big" onClick={() => onTier(unlockedTier)}>Ride {TIERS[unlockedTier].name}</button>}
+        {nextName && !unlockedTier && !cram && <button className="btn big" onClick={onNext}>Next line: {nextName}</button>}
         <button className="btn ghost" onClick={onAgain}>Ride again</button>
-        {nextName && unlockedTier && <button className="btn ghost" onClick={onNext}>Next line</button>}
+        {nextName && unlockedTier && !cram && <button className="btn ghost" onClick={onNext}>Next line</button>}
         <button className="btn ghost" onClick={onMap}>Map</button>
       </div>
     </div>

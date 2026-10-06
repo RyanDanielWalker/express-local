@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { DAY, dayKey, ensureDailyPick, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
+import { DAY, dayKey, ensureDailyPick, finishCram, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
+import { cramPool, cramQuestions, CRAM_SIZE } from './questions';
+import { LINES } from '../data';
 import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN } from './questions';
 import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
@@ -133,5 +135,38 @@ describe('question pools', () => {
     expect(nextStep(flow, ['one', 'two'])).toBe('three');
     expect(nextStep(flow, ['one', 'two', 'three'])).toBeNull();
     expect(pickFlows([flow], 1)).toHaveLength(1);
+  });
+});
+
+describe('cram drills', () => {
+  const open = () => true;
+
+  it('pulls questions from every opened line, including algorithm code checks', () => {
+    const pool = cramPool(LINES, open);
+    expect(pool.length).toBeGreaterThan(100);
+    expect(cramQuestions(pool)).toHaveLength(CRAM_SIZE);
+    expect(cramQuestions(pool).every(q => q.opts.includes(q.a))).toBe(true);
+  });
+
+  it('can be filtered to one division', () => {
+    const nest = cramPool(LINES, open, ['nest']);
+    const all = cramPool(LINES, open);
+    expect(nest.length).toBeGreaterThan(40);
+    expect(nest.length).toBeLessThan(all.length);
+  });
+
+  it('skips lines that are still locked', () => {
+    const firstOnly = cramPool(LINES, (_, i) => i === 0);
+    expect(firstOnly.length).toBeGreaterThan(0);
+    expect(firstOnly.length).toBeLessThan(cramPool(LINES, open).length);
+  });
+
+  it('awards XP and the streak but leaves line progress alone', () => {
+    const before = finishTrip(emptySave(), outcome, NOW).save;
+    const r = finishCram(before, { right: 10, asked: 12, time: 120 }, NOW);
+    expect(r.total).toBe(100);
+    expect(r.save.levels).toEqual(before.levels);
+    expect(r.save.badges.cram).toBeTruthy();
+    expect(r.unlockedTier).toBeNull();
   });
 });
