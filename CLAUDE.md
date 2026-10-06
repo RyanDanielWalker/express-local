@@ -2,6 +2,8 @@
 
 Subway-themed drill for algorithms, NestJS, React and TypeScript. React 19 + TypeScript + Vite, no backend, progress in localStorage.
 
+`ROADMAP.md` is the working board: what's next, parked ideas, the principles this project keeps relearning, and a shipped log. Read it before proposing work, and add to it when an idea comes up that isn't getting built today.
+
 ## Commands
 
 - `npm run dev`: dev server

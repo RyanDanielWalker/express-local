@@ -116,11 +116,13 @@ Adding a whole division is the same, plus an entry in `DIVISIONS` in `src/engine
 
 ## Roadmap
 
-- [x] **TypeScript division:** narrowing, generics, utility types, `unknown` vs `any`, `satisfies`
-- [ ] **Engineer's Cab:** after Rush Hour, write the algorithm yourself against in-browser tests
+The short version. [ROADMAP.md](ROADMAP.md) has the whole board, including the ideas that are still arguments with myself.
+
+- [ ] **Reorganize the page:** a Today band, collapsible divisions, and a play mode that takes over the screen
 - [ ] **Scenario mode:** read a real-world situation, pick the right algorithm or the right Nest building block
-- [ ] More lines: LRU cache, heaps, linked lists, SQL joins, Git as a train yard
-- [ ] Cross-device progress sync
+- [ ] **Engineer's Cab:** after Rush Hour, write the algorithm yourself against in-browser tests
+- [ ] More lines: SQL, testing, GraphQL, LRU cache, heaps, Git as a train yard
+- [ ] A NestJS and Postgres backend, if cross-device sync earns its keep
 
 ## Credits
 
