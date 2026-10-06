@@ -2,8 +2,8 @@ import type { Guide, Line, ReactLineId } from '../engine/types';
 
 /**
  * The React division: the front half of the job. Behavior checked against the
- * React docs, including the React 19 changes (ref as a prop, `<Context>` as a
- * provider, the `use` API, Actions) and the React Compiler.
+ * React docs, including the React 19 changes (ref as a prop, \`<Context>\` as a
+ * provider, the \`use\` API, Actions) and the React Compiler.
  */
 export const REACT_LINES: Line[] = [
   {
@@ -869,6 +869,16 @@ function SearchBox() {
       'With the React Compiler most of that memoization happens automatically, as long as the components follow the Rules of React.',
     ],
     gotcha: 'Wrapping a child in memo does nothing if you pass it a fresh object, array or arrow function on every render. The shallow compare fails every time and you have paid for the comparison for nothing.',
+    rehearse: [
+      {
+        prompt: 'What causes a component to re-render?',
+        answer: 'Its own state changed, its parent re-rendered, or a context it reads changed. A re-render means React called the function again, not that the browser repainted.',
+      },
+      {
+        prompt: 'Typing in a form feels slow. How do you approach it?',
+        answer: 'Profile first with the DevTools Profiler. It is usually state sitting too high in the tree, so I move it down or pass children as a prop. Memo comes after structure, and the compiler covers most of it now.',
+      },
+    ],
   },
   effect: {
     plain: 'useEffect is for syncing your component with something that lives outside React: a subscription, a timer, a browser API, a server. React runs it after the render is on screen, re-runs it when a dependency changes, and runs the cleanup before each re-run and on unmount. If you are using an effect to compute a value from props and state, or to respond to a click, you probably do not want an effect at all.',
@@ -910,6 +920,16 @@ function SearchBox() {
       'Anything I can compute during render does not belong in state plus an effect. That pattern gives you an extra render and a chance to be out of sync.',
     ],
     gotcha: 'Removing a dependency to stop an effect looping just hides a stale closure. Fix the cause: move the function inside the effect, use an updater function, or keep the changing value in a ref.',
+    rehearse: [
+      {
+        prompt: 'What is useEffect for, and when do you not need one?',
+        answer: 'It syncs a component with something outside React: a subscription, a timer, an API. If I can compute the value during render, or the work should happen because a user did something, it belongs in render or in the handler instead.',
+      },
+      {
+        prompt: 'Explain the cleanup function.',
+        answer: 'It undoes the last run. It fires before the effect runs again and once on unmount, so subscriptions stay balanced. StrictMode double-mounting in development exists to expose a missing cleanup.',
+      },
+    ],
   },
   state: {
     plain: 'Each render gets its own frozen copy of state. When you call the setter you are queuing an update, not changing the variable you are holding. React batches everything queued in the same event, applies it, and renders again with the new values. That is why reading state right after setting it gives you the old value, and why two plain setCount(count + 1) calls only add one.',
@@ -952,6 +972,16 @@ setUser({ ...user, name: 'Ryan' });`,
       'Derived values get computed during render. Storing them in state gives you two sources of truth.',
     ],
     gotcha: 'To reset a child component when the selection changes, change its key instead of clearing fields in an effect. Same component in the same position keeps its state, and a new key mounts it fresh.',
+    rehearse: [
+      {
+        prompt: 'Why does calling setCount(count + 1) twice only add one?',
+        answer: 'State is a snapshot, so both calls read the same value from that render. The updater form, setCount(c => c + 1), receives the queued value, so two of those add two.',
+      },
+      {
+        prompt: 'How do you decide between state, a ref, and a derived value?',
+        answer: 'If it should cause a render, state. If it has to survive renders without causing one, a ref. If it can be computed from what I already have, I compute it during render instead of storing it.',
+      },
+    ],
   },
   lists: {
     plain: 'When React re-renders a list it has to match the new items to the old ones. By default it matches by position, which breaks the moment items move or get deleted. A key gives each item an identity that survives reordering, so React can keep the right DOM node, the right state and the right focus with the right item. That is also why changing a key deliberately is the clean way to reset a component.',
@@ -988,6 +1018,16 @@ items.map(item => <Row key={item.id} item={item} />)
       'Changing a key is the documented way to reset a component, because React remounts it.',
     ],
     gotcha: 'key={Math.random()} silences the warning and remounts the whole list on every render, so you lose state, focus and scroll position and do the most expensive DOM work possible.',
+    rehearse: [
+      {
+        prompt: 'Why do keys matter in a list?',
+        answer: 'They tell React which item is which between renders, so state, focus and DOM nodes follow the right item. Index keys break as soon as the list reorders or something is removed.',
+      },
+      {
+        prompt: 'How do you reset a child component on purpose?',
+        answer: 'Change its key. React treats it as a different thing in that position, unmounts the old one and mounts it fresh.',
+      },
+    ],
   },
   perf: {
     plain: "React gives you three memo tools. memo skips a component's re-render when its props are shallow-equal. useMemo caches a computed value. useCallback keeps a function reference stable. They all exist for the same reason: something downstream is comparing references. They cost code and comparison time, so the order is measure, fix the structure, then memoize what is left. The React Compiler now does most of this automatically.",
@@ -1026,6 +1066,16 @@ function List({ items }) {
       'With the React Compiler, most manual memoization goes away, which puts the emphasis back on writing components that follow the rules.',
     ],
     gotcha: 'Memoizing everything is its own performance problem: more code, more comparisons, more ways to hold onto a stale value. Structure first, memo second.',
+    rehearse: [
+      {
+        prompt: 'When do you reach for memo, useMemo or useCallback?',
+        answer: 'After profiling, and only where identity actually matters. memo gets defeated by an inline object or arrow prop, so the fix is often structural. With the React Compiler most of this is handled for me.',
+      },
+      {
+        prompt: 'A table of thousands of rows scrolls badly. What do you do?',
+        answer: 'Virtualize it so only the visible rows render. The cost is the number of DOM nodes, not the render function, so memoizing every row does not help.',
+      },
+    ],
   },
   hooks: {
     plain: 'React keeps your hooks in a list, in the order you called them, for each component. That is the entire reason for the rules: call them at the top level, every render, in the same order, so hook number three is always the same hook. A custom hook is just a function that calls hooks, so it shares logic between components but never shares state. React 19 added a few APIs on top of that: ref as a plain prop, Context used directly as a provider, use() for reading promises and context in render, and the Action hooks for forms.',
@@ -1071,5 +1121,15 @@ function Input({ ref, ...props }) { return <input ref={ref} {...props} />; }
       'The Action hooks (useActionState, useFormStatus, useOptimistic) cover the pending, error and optimistic states that everyone used to hand-roll.',
     ],
     gotcha: 'An early return above a hook breaks the order on the next render. Compute first, call all hooks, then decide what to return.',
+    rehearse: [
+      {
+        prompt: 'Why can hooks not be called conditionally?',
+        answer: 'React matches hooks to their state by call order on every render, so a hook inside a condition shifts the whole list and the state lands on the wrong hook.',
+      },
+      {
+        prompt: 'What changed in React 19 that you actually use?',
+        answer: 'ref is a normal prop so new components do not need forwardRef, Context renders directly as the provider, use() reads a promise or context during render, and the action hooks cover pending, error and optimistic states.',
+      },
+    ],
   },
 };

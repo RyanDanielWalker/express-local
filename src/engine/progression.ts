@@ -107,6 +107,7 @@ export const BADGES: Badge[] = [
   { id: 'fullmap', name: 'Full Map', how: 'Clear every line.' },
   { id: 'master', name: 'Line Master', how: 'Clear Rush Hour on 5 different lines.' },
   { id: 'cram', name: 'Night Before', how: 'Finish a cram drill.' },
+  { id: 'outloud', name: 'Out Loud', how: 'Finish a rehearsal without reading from the screen.' },
 ];
 
 interface BadgeContext {
@@ -135,8 +136,9 @@ export function awardBadges(save: SaveData, ctx: BadgeContext, now = Date.now())
     pass7: () => save.streak.count >= 7,
     fullmap: () => LINES.every(l => has(l.id)),
     master: () => atTier(3) >= 5,
-    // granted by finishCram, not by clearing a line
+    // granted by finishCram and finishRehearsal, not by clearing a line
     cram: () => false,
+    outloud: () => false,
   };
   const got: Badge[] = [];
   for (const b of BADGES) {
@@ -165,6 +167,29 @@ export function finishCram(prev: SaveData, o: { right: number; asked: number; ti
   save.badges.cram ??= today;
   const badges = BADGES.filter(b => b.id === 'cram' && !prev.badges.cram);
   return { save, ledger, total, badges, beatPar: false, newBest: false, unlockedTier: null, reviewInDays: 0 };
+}
+
+/**
+ * An out-loud rehearsal. You grade yourself, so the XP is modest and the real
+ * output is the list of prompts to ask first next time.
+ */
+export function finishRehearsal(prev: SaveData, o: { lineId: string; nailed: string[]; shaky: string[] }, now = Date.now()): TripResult {
+  const save: SaveData = structuredClone(prev);
+  const today = dayKey(now);
+  const total = o.nailed.length + o.shaky.length;
+  const ledger: [string, number][] = [['Prompts answered', total * 10]];
+  if (total > 0 && o.shaky.length === 0) ledger.push(['Said every one cleanly', 40]);
+  if (save.streak.last !== today) {
+    save.streak.count = save.streak.last === dayKey(now - DAY) ? save.streak.count + 1 : 1;
+    save.streak.last = today;
+    ledger.push([`Day ${save.streak.count} of your streak`, 10 * Math.min(save.streak.count, 7)]);
+  }
+  const xp = ledger.reduce((a, [, v]) => a + v, 0);
+  save.xp += xp;
+  save.rehearsal[o.lineId] = { last: now, shaky: o.shaky };
+  const badges = BADGES.filter(b => b.id === 'outloud' && !prev.badges.outloud);
+  save.badges.outloud ??= today;
+  return { save, ledger, total: xp, badges, beatPar: false, newBest: false, unlockedTier: null, reviewInDays: 0 };
 }
 
 /* ---------- finishing a trip ---------- */

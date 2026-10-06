@@ -15,9 +15,13 @@ interface Props {
   /** Questions on this line you have missed and not yet recovered. */
   shakyCount: number;
   onDrillShaky: () => void;
+  /** Out-loud prompts available on this line. */
+  rehearseCount: number;
+  lastRehearsed?: number;
+  onRehearse: () => void;
 }
 
-export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard, shakyCount, onDrillShaky }: Props) {
+export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard, shakyCount, onDrillShaky, rehearseCount, lastRehearsed, onRehearse }: Props) {
   const line = LINES[idx];
   const p = save.levels[line.id];
   const locked = !isUnlocked(save, idx);
@@ -44,6 +48,18 @@ export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard, shakyCoun
             <ul className="rules">{line.rules.map(r => <li key={r}><Rich text={r} /></li>)}</ul>
           </div>
           <div className="hook"><b>Remember it</b><Rich text={line.hook} /></div>
+          {rehearseCount > 0 && !locked && (
+            <div className="outloud">
+              <div>
+                <b>Say it out loud</b>
+                <p>
+                  {rehearseCount} prompts to answer in full sentences, then check yourself.
+                  {lastRehearsed ? ` Last done ${Math.max(0, Math.round((Date.now() - lastRehearsed) / DAY))} days ago.` : ' This is the one that gets you through the phone screen.'}
+                </p>
+              </div>
+              <button className="btn" onClick={onRehearse}>Rehearse</button>
+            </div>
+          )}
           {!locked && (
             <div className="tiers" role="group" aria-label="Difficulty">
               {([1, 2, 3] as Tier[]).map(t => {

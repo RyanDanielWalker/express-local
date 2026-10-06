@@ -319,3 +319,11 @@ code{font-family:var(--mono); font-size:.92em}
 .recap .rq{font-weight:700}
 .recap .ra{font-family:var(--mono); font-size:14px; color:var(--good)}
 .recap .rw{color:var(--muted); font-size:14.5px}
+
+/* out-loud rehearsal */
+.outloud{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; justify-content:space-between; border:2px dashed var(--c); border-radius:10px; padding:10px 14px}
+.outloud b{font-family:var(--display); font-weight:900; font-size:20px; line-height:1; text-transform:uppercase; letter-spacing:.03em; display:block}
+.outloud p{margin:4px 0 0; color:var(--muted); font-size:14px; max-width:60ch}
+.rehearse .prompt{font-size:21px; line-height:1.4; margin:0; max-width:60ch; text-wrap:balance}
+.rehearse .qcard{gap:16px}
+.rehearse .decide{grid-template-columns:1fr 1fr}

@@ -86,6 +86,8 @@ export interface Guide {
   say?: string[];
   /** The thing people get wrong. */
   gotcha?: string;
+  /** Prompts to answer out loud, with the answer you are aiming for. */
+  rehearse?: { prompt: string; answer: string }[];
 }
 
 export interface Best {
@@ -126,5 +128,7 @@ export interface SaveData {
   daily: string;
   /** Per-question history, so weak spots can come back around. */
   questions: Record<string, QuestionStat>;
+  /** Out-loud rehearsals, keyed by line id. `shaky` holds prompts to ask first next time. */
+  rehearsal: Record<string, { last: number; shaky: string[] }>;
   dailyPick?: { day: string; idx: number };
 }

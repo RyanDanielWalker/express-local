@@ -7,7 +7,8 @@ import type { RideStats } from './PlayScreen';
 import { BadgeCard } from './Badges';
 
 interface Props {
-  cram?: boolean;
+  /** What just finished. Lines have reviews and tiers, drills and rehearsals do not. */
+  mode?: 'line' | 'cram' | 'rehearsal';
   line: Line;
   ride: RideStats;
   result: TripResult;
@@ -18,7 +19,8 @@ interface Props {
   onMap: () => void;
 }
 
-export function Results({ cram, line, ride, result, nextName, onAgain, onNext, onTier, onMap }: Props) {
+export function Results({ mode = 'line', line, ride, result, nextName, onAgain, onNext, onTier, onMap }: Props) {
+  const cram = mode !== 'line';
   const { ledger, total, badges, beatPar, newBest, unlockedTier, reviewInDays } = result;
   const g = GUIDE[line.id] as typeof GUIDE[keyof typeof GUIDE] | undefined;
   const prompts = (g?.famous ?? g?.say ?? []) as string[];
@@ -28,14 +30,16 @@ export function Results({ cram, line, ride, result, nextName, onAgain, onNext, o
 
   return (
     <div className="result" style={lineStyle(line)}>
-      <div className="eyebrow">Arrived · {line.topic} · {TIERS[ride.tier].name}</div>
-      <h2>{perfect ? 'Perfect run' : 'Line cleared'}</h2>
-      <p className="mono" style={{ margin: 0 }}>
+      <div className="eyebrow">
+        {mode === 'rehearsal' ? `Out loud · ${line.short}` : mode === 'cram' ? 'Mixed drill' : `Arrived · ${line.topic} · ${TIERS[ride.tier].name}`}
+      </div>
+      <h2>{mode === 'rehearsal' ? (perfect ? 'Said it clean' : 'Rehearsed') : mode === 'cram' ? 'Drill done' : perfect ? 'Perfect run' : 'Line cleared'}</h2>
+      {mode !== 'rehearsal' && <p className="mono" style={{ margin: 0 }}>
         Time {fmtTime(ride.time)}
         {ride.tier === 3 && ` · par ${fmtTime(line.par)}${beatPar ? ' · beat it' : ''}`}
         {` · ${ride.mistakes} mistake${ride.mistakes === 1 ? '' : 's'}`}
         {newBest && <> · <b>new personal best</b></>}
-      </p>
+      </p>}
       <div className="ledger">
         {ledger.map(([k, v]) => (
           <div key={k} style={{ display: 'contents' }}>
@@ -70,9 +74,13 @@ export function Results({ cram, line, ride, result, nextName, onAgain, onNext, o
       )}
       {!cram && line.bigO && <div><span className="stamp">{line.bigO}</span></div>}
       {tryIt && <div className="hook"><b>{g?.famous ? 'Try it for real' : 'Say this out loud'}</b><Rich text={tryIt} /></div>}
-      {cram ? (
+      {mode === 'rehearsal' ? (
         <p className="hint" style={{ margin: 0 }}>
-          Cram drills do not change line progress or review dates. They keep your streak alive and show you what is shaky.
+          Anything you called shaky comes back first next time. Say the answers out loud again tomorrow, not just today.
+        </p>
+      ) : cram ? (
+        <p className="hint" style={{ margin: 0 }}>
+          Drills do not change line progress or review dates. They keep your streak alive and show you what is shaky.
         </p>
       ) : (
         <p className="hint" style={{ margin: 0 }}>

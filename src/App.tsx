@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LINES } from './data';
-import { dailyDone, ensureDailyPick, finishCram, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
+import { dailyDone, ensureDailyPick, finishCram, finishRehearsal, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
 import { cramPool, cramQuestions, CRAM_SIZE, recordAnswers, shakyQuestions } from './engine/questions';
 import { loadSave, persistSave } from './engine/save';
 import type { Division, Line, Question, SaveData, Tier } from './engine/types';
@@ -14,13 +14,16 @@ import { Derailed } from './components/Derailed';
 import { Badges } from './components/Badges';
 import { SaveTransfer } from './components/SaveTransfer';
 import { CramBand } from './components/CramBand';
+import { Rehearse } from './components/Rehearse';
+import { GUIDE } from './data';
 
 type Screen =
   | { kind: 'intro' }
   | { kind: 'cram'; line: Line; run: number }
+  | { kind: 'rehearse'; run: number }
   | { kind: 'play'; tier: Tier; run: number }
   | { kind: 'quiz'; ride: RideStats }
-  | { kind: 'result'; ride: RideStats; result: TripResult; cram?: boolean }
+  | { kind: 'result'; ride: RideStats; result: TripResult; mode?: 'line' | 'cram' | 'rehearsal' }
   | { kind: 'derailed'; ride?: RideStats };
 
 /** Open on whatever needs attention: a due review, then the next new line. */
@@ -109,6 +112,13 @@ export default function App() {
     setScreen({ kind: 'cram', line: drillLine('Shaky Questions', `${questions.length} you have missed before`, questions), run: Date.now() });
   };
 
+  const startRehearsal = () => setScreen({ kind: 'rehearse', run: Date.now() });
+  const onRehearsed = (r: { nailed: string[]; shaky: string[] }) => {
+    const result = finishRehearsal(save, { lineId: line.id, ...r });
+    setSave(result.save);
+    setScreen({ kind: 'result', ride: { tier, rideXp: 0, mistakes: r.shaky.length, time: 0, answers: [] }, result, mode: 'rehearsal' });
+  };
+
   const startCram = () => {
     const questions = cramQuestions(pool, CRAM_SIZE, shaky.map(s => s.question));
     setScreen({ kind: 'cram', line: drillLine('Cram Drill', `${questions.length} mixed questions`, questions), run: Date.now() });
@@ -118,7 +128,7 @@ export default function App() {
     const withStats = recordAnswers(save, ride.answers.map(a => ({ lineId: a.question.from ?? drillOwner.get(a.question) ?? 'cram', question: a.question, correct: a.correct })));
     const result = finishCram(withStats, { right, asked, time: ride.time });
     setSave(result.save);
-    setScreen({ kind: 'result', ride, result, cram: true });
+    setScreen({ kind: 'result', ride, result, mode: 'cram' });
   };
 
   let stage;
@@ -134,6 +144,9 @@ export default function App() {
           onBoard={() => board()}
           shakyCount={shakyQuestions(save, LINES, line.id).length}
           onDrillShaky={() => startShaky(line.id)}
+          rehearseCount={GUIDE[line.id]?.rehearse?.length ?? 0}
+          lastRehearsed={save.rehearsal[line.id]?.last}
+          onRehearse={startRehearsal}
         />
       );
       break;
@@ -162,14 +175,17 @@ export default function App() {
         />
       );
       break;
+    case 'rehearse':
+      stage = <Rehearse key={screen.run} line={line} save={save} onDone={onRehearsed} onQuit={toIntro} />;
+      break;
     case 'quiz':
       stage = <Quiz line={line} onDone={ok => finish(screen.ride, ok)} />;
       break;
     case 'result':
       stage = (
         <Results
-          cram={screen.cram}
-          line={screen.cram ? { ...line, bigO: undefined } : line}
+          mode={screen.mode}
+          line={screen.mode && screen.mode !== 'line' ? { ...line, bigO: undefined } : line}
           ride={screen.ride}
           result={screen.result}
           nextName={LINES[current + 1]?.name ?? null}

@@ -929,6 +929,20 @@ export const NEST_GUIDE: Record<NestLineId, Guide> = {
       'Interceptors are the only piece that sees both sides of the handler, so timing, caching and response shaping live there.',
     ],
     gotcha: 'Middleware runs before guards, so anything that needs to know which handler was matched cannot live in middleware. Use a guard or interceptor instead.',
+    rehearse: [
+      {
+        prompt: 'Walk me through what happens when a request hits a NestJS app.',
+        answer: 'Middleware, then guards, then interceptors, then pipes, then the route handler and whatever services it calls. On the way back out the interceptors finish, and if anything threw, an exception filter turns it into the response.',
+      },
+      {
+        prompt: 'Why does auth belong in a guard instead of the service?',
+        answer: 'A guard runs before pipes and the handler, so a rejected request never costs validation or business logic, and the rule lives in one place instead of being repeated in every service method.',
+      },
+      {
+        prompt: 'What can an interceptor do that middleware cannot?',
+        answer: 'An interceptor wraps the handler and has the execution context, so it can time the call, cache it, or reshape the response. Middleware runs before Nest has even matched a handler, so it has none of that.',
+      },
+    ],
   },
   di: {
     plain: "You never call new on a service in NestJS. You list a class in a module's providers, type it in a constructor, and Nest builds it for you and hands it over. That only works if Nest can see the class from where you are asking. A module's providers are private to that module. To let another module use one, the owning module has to put it in exports, and the other module has to put the owning module in imports.",
@@ -979,6 +993,20 @@ export class OrdersModule {}`,
       'For tests I use Test.createTestingModule with overrideProvider and useValue to swap in a fake, which is only possible because of DI.',
     ],
     gotcha: 'Two modules that each list the same service in providers get two separate instances. If the service holds state, that bites. Export it from one module and import that module instead.',
+    rehearse: [
+      {
+        prompt: "You get \"Nest can't resolve dependencies of OrdersService\". How do you debug it?",
+        answer: 'Four checks: is the class in providers, is it exported by its own module, is that module imported where I need it, and is it marked @Injectable. If two services need each other, that is forwardRef.',
+      },
+      {
+        prompt: 'What does dependency injection actually buy you here?',
+        answer: 'I never construct services by hand, so swapping one for a fake in a test is a single overrideProvider call, and the module graph documents what depends on what.',
+      },
+      {
+        prompt: 'When would you use a request-scoped provider?',
+        answer: 'Rarely. The default singleton is what you want. Request scope bubbles up to everything that injects it and costs performance, so I use it only when a provider truly has to hold per-request state.',
+      },
+    ],
   },
   route: {
     plain: 'A controller is a class with a path prefix. Each method gets an HTTP method decorator and a path piece, and Nest glues them together into a route. Parameters do not come from one magic req object. You pull each piece with its own decorator: @Param for the URL, @Query for the querystring, @Body for the parsed body, @Headers for headers. Whatever you return gets serialized to JSON for you.',
@@ -1021,6 +1049,16 @@ export class UsersController {
       'ParseIntPipe inside @Param does the string to number conversion and throws a 400 if it is not a number, so the handler only ever sees valid input.',
     ],
     gotcha: 'Injecting @Res() switches that handler into library-specific mode. Nest stops handling the response, so returning a value does nothing and interceptors stop applying.',
+    rehearse: [
+      {
+        prompt: 'How do you structure a controller?',
+        answer: 'Thin. It maps a route to a service call, pulls what it needs with @Param, @Query and @Body, and returns a plain object for Nest to serialize. The logic lives in the service.',
+      },
+      {
+        prompt: 'What is the trap with route order?',
+        answer: 'Routes match in declaration order and the first match wins, so a literal path like /users/me has to be declared above /users/:id or the param route swallows it.',
+      },
+    ],
   },
   dto: {
     plain: 'A DTO (data transfer object) is a class that describes what you accept. You decorate its fields with rules from class-validator, and the ValidationPipe checks the incoming JSON against them before your handler runs. If something fails, the client gets a 400 with a list of messages, and your code never sees the bad data. It has to be a class and not an interface, because interfaces disappear when TypeScript compiles and there would be nothing left to read at runtime.',
@@ -1067,6 +1105,16 @@ export class CreateUserDto {
       'DTOs describe the request. Entities describe the database. Keeping them separate stops internal columns leaking into the API.',
     ],
     gotcha: 'Validation decorators do nothing until a ValidationPipe is actually applied. Add it with app.useGlobalPipes in main.ts, and remember it needs both class-validator and class-transformer installed.',
+    rehearse: [
+      {
+        prompt: 'What is a DTO, and why does it have to be a class?',
+        answer: 'It describes the shape of the request. It has to be a class because the ValidationPipe reads decorator metadata at runtime, and an interface disappears when TypeScript compiles.',
+      },
+      {
+        prompt: 'How do you keep bad input out of your services?',
+        answer: 'A global ValidationPipe with whitelist, forbidNonWhitelisted and transform, plus DTOs carrying class-validator rules. The handler then only ever sees input that already passed.',
+      },
+    ],
   },
   block: {
     plain: 'Nest has five places to put logic that is not really about one endpoint. Middleware is the rawest and runs first, before Nest knows which route matched. A guard answers one yes-or-no question: is this request allowed. A pipe works on a single input value: validate it, convert it. An interceptor wraps the handler, so it can start a timer, cache, or reshape what comes back. A filter is the catcher at the end that turns thrown errors into responses.',
@@ -1122,6 +1170,16 @@ export class WrapInterceptor implements NestInterceptor {
       'Middleware is my last choice, because it runs before Nest knows the route and gets none of the execution context.',
     ],
     gotcha: 'Guards and interceptors can read route metadata through Reflector, which is how @Roles() and @Public() style decorators work. Middleware cannot, because the handler has not been resolved yet.',
+    rehearse: [
+      {
+        prompt: 'Where do you put cross-cutting logic in Nest?',
+        answer: 'Guards for allowed or not, pipes for validating and converting one input, interceptors for anything that needs both sides of the handler, filters for turning errors into responses, and middleware for raw request work before routing.',
+      },
+      {
+        prompt: 'A global auth guard is on. How do you make one route public?',
+        answer: 'Set metadata on the handler with a @Public() decorator and read it inside the guard with Reflector, so the exception lives next to the rule instead of removing the guard.',
+      },
+    ],
   },
   err: {
     plain: 'When you throw an HttpException (or one of its built-in subclasses like NotFoundException), Nest catches it and sends back the matching status code with a JSON body. You do not touch res.status. Anything Nest does not recognize, like a plain Error from a library, becomes a 500 with the real message hidden, which is deliberate: internal errors should not leak to clients.',
@@ -1167,5 +1225,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       'I keep 401 and 403 straight: not authenticated versus authenticated but not allowed.',
     ],
     gotcha: 'Throwing a plain Error gives the client a generic 500 and hides your message. That is good for safety and terrible for debugging, so log the original error in a global filter.',
+    rehearse: [
+      {
+        prompt: 'How do you handle errors in a Nest service?',
+        answer: 'I throw domain exceptions like NotFoundException or ConflictException and let Nest map them to status codes, so controllers stay thin. A global filter adds logging and one consistent error shape.',
+      },
+      {
+        prompt: 'What happens when something throws that is not an HttpException?',
+        answer: 'It comes back as a 500 with the message hidden, which is the right default for safety. That is exactly why I log the original error inside a global filter.',
+      },
+    ],
   },
 };

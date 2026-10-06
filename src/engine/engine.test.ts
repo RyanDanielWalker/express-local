@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { DAY, dayKey, ensureDailyPick, finishCram, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
+import { DAY, dayKey, ensureDailyPick, finishCram, finishRehearsal, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
 import { cramPool, cramQuestions, CRAM_SIZE, qid, recordAnswers, shakyQuestions } from './questions';
-import { LINES } from '../data';
+import { GUIDE, LINES } from '../data';
 import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN } from './questions';
 import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
@@ -215,6 +215,43 @@ describe('weak spots', () => {
     const drill = cramQuestions(pool, CRAM_SIZE, shaky);
     expect(drill).toHaveLength(CRAM_SIZE);
     expect(new Set(drill).size).toBe(CRAM_SIZE);
-    expect(drill.filter(q => shaky.includes(q)).length).toBe(Math.floor(CRAM_SIZE / 2));
+    // at least half, and more only because the random half can draw shaky ones too
+    expect(drill.filter(q => shaky.includes(q)).length).toBeGreaterThanOrEqual(Math.floor(CRAM_SIZE / 2));
+  });
+});
+
+describe('out-loud rehearsals', () => {
+  it('awards XP, remembers the shaky prompts, and leaves line progress alone', () => {
+    const before = finishTrip(emptySave(), outcome, NOW).save;
+    const r = finishRehearsal(before, { lineId: 'di', nailed: ['a', 'b'], shaky: ['c'] }, NOW);
+    expect(r.total).toBe(30);
+    expect(r.save.rehearsal.di).toEqual({ last: NOW, shaky: ['c'] });
+    expect(r.save.levels).toEqual(before.levels);
+    expect(r.save.badges.outloud).toBeTruthy();
+  });
+
+  it('pays a bonus when nothing was shaky', () => {
+    const r = finishRehearsal(emptySave(), { lineId: 'di', nailed: ['a', 'b'], shaky: [] }, NOW);
+    expect(r.ledger.some(([k]) => k === 'Said every one cleanly')).toBe(true);
+  });
+
+  it('clears the shaky list when the second pass goes clean', () => {
+    const first = finishRehearsal(emptySave(), { lineId: 'di', nailed: [], shaky: ['c'] }, NOW).save;
+    const second = finishRehearsal(first, { lineId: 'di', nailed: ['c'], shaky: [] }, NOW + DAY).save;
+    expect(second.rehearsal.di.shaky).toEqual([]);
+  });
+});
+
+describe('rehearsal content', () => {
+  it('gives every NestJS and React line prompts with real answers', () => {
+    for (const line of LINES.filter(l => l.division !== 'algos')) {
+      const prompts = GUIDE[line.id].rehearse ?? [];
+      expect(prompts.length, line.id).toBeGreaterThanOrEqual(2);
+      for (const p of prompts) {
+        expect(p.prompt.length, line.id).toBeGreaterThan(20);
+        expect(p.answer.length, line.id).toBeGreaterThan(80);
+        expect(p.answer.includes('—'), line.id).toBe(false);
+      }
+    }
   });
 });
