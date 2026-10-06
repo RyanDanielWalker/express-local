@@ -64,7 +64,10 @@ export function FlowGame({ api, line }: GameProps) {
         </div>
       </div>
       <div className="side">
-        <Panel title="Remember it"><p style={{ margin: 0 }}><Rich text={line.hook} /></p></Panel>
+        {/* Never `line.hook` here: on an ordering puzzle the hook is the answer key. */}
+        {api.assist && line.drill && (
+          <Panel title="Think it through"><p style={{ margin: 0 }}><Rich text={line.drill} /></p></Panel>
+        )}
       </div>
     </>
   );

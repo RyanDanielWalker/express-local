@@ -67,8 +67,18 @@ describe('line data', () => {
     expect(longest / questions.length).toBeLessThan(0.55);
   });
 
+  it('does not hand a flow line its own answer', () => {
+    // The side panel shows `drill` while you play, because `hook` IS the order.
+    for (const line of LINES.filter(l => l.kind === 'flow')) {
+      expect(line.drill, line.id).toBeTruthy();
+      const steps = (line.flows ?? []).flatMap(f => f.steps);
+      const leaked = steps.filter(s => line.drill!.toLowerCase().includes(s.toLowerCase()));
+      expect(leaked, `${line.id} drill names its own steps`).toEqual([]);
+    }
+  });
+
   it('keeps em dashes out of player-facing copy', () => {
-    const copy = LINES.flatMap(l => [l.pitch, l.hook, ...l.rules, ...(l.questions ?? []).flatMap(q => [q.q, q.why, ...q.opts])]);
+    const copy = LINES.flatMap(l => [l.pitch, l.hook, l.drill ?? '', ...l.rules, ...(l.questions ?? []).flatMap(q => [q.q, q.why, ...q.opts])]);
     expect(copy.filter(t => t.includes('—'))).toEqual([]);
   });
 });

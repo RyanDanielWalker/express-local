@@ -286,9 +286,10 @@ code{font-family:var(--mono); font-size:.92em}
 .scenario{font-size:17px; margin:0; max-width:68ch}
 .flow{display:flex; flex-direction:column; gap:8px}
 .flow .slot{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; border:2px solid var(--rule); background:var(--tile); font-family:var(--mono); font-size:14px}
-.flow .slot.done{border-color:var(--c); background:color-mix(in srgb, var(--c) 12%, var(--panel))}
+/* Placed steps are correct, so they read green. The line color is red on some lines and looked like a miss. */
+.flow .slot.done{border-color:var(--good); background:color-mix(in srgb, var(--good) 13%, var(--panel))}
 .flow .n{display:inline-grid; place-items:center; width:24px; height:24px; border-radius:50%; background:var(--ink); color:var(--bg); font-size:12px; font-weight:700; flex:none}
-.flow .slot.done .n{background:var(--c)}
+.flow .slot.done .n{background:var(--good); color:var(--on-accent)}
 .steps{display:flex; flex-wrap:wrap; gap:8px}
 .steps button{font-family:var(--mono); font-size:14px; padding:10px 14px; border-radius:8px; border:2px solid var(--rule); background:var(--tile); text-align:left}
 .steps button:hover:not(:disabled){border-color:var(--ink)}

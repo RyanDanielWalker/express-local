@@ -21,6 +21,7 @@ export const NEST_LINES: Line[] = [
       'On the way out, the order reverses.',
     ],
     hook: 'Middleware → Guards → Interceptors (before) → Pipes → Handler → Service → Interceptors (after) → Filters → Response.',
+    drill: 'Two passes. On the way in, each layer gets its shot at stopping the request, from the most generic (it does not even know which handler yet) to the most specific (it is checking one argument). Then your code runs. On the way back out, only the layers that wrapped the handler get another turn, and whatever threw gets turned into a response last.',
     par: 95,
     flows: [
       {

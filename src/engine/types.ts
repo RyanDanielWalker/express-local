@@ -59,6 +59,11 @@ export interface Line {
   pitch: string;
   rules: string[];
   hook: string;
+  /**
+   * Shown in the side panel during play instead of `hook`, for lines where the
+   * hook is the answer. A way to reason it out, never the sequence itself.
+   */
+  drill?: string;
   /** Complexity stamp on the results screen. Algorithm lines only. */
   bigO?: string;
   /** Rush Hour par time in seconds. */

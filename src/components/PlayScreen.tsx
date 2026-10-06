@@ -107,7 +107,8 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
           </div>
         </div>
       </div>
-      {g && (
+      {/* Flow lines keep the guide off the play screen: `plain` and `words` both spell out the order. */}
+      {g && line.kind !== 'flow' && (
         <details className="explain" open={firstTime}>
           <summary>What's going on here?</summary>
           <p>{g.plain}</p>
