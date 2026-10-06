@@ -5,7 +5,7 @@ import { QuizGame } from '../games/QuizGame';
 import { FlowGame } from '../games/FlowGame';
 import type { GameApi, Tone } from '../games/types';
 import { fmtTime, TIERS } from '../engine/progression';
-import type { AlgoLineId, Line, Tier } from '../engine/types';
+import type { AlgoLineId, Line, Question, Tier } from '../engine/types';
 import { useTimers } from '../hooks/useTimers';
 import { Bullet, lineStyle } from './Bullet';
 import { Words } from './FieldGuide';
@@ -15,6 +15,8 @@ export interface RideStats {
   rideXp: number;
   mistakes: number;
   time: number;
+  /** Every question answered this run, in order, for stats and the recap. */
+  answers: { question: Question; correct: boolean }[];
 }
 
 interface Props {
@@ -24,7 +26,8 @@ interface Props {
   hearts?: number;
   firstTime: boolean;
   onArrive: (stats: RideStats) => void;
-  onDerail: () => void;
+  /** Out of hearts. The run still reports what was answered, so misses are tracked. */
+  onDerail: (stats: RideStats) => void;
 }
 
 const DEFAULT_HEARTS = 3;
@@ -35,7 +38,7 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
   const [hearts, setHearts] = useState(maxHearts);
   const [xp, setXp] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const run = useRef({ over: false, xp: 0, mistakes: 0, hearts: maxHearts, t0: Date.now() });
+  const run = useRef({ over: false, xp: 0, mistakes: 0, hearts: maxHearts, t0: Date.now(), answers: [] as RideStats['answers'] });
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -54,6 +57,9 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
         return r.over;
       },
       say: (msg, tone = '') => setStatus({ msg, tone }),
+      record(question, correct) {
+        r.answers.push({ question, correct });
+      },
       correct(points = 10, msg) {
         r.xp += points;
         setXp(r.xp);
@@ -67,7 +73,8 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
         setStatus({ msg, tone: 'bad' });
         if (r.hearts <= 0) {
           r.over = true;
-          later(onDerail, 1600);
+          const time = (Date.now() - r.t0) / 1000;
+          later(() => onDerail({ tier, rideXp: r.xp, mistakes: r.mistakes, time, answers: r.answers }), 1600);
         }
       },
       finish() {
@@ -75,7 +82,7 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
         r.over = true;
         const time = (Date.now() - r.t0) / 1000;
         setElapsed(time);
-        later(() => onArrive({ tier, rideXp: r.xp, mistakes: r.mistakes, time }), 2000);
+        later(() => onArrive({ tier, rideXp: r.xp, mistakes: r.mistakes, time, answers: r.answers }), 2000);
       },
     };
   }, [tier, later, onArrive, onDerail]);

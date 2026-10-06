@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DAY, dayKey, ensureDailyPick, finishCram, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
-import { cramPool, cramQuestions, CRAM_SIZE } from './questions';
+import { cramPool, cramQuestions, CRAM_SIZE, qid, recordAnswers, shakyQuestions } from './questions';
 import { LINES } from '../data';
 import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN } from './questions';
 import type { Flow, Question, Tier } from './types';
@@ -168,5 +168,53 @@ describe('cram drills', () => {
     expect(r.save.levels).toEqual(before.levels);
     expect(r.save.badges.cram).toBeTruthy();
     expect(r.unlockedTier).toBeNull();
+  });
+});
+
+describe('weak spots', () => {
+  const q = (text: string) => ({ t: 1 as const, q: text, opts: ['a', 'b'], a: 'a', why: 'because' });
+  const line = LINES.find(l => l.questions?.length)!;
+  const first = line.questions![0];
+  const second = line.questions![1];
+
+  it('gives a question a stable id that survives a reshuffle', () => {
+    expect(qid(line.id, first)).toBe(qid(line.id, { ...first, opts: [...first.opts].reverse() }));
+    expect(qid(line.id, first)).not.toBe(qid(line.id, second));
+    expect(qid('a', q('same text'))).not.toBe(qid('b', q('same text')));
+  });
+
+  it('counts misses and forgives two right answers in a row', () => {
+    let save = emptySave();
+    save = recordAnswers(save, [{ lineId: line.id, question: first, correct: false }], NOW);
+    expect(shakyQuestions(save, LINES).map(s => s.question)).toEqual([first]);
+    save = recordAnswers(save, [{ lineId: line.id, question: first, correct: true }], NOW);
+    expect(shakyQuestions(save, LINES)).toHaveLength(0);
+    expect(save.questions[qid(line.id, first)].seen).toBe(2);
+  });
+
+  it('sorts the shaky list worst first and can filter to one line', () => {
+    let save = emptySave();
+    save = recordAnswers(save, [
+      { lineId: line.id, question: first, correct: false },
+      { lineId: line.id, question: first, correct: false },
+      { lineId: line.id, question: second, correct: false },
+    ], NOW);
+    expect(shakyQuestions(save, LINES).map(s => s.missed)).toEqual([2, 1]);
+    expect(shakyQuestions(save, LINES, 'nope')).toHaveLength(0);
+  });
+
+  it('does not mutate the save it was given', () => {
+    const save = emptySave();
+    recordAnswers(save, [{ lineId: line.id, question: first, correct: false }], NOW);
+    expect(save.questions).toEqual({});
+  });
+
+  it('fills up to half a cram drill with questions you have missed', () => {
+    const pool = cramPool(LINES, () => true);
+    const shaky = pool.slice(50, 58);
+    const drill = cramQuestions(pool, CRAM_SIZE, shaky);
+    expect(drill).toHaveLength(CRAM_SIZE);
+    expect(new Set(drill).size).toBe(CRAM_SIZE);
+    expect(drill.filter(q => shaky.includes(q)).length).toBe(Math.floor(CRAM_SIZE / 2));
   });
 });

@@ -12,9 +12,12 @@ interface Props {
   isDaily: boolean;
   onPickTier: (t: Tier) => void;
   onBoard: () => void;
+  /** Questions on this line you have missed and not yet recovered. */
+  shakyCount: number;
+  onDrillShaky: () => void;
 }
 
-export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard }: Props) {
+export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard, shakyCount, onDrillShaky }: Props) {
   const line = LINES[idx];
   const p = save.levels[line.id];
   const locked = !isUnlocked(save, idx);
@@ -66,6 +69,7 @@ export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard }: Props) 
             ) : (
               <>
                 <button className="btn big" onClick={onBoard}>Board: {TIERS[tier].name}</button>
+                {shakyCount > 0 && <button className="btn ghost" onClick={onDrillShaky}>Drill {shakyCount} shaky</button>}
                 <span className="hint">3 hearts per trip. A code check waits at the last stop.</span>
               </>
             )}

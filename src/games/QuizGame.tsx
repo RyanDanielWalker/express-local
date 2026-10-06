@@ -25,6 +25,7 @@ export function QuizGame({ api, line }: GameProps) {
     const ok = o === q.a;
     setPicked(o);
     setMarks(m => [...m, ok ? 'ok' : 'no']);
+    api.record(q, ok);
     if (ok) api.correct(10, 'Correct.');
     else api.wrong(<>Not quite. Read the reason, then keep moving.</>);
     later(() => {

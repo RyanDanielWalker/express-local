@@ -17,6 +17,8 @@ export type LineKind =
 /** One multiple-choice question. `t` is the lowest tier it shows up on. */
 export interface Question {
   t: Tier;
+  /** Set when a question is lifted out of its line (cram drills). */
+  from?: string;
   q: string;
   code?: string;
   opts: string[];
@@ -105,6 +107,14 @@ export interface LineProgress {
   best: Partial<Record<Tier, Best>>;
 }
 
+/** How a single question has gone for you, keyed by `qid()`. */
+export interface QuestionStat {
+  seen: number;
+  missed: number;
+  /** Timestamp of the last miss. */
+  last: number;
+}
+
 export interface SaveData {
   xp: number;
   levels: Partial<Record<LineId, LineProgress>>;
@@ -114,5 +124,7 @@ export interface SaveData {
   streak: { count: number; last: string };
   /** Day the Daily Ride was last cleared. */
   daily: string;
+  /** Per-question history, so weak spots can come back around. */
+  questions: Record<string, QuestionStat>;
   dailyPick?: { day: string; idx: number };
 }

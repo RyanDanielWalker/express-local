@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LINES } from './data';
 import { dailyDone, ensureDailyPick, finishCram, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
-import { cramPool, cramQuestions, CRAM_SIZE } from './engine/questions';
+import { cramPool, cramQuestions, CRAM_SIZE, recordAnswers, shakyQuestions } from './engine/questions';
 import { loadSave, persistSave } from './engine/save';
-import type { Division, Line, SaveData, Tier } from './engine/types';
+import type { Division, Line, Question, SaveData, Tier } from './engine/types';
 import { Header } from './components/Header';
 import { LineMap } from './components/LineMap';
 import { Intro } from './components/Intro';
@@ -21,7 +21,7 @@ type Screen =
   | { kind: 'play'; tier: Tier; run: number }
   | { kind: 'quiz'; ride: RideStats }
   | { kind: 'result'; ride: RideStats; result: TripResult; cram?: boolean }
-  | { kind: 'derailed' };
+  | { kind: 'derailed'; ride?: RideStats };
 
 /** Open on whatever needs attention: a due review, then the next new line. */
 function startingLine(save: SaveData): number {
@@ -69,7 +69,8 @@ export default function App() {
   /** Score the run, bank the new save, show the results screen. */
   const finish = useCallback(
     (ride: RideStats, quizOk: boolean) => {
-      const result = finishTrip(save, { lineIdx: current, quizOk, ...ride });
+      const withStats = recordAnswers(save, ride.answers.map(a => ({ lineId: LINES[current].id, question: a.question, correct: a.correct })));
+      const result = finishTrip(withStats, { lineIdx: current, quizOk, ...ride });
       setSave(result.save);
       setScreen({ kind: 'result', ride, result });
     },
@@ -81,22 +82,41 @@ export default function App() {
     (ride: RideStats) => (LINES[current].quiz?.length ? setScreen({ kind: 'quiz', ride }) : finish(ride, false)),
     [current, finish],
   );
-  const onDerail = useCallback(() => setScreen({ kind: 'derailed' }), []);
+  const onDerail = useCallback(
+    (ride: RideStats) => {
+      // A run can end out of hearts and still teach: keep the misses.
+      setSave(s => recordAnswers(s, ride.answers.map(a => ({ lineId: a.question.from ?? LINES[current].id, question: a.question, correct: a.correct }))));
+      setScreen({ kind: 'derailed', ride });
+    },
+    [current],
+  );
 
   /* ---------- cram drill: mixed questions, no line progress ---------- */
   const pool = cramPool(LINES, (_, i) => isUnlocked(save, i), cramDivisions);
+  const shaky = shakyQuestions(save, LINES);
+  const drillOwner = new Map<Question, string>();
+  LINES.forEach(l => (l.questions ?? []).forEach(q => drillOwner.set(q, l.id)));
+
+  const drillLine = (name: string, topic: string, questions: Question[]): Line => ({
+    id: 'cram' as Line['id'], division: 'algos', kind: 'quiz', bullet: '\u2605', color: '--ink',
+    short: 'Drill', name, topic, pitch: '', rules: [],
+    hook: 'Mixed drill. Answer out loud before you click.', par: 0, questions, preset: true,
+  });
+
+  const startShaky = (lineId?: string) => {
+    const questions = shakyQuestions(save, LINES, lineId).slice(0, 10).map(s => s.question);
+    if (!questions.length) return;
+    setScreen({ kind: 'cram', line: drillLine('Shaky Questions', `${questions.length} you have missed before`, questions), run: Date.now() });
+  };
+
   const startCram = () => {
-    const questions = cramQuestions(pool);
-    const line: Line = {
-      id: 'cram' as Line['id'], division: 'algos', kind: 'quiz', bullet: '\u2605', color: '--ink',
-      short: 'Cram', name: 'Cram Drill', topic: `${questions.length} mixed questions`,
-      pitch: '', rules: [], hook: 'Mixed drill. Answer out loud before you click.', par: 0, questions, preset: true,
-    };
-    setScreen({ kind: 'cram', line, run: Date.now() });
+    const questions = cramQuestions(pool, CRAM_SIZE, shaky.map(s => s.question));
+    setScreen({ kind: 'cram', line: drillLine('Cram Drill', `${questions.length} mixed questions`, questions), run: Date.now() });
   };
   const onCramDone = (ride: RideStats, asked: number) => {
     const right = Math.max(0, asked - ride.mistakes);
-    const result = finishCram(save, { right, asked, time: ride.time });
+    const withStats = recordAnswers(save, ride.answers.map(a => ({ lineId: a.question.from ?? drillOwner.get(a.question) ?? 'cram', question: a.question, correct: a.correct })));
+    const result = finishCram(withStats, { right, asked, time: ride.time });
     setSave(result.save);
     setScreen({ kind: 'result', ride, result, cram: true });
   };
@@ -112,6 +132,8 @@ export default function App() {
           isDaily={current === dailyIdx && isUnlocked(save, current)}
           onPickTier={t => setPicked(p => ({ ...p, [line.id]: t }))}
           onBoard={() => board()}
+          shakyCount={shakyQuestions(save, LINES, line.id).length}
+          onDrillShaky={() => startShaky(line.id)}
         />
       );
       break;
@@ -159,7 +181,14 @@ export default function App() {
       );
       break;
     case 'derailed':
-      stage = <Derailed line={line} onAgain={() => board()} onMap={toIntro} />;
+      stage = (
+        <Derailed
+          line={line}
+          missed={(screen.ride?.answers ?? []).filter(a => !a.correct).map(a => a.question)}
+          onAgain={() => board()}
+          onMap={toIntro}
+        />
+      );
       break;
   }
 
@@ -171,6 +200,8 @@ export default function App() {
         <CramBand
           divisions={cramDivisions}
           poolSize={pool.length}
+          shakyCount={shaky.length}
+          onShaky={() => startShaky()}
           onToggle={d => setCramDivisions(ds => (ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d]))}
           onStart={startCram}
         />

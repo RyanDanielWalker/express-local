@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { Line, Tier } from '../engine/types';
+import type { Line, Question, Tier } from '../engine/types';
 
 export type Tone = 'good' | 'bad' | '';
 
@@ -11,6 +11,8 @@ export interface GameApi {
   /** True once the trip is finished or out of hearts. Check before acting on input. */
   readonly over: boolean;
   say(msg: ReactNode, tone?: Tone): void;
+  /** Report one answered question so the run can track weak spots. */
+  record(question: Question, correct: boolean): void;
   correct(points?: number, msg?: ReactNode): void;
   wrong(msg: ReactNode): void;
   finish(): void;

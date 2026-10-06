@@ -24,6 +24,7 @@ export function Results({ cram, line, ride, result, nextName, onAgain, onNext, o
   const prompts = (g?.famous ?? g?.say ?? []) as string[];
   const tryIt = prompts.length ? prompts[(ride.rideXp + ride.mistakes) % prompts.length] : null;
   const perfect = ride.mistakes === 0;
+  const missed = ride.answers.filter(a => !a.correct);
 
   return (
     <div className="result" style={lineStyle(line)}>
@@ -52,6 +53,21 @@ export function Results({ cram, line, ride, result, nextName, onAgain, onNext, o
         </div>
       )}
       {unlockedTier && <div className="daily">{TIERS[unlockedTier].name} is now open on this line. {TIERS[unlockedTier].blurb}</div>}
+      {missed.length > 0 && (
+        <div>
+          <div className="eyebrow">What you missed</div>
+          <ol className="recap">
+            {missed.map(({ question }, i) => (
+              <li key={i}>
+                <p className="rq"><Rich text={question.q} /></p>
+                <p className="ra"><b>{question.a}</b></p>
+                <p className="rw"><Rich text={question.why} /></p>
+              </li>
+            ))}
+          </ol>
+          <p className="hint" style={{ margin: 0 }}>These come back in your next cram drill until you get them twice in a row.</p>
+        </div>
+      )}
       {!cram && line.bigO && <div><span className="stamp">{line.bigO}</span></div>}
       {tryIt && <div className="hook"><b>{g?.famous ? 'Try it for real' : 'Say this out loud'}</b><Rich text={tryIt} /></div>}
       {cram ? (

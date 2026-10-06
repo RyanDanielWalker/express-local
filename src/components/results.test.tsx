@@ -6,7 +6,7 @@ import { LINES } from '../data';
 import { finishCram, finishTrip } from '../engine/progression';
 import { emptySave } from '../engine/save';
 
-const ride = { tier: 1 as const, rideXp: 60, mistakes: 1, time: 72 };
+const ride = { tier: 1 as const, rideXp: 60, mistakes: 1, time: 72, answers: [] };
 const noop = () => {};
 const props = { ride, nextName: 'Next Line', onAgain: noop, onNext: noop, onTier: noop, onMap: noop };
 

@@ -9,6 +9,7 @@ export const emptySave = (): SaveData => ({
   stats: { reviews: 0, trips: 0 },
   streak: { count: 0, last: '' },
   daily: '',
+  questions: {},
 });
 
 export const emptyProgress = (): LineProgress => ({ cleared: false, box: 0, due: 0, trips: 0, tier: 0, best: {} });
@@ -38,6 +39,7 @@ export function migrate(raw: unknown): SaveData {
     stats: { ...base.stats, ...r.stats },
     streak: { ...base.streak, ...r.streak },
     daily: r.daily ?? '',
+    questions: r.questions ?? {},
   };
 }
 

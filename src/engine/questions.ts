@@ -42,13 +42,74 @@ export function cramPool(lines: Line[], isOpen: (line: Line, idx: number) => boo
     if (!isOpen(line, idx)) return;
     if (divisions?.length && !divisions.includes(line.division)) return;
     for (const q of line.questions ?? []) pool.push(q);
-    for (const q of line.quiz ?? []) pool.push({ t: 1, q: 'What goes in the blank?', code: q.code, opts: q.opts, a: q.a, why: q.why });
+    for (const q of line.quiz ?? []) pool.push({ t: 1, from: line.id, q: 'What goes in the blank?', code: q.code, opts: q.opts, a: q.a, why: q.why });
   });
   return pool;
 }
 
-export const cramQuestions = (pool: Question[], count = CRAM_SIZE): Question[] => shuffle(pool.slice()).slice(0, count);
+/**
+ * A cram drill's questions. Up to half the drill is pulled from what you have
+ * missed before, so the weak spots keep coming back around.
+ */
+export function cramQuestions(pool: Question[], count = CRAM_SIZE, shaky: Question[] = []): Question[] {
+  const weak = shuffle(shaky.filter(q => pool.includes(q))).slice(0, Math.floor(count / 2));
+  const rest = shuffle(pool.filter(q => !weak.includes(q)));
+  return shuffle([...weak, ...rest.slice(0, count - weak.length)]);
+}
 
 /** Lines that are due for review today, in map order. */
 export const dueLines = (lines: Line[], save: SaveData, now = Date.now()): Line[] =>
   lines.filter(l => { const p = save.levels[l.id]; return !!p?.cleared && now >= p.due; });
+
+/* ---------- per-question history ---------- */
+
+/** Stable id for a question, derived from its text so it survives edits elsewhere. */
+export function qid(lineId: string, question: Question): string {
+  const text = question.q + (question.code ?? '');
+  let h = 5381;
+  for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0;
+  return `${question.from ?? lineId}:${h.toString(36)}`;
+}
+
+export interface AnswerRecord {
+  lineId: string;
+  question: Question;
+  correct: boolean;
+}
+
+/** Fold a run's answers into the save. Pure: returns a new save. */
+export function recordAnswers(save: SaveData, answers: AnswerRecord[], now = Date.now()): SaveData {
+  if (!answers.length) return save;
+  const next: SaveData = { ...save, questions: { ...save.questions } };
+  for (const { lineId, question, correct } of answers) {
+    const id = qid(lineId, question);
+    const prev = next.questions[id] ?? { seen: 0, missed: 0, last: 0 };
+    next.questions[id] = {
+      seen: prev.seen + 1,
+      // getting it right twice in a row clears it off the shaky list
+      missed: correct ? Math.max(0, prev.missed - 1) : prev.missed + 1,
+      last: correct ? prev.last : now,
+    };
+  }
+  return next;
+}
+
+export interface Shaky {
+  lineId: string;
+  question: Question;
+  missed: number;
+  last: number;
+}
+
+/** Questions you have missed and not yet recovered, worst first. */
+export function shakyQuestions(save: SaveData, lines: Line[], lineId?: string): Shaky[] {
+  const out: Shaky[] = [];
+  for (const line of lines) {
+    if (lineId && line.id !== lineId) continue;
+    for (const question of line.questions ?? []) {
+      const stat = save.questions[qid(line.id, question)];
+      if (stat && stat.missed > 0) out.push({ lineId: line.id, question, missed: stat.missed, last: stat.last });
+    }
+  }
+  return out.sort((a, b) => b.missed - a.missed || b.last - a.last);
+}
