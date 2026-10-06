@@ -165,6 +165,14 @@ pre.code{background:var(--code); border-radius:10px; padding:14px 16px; overflow
 .opts{display:flex; flex-wrap:wrap; gap:10px}
 .opts button{font-family:var(--mono); font-weight:600; font-size:16px; padding:10px 18px; border-radius:8px; border:2px solid var(--rule); background:var(--tile)}
 .opts button.right{border-color:var(--good); background:color-mix(in srgb, var(--good) 18%, var(--panel))}
+
+/* keyboard affordances: number the options, dim the clock while it is held */
+.opts.stack button{display:flex; align-items:baseline; gap:10px}
+.kb{flex:none; display:inline-grid; place-items:center; min-width:20px; height:20px; border-radius:5px; border:1px solid var(--rule); background:var(--tile); font-family:var(--mono); font-size:11px; color:var(--muted)}
+.opts button:disabled .kb{opacity:.4}
+.clock.held{opacity:.45}
+@media (max-width:560px){ .kb{display:none} }
+
 .opts button.wrongpick{border-color:var(--bad); background:color-mix(in srgb, var(--bad) 14%, var(--panel))}
 .qwrap, .result{display:flex; flex-direction:column; gap:14px; max-width:720px}
 .ledger{display:grid; grid-template-columns:1fr auto; gap:4px 20px; font-variant-numeric:tabular-nums; max-width:360px}

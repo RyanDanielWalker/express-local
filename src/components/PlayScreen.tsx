@@ -38,11 +38,13 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
   const [hearts, setHearts] = useState(maxHearts);
   const [xp, setXp] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const run = useRef({ over: false, xp: 0, mistakes: 0, hearts: maxHearts, t0: Date.now(), answers: [] as RideStats['answers'] });
+  const [held, setHeld] = useState(false);
+  const run = useRef({ over: false, xp: 0, mistakes: 0, hearts: maxHearts, t0: Date.now(), heldAt: 0, answers: [] as RideStats['answers'] });
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      if (!run.current.over) setElapsed((Date.now() - run.current.t0) / 1000);
+      const r = run.current;
+      if (!r.over && !r.heldAt) setElapsed((Date.now() - r.t0) / 1000);
     }, 1000);
     return () => clearInterval(id);
   }, []);
@@ -50,6 +52,15 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
   // Stable for the whole ride, so games can safely list it as an effect dependency.
   const api = useMemo<GameApi>(() => {
     const r = run.current;
+    /** Elapsed seconds, releasing the clock first if it was held. */
+    const stop = () => {
+      if (r.heldAt) {
+        r.t0 += Date.now() - r.heldAt;
+        r.heldAt = 0;
+        setHeld(false);
+      }
+      return (Date.now() - r.t0) / 1000;
+    };
     return {
       tier,
       assist: tier < 3,
@@ -57,6 +68,17 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
         return r.over;
       },
       say: (msg, tone = '') => setStatus({ msg, tone }),
+      hold() {
+        if (r.over || r.heldAt) return;
+        r.heldAt = Date.now();
+        setHeld(true);
+      },
+      resume() {
+        if (!r.heldAt) return;
+        r.t0 += Date.now() - r.heldAt;
+        r.heldAt = 0;
+        setHeld(false);
+      },
       record(question, correct) {
         r.answers.push({ question, correct });
       },
@@ -72,15 +94,15 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
         setHearts(r.hearts);
         setStatus({ msg, tone: 'bad' });
         if (r.hearts <= 0) {
+          const time = stop();
           r.over = true;
-          const time = (Date.now() - r.t0) / 1000;
           later(() => onDerail({ tier, rideXp: r.xp, mistakes: r.mistakes, time, answers: r.answers }), 1600);
         }
       },
       finish() {
         if (r.over) return;
+        const time = stop();
         r.over = true;
-        const time = (Date.now() - r.t0) / 1000;
         setElapsed(time);
         later(() => onArrive({ tier, rideXp: r.xp, mistakes: r.mistakes, time, answers: r.answers }), 2000);
       },
@@ -99,7 +121,7 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
           {!line.preset && <span className="tchip">{TIERS[tier].name}</span>}
         </div>
         <div className="row">
-          <span className="clock" aria-label="Elapsed time">{fmtTime(elapsed)}</span>
+          <span className={`clock ${held ? 'held' : ''}`} aria-label={held ? 'Clock paused while you read' : 'Elapsed time'}>{fmtTime(elapsed)}</span>
           {tier === 3 && !line.preset && <span className="hint" style={{ margin: 0 }}>par {fmtTime(line.par)}</span>}
           <span className="xp">+{xp} XP</span>
           <div className="hearts" aria-label={`${hearts} of ${maxHearts} hearts left`}>

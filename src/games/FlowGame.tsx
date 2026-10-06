@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { nextStep, pickFlows, revealAfterMiss } from '../engine/questions';
 import type { Flow } from '../engine/types';
-import { useTimers } from '../hooks/useTimers';
+import { useKeys } from '../hooks/useKeys';
 import { Rich } from '../components/Rich';
 import { shuffle } from '../lib/random';
 import { Panel } from './parts';
@@ -16,7 +16,6 @@ const trayFor = (flow?: Flow): string[] =>
 
 /** Put the steps of a process back in order. A miss says only that it was a miss. */
 export function FlowGame({ api, line }: GameProps) {
-  const later = useTimers();
   const [flows] = useState<Flow[]>(() => pickFlows(line.flows ?? [], api.tier));
   const [i, setI] = useState(0);
   const [placed, setPlaced] = useState<string[]>(() => given(flows[0]));
@@ -27,6 +26,13 @@ export function FlowGame({ api, line }: GameProps) {
   useEffect(() => api.say('Click the stages in the order they actually run.'), [api]);
 
   const flow = flows[i];
+  useKeys(e => {
+    if (!done || api.over) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      next();
+    }
+  });
   if (!flow) return null;
   const head = flow.start ?? 0;
   // The teaching moved here from the moment of the miss: struggle during, explain after.
@@ -52,17 +58,21 @@ export function FlowGame({ api, line }: GameProps) {
     api.correct(8, `${step}. Keep going.`);
     if (next.length < flow.steps.length) return;
     setDone(true);
-    api.say(<>Full order. {flow.note}</>, 'good');
-    later(() => {
-      if (api.over) return;
-      if (i + 1 >= flows.length) return api.finish();
-      const n = flows[i + 1];
-      setI(i + 1);
-      setPlaced(given(n));
-      setTray(trayFor(n));
-      setMisses({});
-      setDone(false);
-    }, 3600);
+    api.say('Full order. Read why it goes that way, then carry on.', 'good');
+    // Held, not timed: the note under the board is the point of the puzzle.
+    api.hold();
+  }
+
+  function next() {
+    if (api.over || !done) return;
+    api.resume();
+    if (i + 1 >= flows.length) return api.finish();
+    const n = flows[i + 1];
+    setI(i + 1);
+    setPlaced(given(n));
+    setTray(trayFor(n));
+    setMisses({});
+    setDone(false);
   }
 
   return (
@@ -93,6 +103,14 @@ export function FlowGame({ api, line }: GameProps) {
               {fumbled.length > 0 && (
                 <p className="fumbled">Worth saying out loud before you move on: <em>{fumbled.join(', ')}</em>.</p>
               )}
+            </div>
+          )}
+          {done && (
+            <div className="decide">
+              <button className="btn big" onClick={next} autoFocus>
+                {i + 1 >= flows.length ? 'See how you did' : 'Next scenario'}
+              </button>
+              <span className="hint" style={{ margin: 0 }}>or press space. The clock is paused.</span>
             </div>
           )}
         </div>

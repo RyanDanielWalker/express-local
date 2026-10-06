@@ -15,6 +15,10 @@ export interface GameApi {
   record(question: Question, correct: boolean): void;
   correct(points?: number, msg?: ReactNode): void;
   wrong(msg: ReactNode): void;
+  /** Stop the clock while the player reads. Reading an explanation should not cost par time. */
+  hold(): void;
+  /** Start it again. Safe to call when it was never held. */
+  resume(): void;
   finish(): void;
 }
 
