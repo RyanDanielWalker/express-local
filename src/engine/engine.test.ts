@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DAY, dayKey, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
+import { DAY, dayKey, ensureDailyPick, finishTrip, isUnlocked, maxTier, rankFor } from './progression';
 import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN } from './questions';
 import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
@@ -91,10 +91,12 @@ describe('finishing a trip', () => {
     expect(b.save.levels.sq?.best[1]).toEqual({ m: 1, t: 90 });
   });
 
-  it('pays the Daily Ride bonus once per day', () => {
-    const r1 = finishTrip(emptySave(), outcome, NOW);
+  it('pays the Daily Ride bonus once per day, on whichever line is picked', () => {
+    const save = emptySave();
+    const lineIdx = ensureDailyPick(save, NOW);
+    const r1 = finishTrip(save, { ...outcome, lineIdx }, NOW);
     expect(r1.ledger.some(([k]) => k === 'Daily Ride')).toBe(true);
-    const r2 = finishTrip(r1.save, outcome, NOW);
+    const r2 = finishTrip(r1.save, { ...outcome, lineIdx }, NOW);
     expect(r2.ledger.some(([k]) => k === 'Daily Ride')).toBe(false);
   });
 });

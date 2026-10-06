@@ -1,6 +1,7 @@
 export type AlgoLineId = 'sq' | 'bfs' | 'dfs' | 'bin' | 'bub' | 'rec' | 'hash' | 'merge' | 'quick' | 'two' | 'dij';
+export type NestLineId = 'life' | 'di' | 'route' | 'dto' | 'block' | 'err';
 /** Every line on the map. Each division adds its ids here. */
-export type LineId = AlgoLineId;
+export type LineId = AlgoLineId | NestLineId;
 export type Tier = 1 | 2 | 3;
 
 /** Lines are grouped into divisions on the map, and each division unlocks on its own. */
