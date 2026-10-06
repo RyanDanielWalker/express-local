@@ -40,6 +40,7 @@ Lines are data, so most of this is writing rather than building.
 - [ ] **Diminishing returns.** The fourth ride of the same line in one day should pay less. Needs a new save field (rides per line per day), so it was left out rather than quietly changing the save format.
 - [ ] **Interview mode.** Five random rehearsal prompts across divisions, timed, no retries. The closest thing to the real event.
 - [ ] **Study plan.** Give it a date, get a daily plan that walks readiness up to where it needs to be by then.
+- [ ] **"Stuck? Show me."** A voluntary hint button that costs a heart on purpose and marks that step shaky so it comes back. Deciding you are stuck is different from being handed the answer by accident.
 - [ ] **Weekly report.** What decayed since last week, what to drill, nothing else.
 
 ## The fork
@@ -62,6 +63,7 @@ Learned the hard way, mostly by getting them wrong first.
 - **The headline number should be a state you can lose, not a total you accumulate.** XP measures time spent. Readiness measures what you'd recall today.
 - **Pay for the weak stuff.** If replaying a mastered line is the best XP on the board, the scoring is teaching the wrong habit.
 - **Content is data.** Lines live in `src/data/` and are validated by tests, so adding a topic is writing questions, not writing components.
+- **Never answer the question for them.** Feedback on a miss should say that it was a miss, not what the answer was. The moment right after you find a gap in your own model is the one worth spending on retrieval, and a hint that arrives automatically is a hint you did not choose.
 - **Recognition is not recall, and recall is not speech.** Hence shaky drills and out-loud rehearsal. The interview tests the third one.
 - **No em dashes.**
 
@@ -79,3 +81,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-06** Flow puzzles stopped showing their own answer, and stopped using red for correct
 - **2026-10-06** Flow puzzles got mid-flight starts, decoy steps, and openings that differ
 - **2026-10-06** Readiness replaced XP as the headline, ranks re-pegged, derailing costs XP
+- **2026-10-06** Flow misses stopped naming the answer, with hints that fade by tier
