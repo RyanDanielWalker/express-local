@@ -1,61 +1,84 @@
 # Express & Local
 
-**Learn algorithms by being the algorithm.** A subway-themed game where you don't watch BFS run. You *are* BFS, clicking stations in order while the queue fills up next to you.
+**Learn it by doing it.** A subway-themed drill for the things I keep having to re-learn: algorithms, NestJS and React. You don't read about BFS here, you *are* BFS, clicking stations in order while the queue fills up next to you. Then the NestJS and React lines drill the same way a real interview does, one question at a time, with the reason spelled out when you miss.
 
-![The line map and a line's intro screen](docs/intro.png)
+![The map: three divisions, a cram drill at the bottom](docs/map.png)
 
 ## Why this exists
 
-I spent months trying to make CS fundamentals stick. Videos, articles, flashcards: I'd understand something on Tuesday and forget it by Friday. What finally worked was doing the algorithm by hand, step by step, until the moves were muscle memory. So I built a game around that, and then kept going until I actually wanted to open it every day.
+I spent months trying to make this stuff stick. Videos, articles, flashcards: I'd understand something on Tuesday and forget it by Friday. What finally worked was doing the thing by hand, over and over, until the moves were muscle memory. So I built a game around that, and then kept adding the parts of my actual job I wanted to be sharper on.
 
-## What you play
+## The map
 
-Eleven lines, each one an algorithm or data structure. Clear a line to open the next.
+Lines are grouped into divisions. Each division unlocks in its own order, so you can start NestJS without finishing every sorting line.
 
-| | Line | Topic | You play it by... |
-|---|---|---|---|
-| **Q** | Push & Pop Shuttle | Stacks and queues | Reading a push/pop log and picking what comes out |
-| **B** | The Local | Breadth-first search | Clicking stations in BFS order while the queue updates |
-| **D** | The Express | Depth-first search | Same map, but with a stack (and stale entries to skip) |
-| **S** | Split Line | Binary search | Clicking the exact `mid` index each step |
-| **W** | Swap Yard | Bubble sort | Swap or keep, pair by pair |
-| **R** | Call Stack Line | Recursion | Driving the call stack: call, or return a value |
-| **H** | Coat Check | Hash tables | Hashing keys into buckets, then looking them up |
-| **M** | Merge Junction | Merge sort | Always taking the smaller of two fronts |
-| **P** | Pivot Point | Quicksort | Partitioning around a pivot, one value at a time |
-| **2** | Both Ends | Two pointers | Walking `lo` and `hi` inward to hit a target sum |
-| **J** | Shortest Route | Dijkstra | Settling the closest station, then relaxing edges |
+### Algorithms (lettered lines)
+
+Hand-built games. You play the algorithm step by step.
+
+| | Line | Topic |
+|---|---|---|
+| **Q** | Push & Pop Shuttle | Stacks and queues |
+| **B** | The Local | Breadth-first search |
+| **D** | The Express | Depth-first search |
+| **S** | Split Line | Binary search |
+| **W** | Swap Yard | Bubble sort |
+| **R** | Call Stack Line | Recursion |
+| **H** | Coat Check | Hash tables |
+| **M** | Merge Junction | Merge sort |
+| **P** | Pivot Point | Quicksort |
+| **2** | Both Ends | Two pointers |
+| **J** | Shortest Route | Dijkstra |
+
+### NestJS (numbered lines)
+
+| | Line | Topic |
+|---|---|---|
+| **1** | Main Line | Put the request lifecycle in order |
+| **2** | Wiring Yard | DI, modules, "Nest can't resolve dependencies" |
+| **3** | Platform Signs | Controllers, routing, params, status codes |
+| **4** | Ticket Check | DTOs and the ValidationPipe |
+| **5** | Dispatch Desk | Guard vs pipe vs interceptor vs filter vs middleware |
+| **6** | Fault Line | Exceptions, status codes, filters |
+
+### React
+
+| | Line | Topic |
+|---|---|---|
+| **C** | Repaint Line | What actually triggers a re-render |
+| **E** | Side Track | Effects, dependencies, cleanup |
+| **A** | Snapshot Line | State, batching, the updater form |
+| **K** | Key Change | Keys, lists, reconciliation |
+| **F** | Memo Yard | memo, useMemo, useCallback, profiling |
+| **N** | Hook Junction | Hook rules and the React 19 APIs |
+
+## What keeps you coming back
+
+- **Three tiers per line.** Local, Express, Rush Hour. Inputs get bigger, question pools get deeper, and Rush Hour takes the helpers away and adds a par time.
+- **Spaced repetition.** Clearing a line schedules a review (1, 3, 7, 14, then 30 days) with a Leitner box. Nail the review and the gap grows, stumble and it shrinks.
+- **Cram drill.** Twelve mixed questions from everything you have opened, five hearts, no tiers, filterable by division. Built for the morning of an interview.
+- **A field guide on every line.** Plain English, vocabulary, real code, and for the NestJS and React lines, the talking points to say out loud plus the gotcha people trip on.
+- **Streaks, a daily ride, badges and personal bests.**
 
 ![Mid-ride on the BFS line](docs/bfs.png)
-
-Every ride ends with a fill-in-the-blank code check, so the thing you just did by hand connects back to real code.
-
-## Why it keeps pulling you back
-
-- **Three tiers per line.** Local, Express, and Rush Hour. Inputs get bigger, and Rush Hour takes the helpers away (no queue panel, no distance table) and adds a par time. Your skill grows with the game.
-- **Spaced repetition.** Each cleared line schedules a review (1, 3, 7, 14, then 30 days) using a Leitner box system. Nail a review and the gap grows. Stumble and it shrinks.
-- **Streaks, a Daily Ride, and 14 badges.** Small, honest incentives to come back tomorrow.
-- **A field guide for every line.** Plain-English explanation, vocabulary, where it shows up in real code (React, `Map`, `git bisect`), famous problems to try next, and a bit of history.
-- **Personal bests** per line and tier: fewest mistakes, then fastest time.
-
 ![Dijkstra in dark mode](docs/dijkstra-dark.png)
 
 ## Tech
 
 - **React 19 + TypeScript + Vite.** No backend. Progress lives in `localStorage`, with a copy/paste save code for moving between browsers.
-- **Game logic is pure.** Every algorithm is a small state machine in `src/algorithms/`: the UI asks for the right move, sends the player's move, and renders whatever state comes back. React never decides what's correct.
-- **Scoring is pure too.** `finishTrip()` takes a save and a ride outcome and returns a new save plus everything the results screen shows. No side effects, easy to test.
-- **Tested with Vitest.** The tests play each algorithm perfectly and check the result against a reference (sorted output, true shortest distances, correct traversal orders), and cover streaks, tiers, review scheduling, badges, and save migration.
-- **Accessible by default.** Keyboard shortcuts on every line, focusable graph nodes, `aria-live` status updates, reduced-motion support, and light/dark themes.
-- **Self-hosted fonts** via Fontsource: Big Shoulders Display, Atkinson Hyperlegible, and JetBrains Mono.
+- **Game logic is pure.** Algorithms are small state machines in `src/algorithms/`: the UI asks what the right move is, sends the player's move, and renders whatever state comes back. React never decides what's correct.
+- **Content is data.** Quiz and flow lines are entries in `src/data/`, so adding a topic is writing questions, not writing components.
+- **Scoring is pure too.** `finishTrip()` and `finishCram()` take a save plus a run and return a new save with everything the results screen shows.
+- **Tested with Vitest.** The tests play each algorithm perfectly and check the result against a reference, cover progression (streaks, tiers, review scheduling, badges, save migration), validate the content (every answer exists among its options, no em dashes in player-facing copy), and server-render the results screens for every line.
+- **Accessible by default.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced motion, light and dark themes.
 
 ```
 src/
-  algorithms/   pure game logic + tests (graph, sorting, searching, recursion, dijkstra)
-  engine/       save data, progression, scoring, badges + tests
-  data/         line definitions and field guide copy
-  games/        one React component per line
-  components/   screens: map, intro, play, quiz, results, badges
+  algorithms/   pure algorithm logic + tests
+  engine/       save data, progression, scoring, question pools + tests
+  data/         lines.ts + guide.ts (algorithms), nest.ts, react.ts, index.ts
+  games/        one component per algorithm line, plus QuizGame and FlowGame
+  components/   screens: map, intro, play, quiz, results, cram band, badges
 ```
 
 ## Run it
@@ -69,24 +92,21 @@ npm test           # unit tests
 npm run build      # typecheck + production build into dist/
 ```
 
-## Deploy
-
-It's a static site. On Vercel: import the repo, keep the Vite preset, deploy. Any static host works (`npm run build`, then serve `dist/`).
-
 ## Adding a line
 
-1. Add the line to `LINES` in `src/data/lines.ts` (copy, rules, quiz questions, par time).
-2. Add its field guide to `src/data/guide.ts`.
-3. Write the logic as pure functions in `src/algorithms/` with a test.
-4. Build the game component in `src/games/` and register it in `src/games/index.ts`.
+1. Add the id to `LineId` in `src/engine/types.ts`.
+2. Add the line to its division's data file (`src/data/nest.ts`, `react.ts`, or `lines.ts`) with `division`, `kind`, copy and content.
+3. Add its field guide entry in the same file.
+4. For a `kind: 'game'` line, write the pure logic in `src/algorithms/` with tests and register the component in `src/games/index.ts`. Quiz and flow lines need no component.
+
+Adding a whole division is the same, plus an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-- [ ] **Event Loop line:** sort callbacks into the call stack, microtask queue, and task queue, then predict the log order
-- [ ] **React Re-render line:** a parent's state changes; click every component that re-renders
+- [ ] **TypeScript division:** narrowing, generics, utility types, `unknown` vs `any`, `satisfies`
 - [ ] **Engineer's Cab:** after Rush Hour, write the algorithm yourself against in-browser tests
-- [ ] **Dispatch Desk:** read a real-world scenario, pick the right algorithm
-- [ ] More lines: LRU cache, heaps, linked lists, DP tables, sliding window, SQL joins, Git as a train yard
+- [ ] **Scenario mode:** read a real-world situation, pick the right algorithm or the right Nest building block
+- [ ] More lines: LRU cache, heaps, linked lists, SQL joins, Git as a train yard
 - [ ] Cross-device progress sync
 
 ## Credits
