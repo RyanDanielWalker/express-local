@@ -20,15 +20,15 @@ Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 4 (data
 
 ## Now: NestJS
 
-- [x] **The bar, as a test ratchet.** First run: NestJS 1 of 6 lines clear (the lifecycle). TypeScript and React 0 of 6.
-- [ ] **Mixed runs.** Every quiz line in the app fails the judgment check, because a quiz line can only hold questions. Let a quiz line carry a flow or a sort that plays inside its run, so the DTO line can end on "order the validation pipeline" instead of a ninth recognition question. This is engine work, and it is what makes check 4 reachable at all.
-- [ ] **Fill tier 1.** Nest lines carry 3 or 4 tier 1 questions against a run of 6, so about 13 new ones across the six lines.
-- [ ] **Rehearsal to three prompts a line.** Currently two.
-- [ ] **A "what do you actually type" line.** The whole division teaches concepts and never the API. The decorator you reach for, the interface you implement, the method you write, and real examples from the framework: `ValidationPipe`, `ParseIntPipe`, `AuthGuard`, `RolesGuard`, `ClassSerializerInterceptor`, `CacheInterceptor`, helmet and cors as middleware, `HttpExceptionFilter`. This is the gap behind "can you give me an example of a pipe".
-- [ ] **A matching mechanic (`kind: 'sort'`).** Buckets across the top, real class and decorator names in a tray, put each one where it belongs. A wrong drop teaches what that thing actually is. Generalizes beyond Nest: React hooks by what they are for, TypeScript utilities by what they operate on.
+- [x] **The bar, as a test ratchet.** First run: NestJS 1 of 6 lines clear. Now 6 of 6.
+- [x] **Mixed runs.** Every quiz line in the app fails the judgment check, because a quiz line can only hold questions. Let a quiz line carry a flow or a sort that plays inside its run, so the DTO line can end on "order the validation pipeline" instead of a ninth recognition question. This is engine work, and it is what makes check 4 reachable at all.
+- [x] **Fill tier 1.** Thirteen new questions, leaning toward what you type: `@Param` versus `@Query`, `useGlobalPipes`, throwing versus returning a 404.
+- [x] **Rehearsal to three prompts a line.** Including "give me a real example of each building block."
+- [ ] **A "what do you actually type" line.** Partly covered now by the new tier 1 questions and the real-packages sort. Still worth a line of its own for interfaces and method signatures: `canActivate`, `transform`, `intercept`, `catch`, `use`.
+- [x] **A matching mechanic.** Shipped as sorts that a quiz line ends on, rather than a line kind of their own. Cards are named by the job, never by their box, and a test enforces it. Generalizes beyond Nest: React hooks by what they are for, TypeScript utilities by what they operate on.
 - [ ] **A testing line.** `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
 - [ ] **An auth line.** Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
-- [ ] **More flows.** One flow line in the whole app is one too few. DI resolution and the validation pipeline both have an order worth drilling.
+- [ ] **More flows.** The validation pipeline shipped on the DTO line. DI resolution order is still worth one.
 
 ## Then: TypeScript
 
@@ -114,3 +114,7 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-06** Flow misses stopped naming the answer, with hints that fade by tier
 - **2026-10-06** Drills advance on a click, not a timer, with keyboard shortcuts and a clock that holds while you read
 - **2026-10-07** Roadmap restructured around a done bar, depth before breadth
+- **2026-10-07** The bar as a test ratchet, `npm run bar`
+- **2026-10-07** Sort puzzles, and quiz runs that end on a puzzle as their last stop
+- **2026-10-07** Answer keys taken off the play screen: quiz side panels use a drill, the guide panel only shows on algorithm games
+- **2026-10-07** NestJS clears the bar on all six lines: full runs at every tier, three rehearsal prompts, a puzzle each
