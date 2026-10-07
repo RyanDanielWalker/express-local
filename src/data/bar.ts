@@ -11,7 +11,7 @@ import type { Division, Guide, Line, Tier } from '../engine/types';
 export const FINISHED: Division[] = ['nest'];
 
 export interface BarCheck {
-  id: 'runs' | 'rehearse' | 'guide' | 'judgment' | 'tells';
+  id: 'runs' | 'variety' | 'rehearse' | 'guide' | 'judgment' | 'tells';
   label: string;
   ok: boolean;
   /** What is missing, in a few words. */
@@ -28,6 +28,16 @@ const TIERS: Tier[] = [1, 2, 3];
 export const MAX_LONGEST_SHARE = 0.5;
 
 /**
+ * How much bigger than a run a tier's pool has to be. A pool exactly the size
+ * of a run makes every replay the same run, so the second ride is a memory
+ * test. At 1.5x, a replay still leads with questions you have not seen.
+ */
+export const VARIETY = 1.5;
+
+/** Puzzles a quiz line needs on Local, so back-to-back rides end differently. */
+export const PUZZLES_AT_LOCAL = 2;
+
+/**
  * One line against the bar in ROADMAP.md. Check 5 there (content tests) is
  * mostly enforced for every line by data.test.ts; the one part that has to be
  * judged per line, answers giving themselves away by length, lives here.
@@ -36,15 +46,21 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
   // Hand-built games generate their own runs and are judgment puzzles by nature.
   const game = line.kind === 'game';
 
-  const short = game
+  const pools = game
     ? []
     : TIERS.map(t => {
         const have = line.kind === 'flow'
           ? (line.flows ?? []).filter(f => f.t <= t).length
           : (line.questions ?? []).filter(q => q.t <= t).length;
-        const need = line.kind === 'flow' ? FLOWS_PER_RUN[t] : QUESTIONS_PER_RUN[t];
-        return { t, have, need };
-      }).filter(r => r.have < r.need);
+        const run = line.kind === 'flow' ? FLOWS_PER_RUN[t] : QUESTIONS_PER_RUN[t];
+        return { t, have, run, room: Math.ceil(run * VARIETY) };
+      });
+  const short = pools.filter(r => r.have < r.run);
+  const samey = pools.filter(r => r.have >= r.run && r.have < r.room);
+  const localPuzzles = line.kind === 'quiz'
+    ? [...(line.flows ?? []), ...(line.sorts ?? [])].filter(p => p.t === 1).length
+    : PUZZLES_AT_LOCAL;
+  const fewEndings = !line.preset && line.kind === 'quiz' && localPuzzles < PUZZLES_AT_LOCAL;
 
   const prompts = guide?.rehearse?.length ?? 0;
   const talking = (guide?.say?.length ?? 0) > 0;
@@ -66,7 +82,16 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
       id: 'runs',
       label: 'Fills a run at every tier',
       ok: short.length === 0,
-      detail: short.length ? short.map(r => `T${r.t} ${r.have}/${r.need}`).join(' ') : '',
+      detail: short.length ? short.map(r => `T${r.t} ${r.have}/${r.run}`).join(' ') : '',
+    },
+    {
+      id: 'variety',
+      label: 'Replays differ',
+      ok: samey.length === 0 && !fewEndings,
+      detail: [
+        ...samey.map(r => `T${r.t} ${r.have}/${r.room}`),
+        fewEndings && `${localPuzzles}/${PUZZLES_AT_LOCAL} Local puzzles`,
+      ].filter(Boolean).join(' '),
     },
     {
       id: 'rehearse',

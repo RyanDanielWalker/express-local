@@ -41,12 +41,26 @@ describe('the auditor', () => {
     rehearse: Array.from({ length: prompts }, (_, i) => ({ prompt: `p${i}`, answer: 'a' })),
     ...extra,
   });
-  const full = [...q(1, 6), ...q(2, 2), ...q(3, 2)];
+  const full = [...q(1, 9), ...q(2, 3), ...q(3, 3)];
+  const flow = (t: 1 | 2 | 3 = 1) => ({ t, title: `x${t}`, steps: ['a', 'b'], note: 'n' });
 
   it('fails a line that cannot fill a Local run, and says by how much', () => {
     const runs = auditLine(quiz([...q(1, 3), ...q(2, 5), ...q(3, 2)]), guide(3)).find(c => c.id === 'runs')!;
     expect(runs.ok).toBe(false);
     expect(runs.detail).toBe('T1 3/6');
+  });
+
+  it('fails a line whose pool is no bigger than a run, so every replay is the same', () => {
+    const variety = auditLine(quiz([...q(1, 6), ...q(2, 2), ...q(3, 2)], { flows: [flow(), flow()] }), guide(3))
+      .find(c => c.id === 'variety')!;
+    expect(variety.ok).toBe(false);
+    expect(variety.detail).toBe('T1 6/9 T2 8/12 T3 10/15');
+  });
+
+  it('wants two puzzles on Local, so back-to-back rides end differently', () => {
+    const variety = (flows: ReturnType<typeof flow>[]) => auditLine(quiz(full, { flows }), guide(3)).find(c => c.id === 'variety')!;
+    expect(variety([flow(), flow(2)]).detail).toBe('1/2 Local puzzles');
+    expect(variety([flow(), flow()]).ok).toBe(true);
   });
 
   it('wants three rehearsal prompts, talking points and a gotcha', () => {
@@ -59,15 +73,15 @@ describe('the auditor', () => {
     const tilted = (n: number): Question[] => Array.from({ length: n }, (_, i) => ({
       t: 1 as const, q: `q${i}`, opts: ['the long right answer', 'short', 'brief'], a: 'the long right answer', why: 'because',
     }));
-    const line = quiz([...tilted(6), ...q(2, 2), ...q(3, 2)], { flows: [{ t: 1, title: 'x', steps: ['a', 'b'], note: 'n' }] });
+    const line = quiz([...tilted(9), ...q(2, 3), ...q(3, 3)], { flows: [flow(), flow()] });
     const tells = auditLine(line, guide(3)).find(c => c.id === 'tells')!;
     expect(tells.ok).toBe(false);
-    expect(tells.detail).toBe('answer is the longest option on 6/10');
+    expect(tells.detail).toBe('answer is the longest option on 9/15');
   });
 
   it('does not count recognition alone as judgment', () => {
     expect(auditLine(quiz(full), guide(3)).find(c => c.id === 'judgment')!.ok).toBe(false);
-    const withFlow = quiz(full, { flows: [{ t: 1, title: 'x', steps: ['a', 'b'], note: 'n' }] });
+    const withFlow = quiz(full, { flows: [flow(), flow()] });
     expect(clears(auditLine(withFlow, guide(3)))).toBe(true);
   });
 });
