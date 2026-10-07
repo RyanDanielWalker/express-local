@@ -14,9 +14,9 @@ import type { GameApi, GameProps } from './types';
  * instead of ending the run. Everything else (hearts, clock, XP) is the same
  * object underneath, so the run is still one run.
  */
-export function QuizRun({ api, line }: GameProps) {
+export function QuizRun({ api, line, history, turn }: GameProps) {
   // Drills hand-pick their questions and never end on a puzzle.
-  const [puzzle] = useState(() => (line.preset ? null : pickPuzzle(line, api.tier)));
+  const [puzzle] = useState(() => (line.preset ? null : pickPuzzle(line, api.tier, Math.random, turn)));
   const [stage, setStage] = useState<'questions' | 'puzzle'>('questions');
 
   const opener = useMemo<GameApi>(() => {
@@ -27,7 +27,7 @@ export function QuizRun({ api, line }: GameProps) {
   }, [api, puzzle]);
 
   if (!puzzle || stage === 'questions') {
-    return <QuizGame key="questions" api={opener} line={line} role={puzzle ? 'opener' : undefined} />;
+    return <QuizGame key="questions" api={opener} line={line} role={puzzle ? 'opener' : undefined} history={history} />;
   }
   if (puzzle.kind === 'flow') {
     return <FlowGame key="flow" api={api} line={{ ...line, flows: [puzzle.flow] }} role="finale" />;

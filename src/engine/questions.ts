@@ -1,5 +1,5 @@
 import { shuffle } from '../lib/random';
-import type { Division, Flow, Line, Question, SaveData, Sort, Tier } from './types';
+import type { Division, Flow, Line, Question, QuestionStat, SaveData, Sort, Tier } from './types';
 
 export const DIVISIONS: { id: Division; name: string; blurb: string }[] = [
   { id: 'algos', name: 'Algorithms', blurb: 'Be the algorithm. Click it out stop by stop.' },
@@ -12,12 +12,32 @@ export const DIVISIONS: { id: Division; name: string; blurb: string }[] = [
 export const QUESTIONS_PER_RUN: Record<Tier, number> = { 1: 6, 2: 8, 3: 10 };
 
 /**
- * Pick a run's worth of questions: only ones unlocked at this tier, shuffled,
- * never repeating inside a run. Falls back to a shorter run if the pool is small.
+ * Pick a run's worth of questions from those unlocked at this tier.
+ *
+ * Questions you have not answered yet, or are shaky on, come before ones you
+ * have already answered cleanly, so replaying a line shows you something new
+ * before it repeats itself. Order is random within each group, and the run is
+ * shuffled once more so the fresh ones are not always first. Falls back to a
+ * shorter run if the pool is small.
  */
-export function pickQuestions(pool: Question[], tier: Tier, count = QUESTIONS_PER_RUN[tier]): Question[] {
-  return shuffle(pool.filter(q => q.t <= tier).slice()).slice(0, count);
+export function pickQuestions(
+  pool: Question[],
+  tier: Tier,
+  count = QUESTIONS_PER_RUN[tier],
+  isSolid: (q: Question) => boolean = () => false,
+): Question[] {
+  const open = shuffle(pool.filter(q => q.t <= tier));
+  const fresh = open.filter(q => !isSolid(q));
+  const solid = open.filter(q => isSolid(q));
+  return shuffle([...fresh, ...solid].slice(0, count));
 }
+
+/** True for a question you have answered and are not currently shaky on. */
+export const solidIn = (history: Record<string, QuestionStat> | undefined, lineId: string) =>
+  (q: Question): boolean => {
+    const stat = history?.[qid(lineId, q)];
+    return !!stat && stat.missed === 0;
+  };
 
 /** How many ordering puzzles a run asks at each tier. */
 export const FLOWS_PER_RUN: Record<Tier, number> = { 1: 2, 2: 3, 3: 4 };
@@ -35,13 +55,18 @@ export type Puzzle = { kind: 'flow'; flow: Flow } | { kind: 'sort'; sort: Sort }
 /**
  * Pick the one puzzle a quiz line ends on this run, from whatever it offers at
  * this tier. Null when it offers none, and the run is questions only.
+ *
+ * Given `turn` (how many times the line has been ridden), the puzzles rotate,
+ * so two rides in a row never end on the same one. Without it, the pick is
+ * random.
  */
-export function pickPuzzle(line: Line, tier: Tier, rand: () => number = Math.random): Puzzle | null {
+export function pickPuzzle(line: Line, tier: Tier, rand: () => number = Math.random, turn?: number): Puzzle | null {
   const pool: Puzzle[] = [
     ...(line.flows ?? []).filter(f => f.t <= tier).map(flow => ({ kind: 'flow' as const, flow })),
     ...(line.sorts ?? []).filter(s => s.t <= tier).map(sort => ({ kind: 'sort' as const, sort })),
   ];
-  return pool.length ? pool[Math.floor(rand() * pool.length)] : null;
+  if (!pool.length) return null;
+  return turn === undefined ? pool[Math.floor(rand() * pool.length)] : pool[turn % pool.length];
 }
 
 /** Whether a quiz line's run ends on a puzzle at this tier. Drills never do. */

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DAY, dayKey, DERAIL_COST, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isUnlocked, lineReadiness, maxTier, rankFloor, rankFor, RANKS, readinessOf } from './progression';
 import { cramPool, cramQuestions, CRAM_SIZE, qid, recordAnswers, shakyQuestions } from './questions';
 import { GUIDE, LINES } from '../data';
-import { heartsFor, nextStep, pickFlows, pickPuzzle, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss } from './questions';
+import { heartsFor, nextStep, pickFlows, pickPuzzle, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss, solidIn } from './questions';
 import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
 import type { SaveData } from './types';
@@ -136,6 +136,25 @@ describe('question pools', () => {
     pickQuestions(pool, 3);
     pickQuestions(pool, 3);
     expect(pool.map(q => q.q)).toEqual(before);
+  });
+
+  it('asks what you have not answered cleanly before repeating what you have', () => {
+    const t1 = pool.filter(q => q.t === 1); // 4 questions, a run of 6 at tier 2 draws from 8
+    const solid = new Set(t1.map(q => q.q));
+    for (let i = 0; i < 20; i++) {
+      const run = pickQuestions(pool, 2, 4, q => solid.has(q.q));
+      expect(run.every(q => !solid.has(q.q))).toBe(true);
+    }
+    // once everything is solid, it still fills the run
+    expect(pickQuestions(pool, 1, 4, () => true)).toHaveLength(4);
+  });
+
+  it('counts a question as solid only when it was answered and is not shaky', () => {
+    const [a, b, c] = pool;
+    const history = { [qid('di', a)]: { seen: 2, missed: 0, last: 0 }, [qid('di', b)]: { seen: 3, missed: 1, last: 0 } };
+    const isSolid = solidIn(history, 'di');
+    expect([isSolid(a), isSolid(b), isSolid(c)]).toEqual([true, false, false]);
+    expect(solidIn(undefined, 'di')(a)).toBe(false);
   });
 
   it('walks a flow one step at a time and reports the end', () => {
@@ -361,6 +380,12 @@ describe('mixed runs', () => {
     // not unlocked at this tier yet, and drills never end on a puzzle
     expect(heartsFor({ ...base, flows: [flow], sorts: undefined }, 1)).toBe(3);
     expect(heartsFor({ ...base, sorts: [sort], preset: true }, 1)).toBe(3);
+  });
+
+  it('rotates through the puzzles ride by ride, so replays do not repeat the last stop', () => {
+    const line = { ...base, flows: [flow], sorts: [sort] };
+    const seen = [0, 1, 2, 3].map(turn => pickPuzzle(line, 3, () => 0, turn)?.kind);
+    expect(seen).toEqual(['flow', 'sort', 'flow', 'sort']);
   });
 
   it('draws from flows and sorts together', () => {

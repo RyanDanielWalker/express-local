@@ -173,6 +173,8 @@ export default function App() {
           tier={screen.tier}
           hearts={heartsFor(line, screen.tier)}
           firstTime={!save.levels[line.id]?.trips}
+          history={save.questions}
+          turn={save.levels[line.id]?.trips ?? 0}
           onArrive={onArrive}
           onDerail={onDerail}
         />

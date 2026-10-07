@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { Line, Question, Tier } from '../engine/types';
+import type { Line, Question, QuestionStat, Tier } from '../engine/types';
 
 export type Tone = 'good' | 'bad' | '';
 
@@ -32,4 +32,8 @@ export interface GameProps {
    * Unset means the game is the whole run.
    */
   role?: 'opener' | 'finale';
+  /** Your answer history, so a run can show unseen and shaky questions first. */
+  history?: Record<string, QuestionStat>;
+  /** How many times this line has been ridden, so its last stop rotates. */
+  turn?: number;
 }

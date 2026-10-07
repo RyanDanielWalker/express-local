@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { pickQuestions } from '../engine/questions';
+import { pickQuestions, solidIn } from '../engine/questions';
 import type { Question } from '../engine/types';
 import { useKeys } from '../hooks/useKeys';
 import { Rich } from '../components/Rich';
@@ -14,8 +14,10 @@ import type { GameProps } from './types';
  * 1.5 second auto-advance meant you never read it, least of all when you were
  * right, which is exactly when it catches you being right for a bad reason.
  */
-export function QuizGame({ api, line, role }: GameProps) {
-  const [items] = useState<Question[]>(() => (line.preset ? (line.questions ?? []) : pickQuestions(line.questions ?? [], api.tier)));
+export function QuizGame({ api, line, role, history }: GameProps) {
+  const [items] = useState<Question[]>(() =>
+    line.preset ? (line.questions ?? []) : pickQuestions(line.questions ?? [], api.tier, undefined, solidIn(history, line.id)),
+  );
   const [i, setI] = useState(0);
   const [opts, setOpts] = useState<string[]>(() => shuffle([...(items[0]?.opts ?? [])]));
   const [picked, setPicked] = useState<string | null>(null);

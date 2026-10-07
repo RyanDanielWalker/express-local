@@ -5,7 +5,7 @@ import { QuizRun } from '../games/QuizRun';
 import { FlowGame } from '../games/FlowGame';
 import type { GameApi, Tone } from '../games/types';
 import { fmtTime, TIERS } from '../engine/progression';
-import type { AlgoLineId, Line, Question, Tier } from '../engine/types';
+import type { AlgoLineId, Line, Question, QuestionStat, Tier } from '../engine/types';
 import { useTimers } from '../hooks/useTimers';
 import { Bullet, lineStyle } from './Bullet';
 import { Words } from './FieldGuide';
@@ -28,11 +28,14 @@ interface Props {
   onArrive: (stats: RideStats) => void;
   /** Out of hearts. The run still reports what was answered, so misses are tracked. */
   onDerail: (stats: RideStats) => void;
+  /** Answer history and ride count, so replays show new questions and rotate puzzles. */
+  history?: Record<string, QuestionStat>;
+  turn?: number;
 }
 
 const DEFAULT_HEARTS = 3;
 
-export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, firstTime, onArrive, onDerail }: Props) {
+export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, firstTime, onArrive, onDerail, history, turn }: Props) {
   const later = useTimers();
   const [status, setStatus] = useState<{ msg: ReactNode; tone: Tone }>({ msg: null, tone: '' });
   const [hearts, setHearts] = useState(maxHearts);
@@ -144,7 +147,7 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
       )}
       <div className={`status ${status.tone}`} aria-live="polite">{status.msg}</div>
       <div className="play">
-        <Game api={api} line={line} />
+        <Game api={api} line={line} history={history} turn={turn} />
       </div>
     </div>
   );
