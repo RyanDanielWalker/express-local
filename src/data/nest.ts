@@ -1328,6 +1328,178 @@ findOne(@Param('id') id: number) {}`,
       },
     ],
   },
+  {
+    id: 'auth',
+    division: 'nest',
+    kind: 'quiz',
+    bullet: '8',
+    color: '--magenta',
+    short: 'Auth',
+    name: 'Turnstile',
+    topic: 'Authentication and authorization',
+    pitch: 'Auth comes up in nearly every backend interview, and Nest has a clear shape for it: something checks who you are and puts the user on the request, guards decide what you may do, and open routes opt out with metadata. Learn the shape and the library underneath stops mattering.',
+    rules: [
+      'Tell who you are apart from what you may do.',
+      'Follow the token from login to the next request.',
+      'Know which piece does which job.',
+    ],
+    hook: 'Authentication is who you are (401). Authorization is what you may do (403). A guard checks the token and puts the user on the request. @Public() opts a route out. Roles are metadata a guard reads.',
+    drill: 'Ask which question is being answered: who is this, or may they do this? Then ask where in the request that has to happen, and what the route itself has to say about it.',
+    par: 100,
+    questions: [
+      {
+        t: 1,
+        q: 'What is the difference between authentication and authorization?',
+        opts: [
+          'Who you are, versus what you may do',
+          'Signing in, versus signing back out',
+          'Passwords, versus tokens and sessions',
+        ],
+        a: 'Who you are, versus what you may do',
+        why: 'Authentication answers who is this, and failing it is a 401. Authorization answers may they do this, and failing it is a 403. Interviewers love asking for the difference, and the status codes are the tidy way to show you know it.',
+      },
+      {
+        t: 1,
+        q: 'Where does a JWT usually travel on a request?',
+        opts: [
+          'Authorization: Bearer <token> header',
+          'A ?token= parameter on every URL',
+          'A token field in the JSON body',
+        ],
+        a: 'Authorization: Bearer <token> header',
+        why: 'The standard is the Authorization header with the Bearer scheme. Query strings end up in server logs and browser history, which is the last place a token should be.',
+      },
+      {
+        t: 1,
+        q: 'Where do you check the token on a protected route?',
+        opts: [
+          'In a guard, before the handler runs',
+          'In the service, at the top of each method',
+          'In an exception filter after the handler',
+        ],
+        a: 'In a guard, before the handler runs',
+        why: 'A guard runs before pipes and the handler, so a bad token never costs you validation or a database call, and the rule lives in one place instead of every service method.',
+      },
+      {
+        t: 1,
+        q: 'After the auth guard passes, where does the user usually end up?',
+        opts: [
+          'On the request, as req.user',
+          'In a module-level variable',
+          'In the response headers sent back',
+        ],
+        a: 'On the request, as req.user',
+        why: 'The guard, or a Passport strategy behind it, attaches the user to the request, and everything after it can read it. A @CurrentUser() param decorator is the tidy way to hand it to a handler.',
+      },
+      {
+        t: 1,
+        q: 'How should a password be stored?',
+        opts: [
+          'As a slow, salted hash like bcrypt',
+          'Encrypted with a key on the server',
+          'As plain text in a locked-down table',
+        ],
+        a: 'As a slow, salted hash like bcrypt',
+        why: 'Hash it with something deliberately slow and salted, like bcrypt, scrypt or argon2, and compare hashes at login. Encryption can be reversed by whoever has the key, which is exactly what you do not want.',
+      },
+      {
+        t: 1,
+        q: 'A global auth guard is on. How does /health stay reachable?',
+        opts: [
+          'Mark it @Public() and have the guard skip it',
+          'Register /health before the guard loads',
+          'Give /health its own module with no providers',
+        ],
+        a: 'Mark it @Public() and have the guard skip it',
+        why: 'The route carries metadata and the guard reads it with Reflector before checking anything. That keeps the default safe, everything locked, with each exception visible right on the route.',
+      },
+      {
+        t: 2,
+        q: 'What makes @Public() work?',
+        code: 'export const IS_PUBLIC_KEY = \'isPublic\';\nexport const Public = () => SetMetadata(IS_PUBLIC_KEY, true);',
+        opts: [
+          'The guard reads that metadata with Reflector',
+          'SetMetadata removes the guard from the route',
+          'Nest skips all guards on decorated routes',
+        ],
+        a: 'The guard reads that metadata with Reflector',
+        why: 'SetMetadata only attaches data. Nothing happens until the guard asks for it, usually reflector.getAllAndOverride(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]), and returns true early.',
+      },
+      {
+        t: 2,
+        q: 'The token is valid, but the user lacks the admin role. Which status?',
+        opts: [
+          '403 Forbidden',
+          '401 Unauthorized',
+          '404 Not Found',
+        ],
+        a: '403 Forbidden',
+        why: 'We know exactly who they are, so it is not a 401. They are not allowed, which is a 403. Some APIs answer 404 to hide that the resource exists, but 403 is the textbook answer.',
+      },
+      {
+        t: 2,
+        q: 'With Passport, what happens to the value your strategy\'s validate() returns?',
+        opts: [
+          'It becomes req.user',
+          'It is signed into a new JWT',
+          'It is sent back as the response',
+        ],
+        a: 'It becomes req.user',
+        why: 'That is the whole contract. For a JWT strategy, Passport has already checked the signature and expiry before validate() runs, so validate() just turns the payload into whatever you want on req.user.',
+      },
+      {
+        t: 3,
+        q: 'A JWT strategy\'s validate() is called. What has Passport already done?',
+        opts: [
+          'Verified the signature and decoded it',
+          'Looked the user up in your database',
+          'Checked the user\'s roles for this route',
+        ],
+        a: 'Verified the signature and decoded it',
+        why: 'Passport verifies the signature with your secret and, with ignoreExpiration false, rejects expired tokens before validate() ever runs. Looking the user up or checking roles is your code, if you need it.',
+      },
+      {
+        t: 3,
+        q: 'Why is a JWT hard to revoke before it expires?',
+        opts: [
+          'The server checks it without storing it',
+          'It is encrypted, so it cannot be read',
+          'The browser caches it until expiry',
+        ],
+        a: 'The server checks it without storing it',
+        why: 'A JWT is signed, not stored: any server with the key can verify it without asking a database. That is the appeal and the catch. Short expiry plus refresh tokens, or a denylist, are the usual answers.',
+      },
+      {
+        t: 3,
+        q: 'Where should the JWT signing secret come from?',
+        opts: [
+          'Config or env, read through ConfigService',
+          'A constant committed in auth.module.ts',
+          'The payload of the token being checked',
+        ],
+        a: 'Config or env, read through ConfigService',
+        why: 'A secret in the repo is a secret everyone with repo access has. Read it from the environment, typically with ConfigService and JwtModule.registerAsync, so each environment has its own and it can be rotated.',
+      },
+    ],
+    flows: [
+      {
+        t: 1,
+        title: 'A user logs in, then calls GET /orders with the token they got back',
+        steps: [
+          'POST /auth/login with email and password',
+          'Find the user by email',
+          'Compare the password with the stored hash',
+          'Sign a JWT with the user id as sub',
+          'Client sends Authorization: Bearer <token>',
+          'Guard verifies the signature and expiry',
+          'User attached to req.user',
+          'Handler returns their orders',
+        ],
+        decoys: ['Decrypt the stored password', 'Look the token up in the database'],
+        note: 'Login is the only time the password is touched, and it is compared as a hash, never decrypted. After that the token does the work: the guard verifies it with just the secret, no database round trip, which is why JWTs scale and also why they are hard to revoke.',
+      },
+    ],
+  },
 
 ];
 
@@ -1761,6 +1933,69 @@ class RequestIdMiddleware implements NestMiddleware {
       {
         prompt: 'Walk me through writing an exception filter.',
         answer: 'A class decorated with @Catch, listing the exception types it handles or nothing to catch everything, implementing ExceptionFilter. catch(exception, host) switches the host to HTTP to get the response and request, works out the status, usually exception.getStatus() on an HttpException, and writes the JSON. If I only want logging on top of the default, I extend BaseExceptionFilter and call super.catch.',
+      },
+    ],
+  },
+  auth: {
+    plain: 'Auth in Nest has a shape that survives whichever library you use. At login you check a password against a stored hash and hand back a token. On every request after that, a guard reads the token, proves it is genuine, and puts the user on the request. Other guards, like a roles guard, then decide whether that user may do this particular thing. Routes that should be open say so with metadata, usually a @Public() decorator, and the guard checks for it first.',
+    words: [
+      ['authentication', 'Who are you. Failing it is a 401.'],
+      ['authorization', 'May you do this. Failing it is a 403.'],
+      ['JWT', 'A signed token. Anyone with the key can verify it without a database lookup. Signed, not encrypted.'],
+      ['strategy', 'In Passport, the class that checks one kind of credential. Whatever its validate() returns becomes req.user.'],
+      ['@Public()', 'Metadata on a route, read by a global guard with Reflector, that lets the request through without a token.'],
+    ],
+    code: {
+      label: 'a global JWT guard with a public escape hatch',
+      snippet: `export const IS_PUBLIC = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC, true);
+
+@Injectable()
+export class JwtAuthGuard implements CanActivate {
+  constructor(private jwt: JwtService, private reflector: Reflector) {}
+
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    const open = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, [
+      ctx.getHandler(),
+      ctx.getClass(),
+    ]);
+    if (open) return true;
+
+    const req = ctx.switchToHttp().getRequest();
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) throw new UnauthorizedException();
+    try {
+      req.user = await this.jwt.verifyAsync(token);
+    } catch {
+      throw new UnauthorizedException();
+    }
+    return true;
+  }
+}
+
+// registered once, for the whole app:
+// providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }]`,
+      note: 'The Nest docs now lead with @nestjs/authentication, a first-party package with its own global guard, @Public() and @CurrentUser(). Passport with @nestjs/jwt is what most existing codebases use. The shape is the same either way.',
+    },
+    say: [
+      'Authentication is who you are and fails with a 401. Authorization is what you may do and fails with a 403.',
+      'I put auth in a guard, registered globally with APP_GUARD, so everything is locked by default and open routes opt out with a @Public() decorator.',
+      'The guard verifies the token and puts the user on req.user, and a @CurrentUser() decorator hands it to handlers.',
+      'Passwords are stored as a slow, salted hash and compared at login. Nothing ever decrypts them.',
+    ],
+    gotcha: 'A JWT is signed, not encrypted. Anyone holding one can decode the payload and read it, so it should carry an id and maybe roles, never anything secret.',
+    rehearse: [
+      {
+        prompt: 'Walk me through JWT auth in a Nest app, from login to a protected request.',
+        answer: 'Login finds the user by email, compares the password against the stored hash, and signs a JWT with the user id as sub. The client sends it back as Authorization: Bearer. A guard, often AuthGuard("jwt") with a Passport strategy, verifies the signature and expiry and puts the user on req.user, and handlers read it, usually through a @CurrentUser() decorator.',
+      },
+      {
+        prompt: 'How do you handle public routes when auth is global?',
+        answer: 'I register the auth guard globally with APP_GUARD so everything is locked by default. Open routes get a @Public() decorator built with SetMetadata, and the guard checks it with reflector.getAllAndOverride on the handler and the class, returning true early. The safe default stays safe, and every exception is visible right on the route.',
+      },
+      {
+        prompt: 'What is the difference between a 401 and a 403, and where does each come from?',
+        answer: '401 means we do not know who you are: no token, a bad one or an expired one, and the auth guard throws UnauthorizedException. 403 means we know exactly who you are and the answer is no, like a missing role, which is what a guard returning false gives you.',
       },
     ],
   },
