@@ -44,6 +44,17 @@ export function pickPuzzle(line: Line, tier: Tier, rand: () => number = Math.ran
   return pool.length ? pool[Math.floor(rand() * pool.length)] : null;
 }
 
+/** Whether a quiz line's run ends on a puzzle at this tier. Drills never do. */
+export const hasPuzzle = (line: Line, tier: Tier): boolean =>
+  !line.preset && line.kind === 'quiz' && [...(line.flows ?? []), ...(line.sorts ?? [])].some(p => p.t <= tier);
+
+/**
+ * Hearts for a line ride. A run that ends on a puzzle is roughly twice as many
+ * decisions, so it gets one more heart rather than turning Local into the
+ * place you get punished for learning.
+ */
+export const heartsFor = (line: Line, tier: Tier): number => (hasPuzzle(line, tier) ? 4 : 3);
+
 /**
  * Whether a miss should name the step you were looking for.
  *

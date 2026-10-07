@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LINES } from './data';
 import { dailyDone, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
-import { cramPool, cramQuestions, CRAM_SIZE, recordAnswers, shakyQuestions } from './engine/questions';
+import { cramPool, cramQuestions, CRAM_SIZE, heartsFor, recordAnswers, shakyQuestions } from './engine/questions';
 import { loadSave, persistSave } from './engine/save';
 import type { Division, Line, Question, SaveData, Tier } from './engine/types';
 import { Header } from './components/Header';
@@ -171,6 +171,7 @@ export default function App() {
           key={screen.run}
           line={line}
           tier={screen.tier}
+          hearts={heartsFor(line, screen.tier)}
           firstTime={!save.levels[line.id]?.trips}
           onArrive={onArrive}
           onDerail={onDerail}

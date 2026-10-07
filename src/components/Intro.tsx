@@ -1,6 +1,7 @@
 import { LINES } from '../data';
 import { DAY, fmtTime, isUnlocked, maxTier, TIERS } from '../engine/progression';
-import type { SaveData, Tier } from '../engine/types';
+import { hasPuzzle, heartsFor } from '../engine/questions';
+import type { Line, SaveData, Tier } from '../engine/types';
 import { Bullet, lineStyle } from './Bullet';
 import { FieldGuide } from './FieldGuide';
 import { Rich } from './Rich';
@@ -19,6 +20,13 @@ interface Props {
   rehearseCount: number;
   lastRehearsed?: number;
   onRehearse: () => void;
+}
+
+/** What waits at the end of a ride, in a few words. Only the algorithm games have a code check. */
+function lastStop(line: Line, tier: Tier): string {
+  if (line.kind === 'game' && line.quiz?.length) return ' A code check waits at the last stop.';
+  if (hasPuzzle(line, tier)) return ' The last stop is a puzzle.';
+  return '';
 }
 
 export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard, shakyCount, onDrillShaky, rehearseCount, lastRehearsed, onRehearse }: Props) {
@@ -86,7 +94,7 @@ export function Intro({ save, idx, tier, isDaily, onPickTier, onBoard, shakyCoun
               <>
                 <button className="btn big" onClick={onBoard}>Board: {TIERS[tier].name}</button>
                 {shakyCount > 0 && <button className="btn ghost" onClick={onDrillShaky}>Drill {shakyCount} shaky</button>}
-                <span className="hint">3 hearts per trip. A code check waits at the last stop.</span>
+                <span className="hint">{heartsFor(line, tier)} hearts per trip.{lastStop(line, tier)}</span>
               </>
             )}
           </div>

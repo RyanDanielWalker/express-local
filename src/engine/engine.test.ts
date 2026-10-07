@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DAY, dayKey, DERAIL_COST, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isUnlocked, lineReadiness, maxTier, rankFloor, rankFor, RANKS, readinessOf } from './progression';
 import { cramPool, cramQuestions, CRAM_SIZE, qid, recordAnswers, shakyQuestions } from './questions';
 import { GUIDE, LINES } from '../data';
-import { nextStep, pickFlows, pickPuzzle, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss } from './questions';
+import { heartsFor, nextStep, pickFlows, pickPuzzle, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss } from './questions';
 import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
 import type { SaveData } from './types';
@@ -353,6 +353,14 @@ describe('mixed runs', () => {
     const line = { ...base, flows: [flow], sorts: undefined };
     expect(pickPuzzle(line, 1)).toBeNull();
     expect(pickPuzzle(line, 2)).toEqual({ kind: 'flow', flow });
+  });
+
+  it('gives a run that ends on a puzzle one more heart', () => {
+    expect(heartsFor({ ...base, flows: undefined, sorts: undefined }, 1)).toBe(3);
+    expect(heartsFor({ ...base, flows: undefined, sorts: [sort] }, 1)).toBe(4);
+    // not unlocked at this tier yet, and drills never end on a puzzle
+    expect(heartsFor({ ...base, flows: [flow], sorts: undefined }, 1)).toBe(3);
+    expect(heartsFor({ ...base, sorts: [sort], preset: true }, 1)).toBe(3);
   });
 
   it('draws from flows and sorts together', () => {
