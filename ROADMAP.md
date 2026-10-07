@@ -2,21 +2,22 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 29 lines across 4 divisions, 74 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript, then React.** No new divisions until they clear the bar below.
+Status: 32 lines across 4 divisions, 92 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript, then React.** No new divisions until they clear the bar below.
 
 ## The bar
 
 A line is **done** when:
 
 1. It can fill a full run at every tier it offers: 6 questions on Local, 8 on Express, 10 on Rush Hour
-2. It has at least three rehearsal prompts, written as a spoken answer
-3. Its field guide has the talking points and the gotcha
-4. It has at least one puzzle where order or judgment matters, not just recognition
-5. It passes the content tests: answers not guessable by length, no em dashes, every option set clean
+2. Replays differ: every tier's pool is at least 1.5x a run, and a quiz line has two puzzles on Local, so the second ride is not a memory test of the first
+3. It has at least three rehearsal prompts, written as a spoken answer
+4. Its field guide has the talking points and the gotcha
+5. It has at least one puzzle where order or judgment matters, not just recognition
+6. It passes the content tests: answers not guessable by length, no em dashes, every option set clean
 
 A division is **done** when every line clears that, and the division could carry an interview on its own topic. That second half is the one that adds lines rather than questions: NestJS without testing or auth is not a division that could carry a NestJS interview, however deep its other six lines get.
 
-Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 4 (data tests already cover 5), `npm run bar` prints where every line stands, and any division listed in `FINISHED` is enforced by the test suite from then on, so finished stays finished.
+Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 5 (data tests already cover 6), `npm run bar` prints where every line stands, and any division listed in `FINISHED` is enforced by the test suite from then on, so finished stays finished.
 
 ## Done: NestJS
 
@@ -30,22 +31,23 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [x] **A matching mechanic.** Shipped as sorts that a quiz line ends on, rather than a line kind of their own. Cards are named by the job, never by their box, and a test enforces it. Generalizes beyond Nest: React hooks by what they are for, TypeScript utilities by what they operate on.
 - [x] **A testing line.** Test Track. `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
 - [x] **An auth line.** Turnstile. Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
-- [ ] **More flows.** The validation pipeline shipped on the DTO line. DI resolution order is still worth one.
+- [x] **More flows.** The validation pipeline on the DTO line, DI resolution order on Wiring Yard, an exception's trip to the client on Fault Line, and an interceptor wrapping a handler on Tool Shed.
+- [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
 
 ## Now: TypeScript
 
 `npm run bar` lists exactly what each line is missing. On top of the gaps below, four TypeScript lines give their answers away by length (any vs unknown: the longest option is right on 9 of 10).
 
-- [ ] Fill tier 1: about 18 questions across the six lines
+- [ ] Fill tier 1 to 9 questions a line, so replays differ: about 36 across the six lines
 - [ ] Rehearsal to three prompts a line
 - [ ] A sort line: utility types by what they operate on, object keys vs union members
-- [ ] A judgment puzzle per line, so it is not six recognition quizzes in a row
+- [ ] Two Local puzzles per line, so it is not six recognition quizzes in a row
 
 ## Then: React
 
 Three React lines also give their answers away by length (performance: 8 of 9).
 
-- [ ] Fill tier 1: about 19 questions across the six lines
+- [ ] Fill tier 1 to 9 questions a line: about 37 across the six lines
 - [ ] Rehearsal to three prompts a line
 - [ ] A sort line: hooks by what they are for, and which ones are allowed where
 - [ ] Likely missing lines: forms and controlled inputs, data fetching and error boundaries
@@ -99,6 +101,7 @@ Learned the hard way, mostly by getting them wrong first.
 - **Pay for the weak stuff.** If replaying a mastered line is the best XP on the board, the scoring is teaching the wrong habit.
 - **Content is data.** Lines live in `src/data/`, validated by tests, so adding a topic is writing questions and not writing components.
 - **Never answer the question for them.** Feedback on a miss should say that it was a miss, not what the answer was.
+- **A replay should teach something.** If the second ride is the first ride again, it tests memory of the ride, not the material. Size pools well past a run and lead with what has not been seen.
 - **Recognition is not recall, and recall is not speech.** Hence shaky drills and out-loud rehearsal. The interview tests the third one.
 - **Concepts without the API is half a lesson.** Knowing a pipe validates input and not being able to name `ValidationPipe` is the gap between having read the docs and having used the thing.
 - **Depth before breadth.** A division that cannot carry an interview on its own topic is not finished, and a new division does not fix it.
@@ -130,3 +133,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-07** The bar checks each line for answers that give themselves away by length
 - **2026-10-07** Tool Shed, Turnstile and Test Track. NestJS finished: nine lines, enforced by the suite
 - **2026-10-07** NestJS content checked against the v12 docs: route order, schema-first validation, errorCode, serialization, Jest on Node 24.9
+- **2026-10-07** Replays differ: unseen and shaky questions first, puzzles rotate, and the bar checks pool size. 24 new Local questions and 9 Local puzzles across NestJS

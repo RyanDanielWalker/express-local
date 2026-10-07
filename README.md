@@ -68,6 +68,7 @@ Checked against the NestJS 12 documentation. Where a behavior depends on the ver
 
 - **Three tiers per line.** Local, Express and Rush Hour ask up to 6, 8 and 10 questions. Rush Hour turns the helper panels off and adds a par time.
 - **NestJS runs end on a puzzle.** After the questions comes a "last stop": a sort (put each job or signature in the right box) or a flow (put the steps of a process in order). Cards are named by what they do, never by their answer, and flows include decoy steps that do not happen in that scenario. Runs that end on a puzzle get a fourth heart. React and TypeScript get puzzles next.
+- **Replays differ.** Questions not yet seen, or missed last time, come first, and the last-stop puzzle rotates from ride to ride. Every NestJS line has at least half again as many questions as a run at each tier.
 - **A miss says it was a miss, nothing more.** The explanation comes after the answer is committed, and in puzzles at the end of the run. On Local, a second miss on the same step reveals it, so nobody gets stuck.
 - **You advance, not a timer.** Explanations stay on screen until you continue, and the clock holds while you read. Number keys pick an option or a box, and space continues.
 
@@ -101,7 +102,7 @@ A few choices that shape how the app teaches. [ROADMAP.md](ROADMAP.md) has the f
 - **Game logic is pure.** Algorithms are small state machines in `src/algorithms/`: the UI asks for the right move, sends the player's move, and renders the state that comes back. Components never decide what is correct.
 - **Content is data.** Quiz lines, flows and sorts are entries in `src/data/`, so adding a topic means writing questions, not components.
 - **Scoring is pure.** `finishTrip()`, `finishCram()`, `finishRehearsal()` and `finishDerail()` take a save and a run and return a new save plus everything the results screen shows. Readiness is computed from the save, never stored.
-- **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier, three rehearsal prompts, talking points and a gotcha in its field guide, a puzzle beyond recognition, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS) fail the build if any line slips.
+- **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier with room to vary, three rehearsal prompts, talking points and a gotcha in its field guide, a puzzle beyond recognition, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS) fail the build if any line slips.
 - **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration), validate every piece of content, and render the results screen for every line.
 - **Accessible.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced-motion support, and light and dark themes.
 
