@@ -389,7 +389,7 @@ export class OrdersModule {}`,
       'Route order matters more than you think.',
       'Watch which decorator pulls from where.',
     ],
-    hook: '@Controller(prefix) + @Get(path) build the URL. Routes match top to bottom, first match wins.',
+    hook: '@Controller(prefix) + @Get(path) build the URL. On Express, routes match in the order you declare them, and the first match wins.',
     par: 95,
     sorts: [
       {
@@ -422,7 +422,7 @@ export class UsersController {
           '404, the two routes conflict',
         ],
         a: "findOne runs, with id = 'me'",
-        why: 'Routes are matched in declaration order and the first match wins. Literal paths have to be declared above param routes.',
+        why: 'Nest registers routes in declaration order, and on the default Express adapter the first match wins, so a literal path has to be declared above a param route. Fastify ranks by specificity on its own. Nest 12 can also warn about this or sort by specificity, but both are opt-in.',
       },
       {
         t: 1,
@@ -492,7 +492,7 @@ remove(@Param('id') id: string) { return this.users.remove(id); }`,
           'Interceptors keep reshaping the returned value',
         ],
         a: 'You own the response. Returning a value does nothing',
-        why: 'That is library-specific mode. It opts the route out of Nest response handling, including interceptors, so avoid it unless you are streaming.',
+        why: 'That is library-specific mode. It opts the route out of Nest response handling, including interceptors and @HttpCode(). If you only need res to set a cookie or a header, @Res({ passthrough: true }) keeps the standard handling on.',
       },
       {
         t: 2,
@@ -518,14 +518,14 @@ one(@Param() params) {}`,
       },
       {
         t: 3,
-        q: 'A catch-all route is declared first in the controller. What happens to the routes below it?',
+        q: 'Default Express setup, no extra options. A catch-all route is declared first in the controller. What happens to the routes below it?',
         opts: [
           'They never match. Declaration order wins',
           'They still match: specific routes win',
           'Nest throws a route conflict at startup',
         ],
         a: 'They never match. Declaration order wins',
-        why: 'Nest does not rank by specificity. Order your routes from most specific to least.',
+        why: 'By default Nest registers routes in declaration order and Express takes the first match, so order routes from most specific to least. The other two answers are real, just not by default: Nest 12 can sort by specificity (routeResolutionStrategy) or flag the shadowing at startup (routeConflictPolicy), and Fastify ranks by specificity anyway.',
       },
       {
         t: 3,
@@ -559,6 +559,17 @@ one(@Param() params) {}`,
         ],
         a: '@Controller(\'orders\')',
         why: 'The string is the route prefix for every handler in the class. The controller still has to be listed in a module\'s controllers array, or Nest never registers its routes.',
+      },
+      {
+        t: 3,
+        q: 'Nest 12. You want /users/me to beat /users/:id on Express without reordering the methods. What do you set?',
+        opts: [
+          'routeResolutionStrategy: \'specificity\'',
+          'routeConflictPolicy: { shadow: \'error\' }',
+          '@Get(\'me\', { priority: 1 }) on the method',
+        ],
+        a: 'routeResolutionStrategy: \'specificity\'',
+        why: 'Passed to NestFactory.create, \'specificity\' registers literal segments before params, and params before wildcards. routeConflictPolicy only reports the problem, as a warning or a startup error. Both are opt-in and default to the old behavior, and on Fastify the specificity sort has no effect, since its router already ranks routes that way.',
       },
     ],
   },
@@ -1836,12 +1847,12 @@ export class UsersController {
 }`,
     },
     say: [
-      'Routes are matched in declaration order, so a literal path like /users/me has to be declared above /users/:id or the param route swallows it.',
+      'On Express, routes are matched in declaration order, so a literal path like /users/me has to be declared above /users/:id or the param route swallows it.',
       'POST returns 201 by default, everything else 200, and @HttpCode changes that.',
       'I return plain objects and let Nest serialize. Reaching for @Res() opts you out of the whole pipeline, including interceptors.',
       'ParseIntPipe inside @Param does the string to number conversion and throws a 400 if it is not a number, so the handler only ever sees valid input.',
     ],
-    gotcha: 'Injecting @Res() switches that handler into library-specific mode. Nest stops handling the response, so returning a value does nothing and interceptors stop applying.',
+    gotcha: 'Injecting @Res() switches that handler into library-specific mode. Nest stops handling the response, so returning a value does nothing and interceptors stop applying. Use @Res({ passthrough: true }) when all you need is to set a cookie or a header.',
     rehearse: [
       {
         prompt: 'How do you structure a controller?',
@@ -1849,7 +1860,7 @@ export class UsersController {
       },
       {
         prompt: 'What is the trap with route order?',
-        answer: 'Routes match in declaration order and the first match wins, so a literal path like /users/me has to be declared above /users/:id or the param route swallows it.',
+        answer: 'Nest registers routes in the order they are declared, and on Express the first match wins, so /users/me has to sit above /users/:id or the param route swallows it. Nest 12 adds opt-in help: routeConflictPolicy can warn or fail at startup when one route shadows another, and routeResolutionStrategy: "specificity" registers literal segments first. Fastify already ranks by specificity.',
       },
       {
         prompt: 'Walk me through what you type to add GET /orders/:id.',
