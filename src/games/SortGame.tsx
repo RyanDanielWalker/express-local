@@ -7,6 +7,10 @@ import { shuffle } from '../lib/random';
 import { Panel } from './parts';
 import type { GameProps } from './types';
 
+/** Let a long identifier wrap at its camelCase seams (BadRequest / Exception) instead of mid-word. */
+const seams = (label: string) =>
+  label.split(/(?<=[a-z])(?=[A-Z])/).flatMap((part, i) => (i ? [<wbr key={i} />, part] : [part]));
+
 /**
  * Put each item in the bucket it belongs to. Pick a card, then a box.
  *
@@ -78,7 +82,7 @@ export function SortGame({ api, sort, role }: GameProps & { sort: Sort }) {
           <div className="buckets">
             {sort.buckets.map((b, k) => (
               <button key={b} className={`bucket ${item && !done ? 'armed' : ''}`} onClick={() => drop(b)} disabled={done}>
-                <span className="bh"><span className="kb" aria-hidden="true">{k + 1}</span>{b}</span>
+                <span className="bh"><span className="kb" aria-hidden="true">{k + 1}</span><span>{seams(b)}</span></span>
                 <span className="chips">
                   {items.filter(i => placed[i.name] === b).map(i => <span key={i.name} className="sorted">{i.name}</span>)}
                 </span>
