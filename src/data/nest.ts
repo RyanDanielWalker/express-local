@@ -492,6 +492,22 @@ one(@Param() params) {}`,
     ],
     hook: 'DTO must be a class (interfaces vanish at runtime). ValidationPipe fails with 400 and a message array.',
     par: 95,
+    flows: [
+      {
+        t: 2,
+        title: 'POST /users with an extra isAdmin field. The global ValidationPipe has whitelist and forbidNonWhitelisted on',
+        steps: [
+          'JSON body parsed',
+          'ValidationPipe runs',
+          'Body becomes a CreateUserDto instance',
+          'Decorators checked',
+          'BadRequestException thrown',
+          '400: "property isAdmin should not exist"',
+        ],
+        decoys: ['isAdmin quietly stripped', 'Route handler'],
+        note: 'class-validator reads decorators off a class instance, which is why the pipe converts the plain object first. With whitelist alone, isAdmin would be stripped quietly and the handler would run. forbidNonWhitelisted turns that into a 400, which is what you want from an API that should not accept fields it does not know about.',
+      },
+    ],
     questions: [
       {
         t: 1,
@@ -642,6 +658,38 @@ findOne(@Param('id') id: number) {}`,
     ],
     hook: 'Middleware: raw req/res. Guard: can you? Pipe: is this input valid and the right type? Interceptor: wrap before and after. Filter: turn errors into responses.',
     par: 85,
+    drill: 'Ask what the job needs. The raw request, before Nest knows which handler it is for? A yes or no on whether this request may continue? One argument, checked or converted? Code on both sides of your handler? Something that already went wrong?',
+    sorts: [
+      {
+        t: 1,
+        title: 'Which building block does each job?',
+        buckets: ['Middleware', 'Guard', 'Pipe', 'Interceptor', 'Exception filter'],
+        items: [
+          { name: 'Check that the user is an admin', bucket: 'Guard', why: 'A yes or no on whether this request may continue. In practice that is a RolesGuard reading roles you attached with a decorator.' },
+          { name: 'Turn the "42" in /posts/42 into the number 42', bucket: 'Pipe', why: 'Converting one argument before the handler sees it. Nest ships ParseIntPipe for exactly this.' },
+          { name: 'Reject a body that is missing its email', bucket: 'Pipe', why: 'Checking one argument against its DTO is ValidationPipe. The 400 goes back before your handler runs.' },
+          { name: 'Strip passwordHash out of every response', bucket: 'Interceptor', why: 'Reshaping what comes back means running after the handler, which only an interceptor does. Nest ships ClassSerializerInterceptor, paired with @Exclude() on the entity.' },
+          { name: 'Time how long the handler took', bucket: 'Interceptor', why: 'You need a timestamp before the handler and another after it. An interceptor wraps both sides in one class.' },
+          { name: 'Send the same JSON error shape for every failure', bucket: 'Exception filter', why: 'Turning a thrown error into a response is the whole job. One global filter gives the whole API one error shape.' },
+          { name: 'Add security headers before anything else runs', bucket: 'Middleware', why: 'helmet is plain Express middleware, applied with app.use(helmet()). It works on the raw response before Nest has picked a handler.' },
+        ],
+        note: 'Five boxes, five questions. Does it need the raw request before routing? Middleware. Is it a yes or no? Guard. Is it about one argument? Pipe. Does it need both sides of the handler? Interceptor. Did something already go wrong? Filter.',
+      },
+      {
+        t: 3,
+        title: 'Same five boxes, real packages. Where does each one live?',
+        buckets: ['Middleware', 'Guard', 'Pipe', 'Interceptor', 'Exception filter'],
+        items: [
+          { name: 'Rate limit every route, except ones marked @SkipThrottle()', bucket: 'Guard', why: 'ThrottlerGuard, bound globally with APP_GUARD. It has to read metadata off the handler to honor @SkipThrottle(), and middleware runs before there is a handler to read.' },
+          { name: 'Check a JWT and put the user on req.user', bucket: 'Guard', why: 'AuthGuard("jwt") from @nestjs/passport runs your JWT strategy. The strategy decodes the token, the guard decides, and the user lands on req.user for everything after.' },
+          { name: 'Fall back to page 1 when ?page is missing', bucket: 'Pipe', why: 'DefaultValuePipe, chained before ParseIntPipe: @Query("page", new DefaultValuePipe(1), ParseIntPipe).' },
+          { name: 'Answer a repeat GET from memory for 30 seconds', bucket: 'Interceptor', why: 'CacheInterceptor from @nestjs/cache-manager. On a hit it answers without calling your handler at all, which only something wrapped around the handler can do.' },
+          { name: 'Turn Prisma error P2025 into a 404', bucket: 'Exception filter', why: 'Prisma throws its own error when a record is not found. A filter that catches it and answers 404 keeps that translation out of every service.' },
+          { name: 'Parse cookies onto req for everything downstream', bucket: 'Middleware', why: 'cookie-parser is Express middleware, applied with app.use(cookieParser()). Everything after it, guards included, can read req.cookies.' },
+        ],
+        note: 'The ecosystem uses the same five boxes. If a package needs to know which handler it is protecting, it is a guard. If it needs the raw request before routing, it is middleware. Read the job, and the job tells you the box, and the box tells you which package to go looking for.',
+      },
+    ],
     questions: [
       {
         t: 1,
