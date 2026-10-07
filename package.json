@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "bar": "BAR=1 vitest run src/data/bar.test.ts --reporter=verbose"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.3.0",

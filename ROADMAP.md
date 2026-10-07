@@ -16,11 +16,12 @@ A line is **done** when:
 
 A division is **done** when every line clears that, and the division could carry an interview on its own topic. That second half is the one that adds lines rather than questions: NestJS without testing or auth is not a division that could carry a NestJS interview, however deep its other six lines get.
 
-Nothing here is measured by vibes. An `npm run audit` that prints the bar per line is the first thing to build, so "is NestJS done" has an answer.
+Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 4 (data tests already cover 5), `npm run bar` prints where every line stands, and any division listed in `FINISHED` is enforced by the test suite from then on, so finished stays finished.
 
 ## Now: NestJS
 
-- [ ] **Audit script.** Print every line against the five checks. Build it first so the rest of this is measurable.
+- [x] **The bar, as a test ratchet.** First run: NestJS 1 of 6 lines clear (the lifecycle). TypeScript and React 0 of 6.
+- [ ] **Mixed runs.** Every quiz line in the app fails the judgment check, because a quiz line can only hold questions. Let a quiz line carry a flow or a sort that plays inside its run, so the DTO line can end on "order the validation pipeline" instead of a ninth recognition question. This is engine work, and it is what makes check 4 reachable at all.
 - [ ] **Fill tier 1.** Nest lines carry 3 or 4 tier 1 questions against a run of 6, so about 13 new ones across the six lines.
 - [ ] **Rehearsal to three prompts a line.** Currently two.
 - [ ] **A "what do you actually type" line.** The whole division teaches concepts and never the API. The decorator you reach for, the interface you implement, the method you write, and real examples from the framework: `ValidationPipe`, `ParseIntPipe`, `AuthGuard`, `RolesGuard`, `ClassSerializerInterceptor`, `CacheInterceptor`, helmet and cors as middleware, `HttpExceptionFilter`. This is the gap behind "can you give me an example of a pipe".
