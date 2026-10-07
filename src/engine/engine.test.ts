@@ -369,3 +369,18 @@ describe('mixed runs', () => {
     expect(pickPuzzle(line, 3, () => 0.99)).toEqual({ kind: 'sort', sort });
   });
 });
+
+describe('daily ride pick', () => {
+  it('is stored by line id, so adding lines cannot move it', () => {
+    const save = emptySave();
+    const idx = ensureDailyPick(save, NOW);
+    expect(save.dailyPick).toEqual({ day: dayKey(NOW), id: LINES[idx].id });
+    // same day, same answer
+    expect(ensureDailyPick(save, NOW)).toBe(idx);
+  });
+
+  it('drops an old index-based pick instead of trusting it', () => {
+    const old = { ...emptySave(), dailyPick: { day: dayKey(NOW), idx: 3 } } as unknown;
+    expect(migrate(old).dailyPick).toBeUndefined();
+  });
+});

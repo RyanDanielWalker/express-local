@@ -166,5 +166,10 @@ export interface SaveData {
   questions: Record<string, QuestionStat>;
   /** Out-loud rehearsals, keyed by line id. `shaky` holds prompts to ask first next time. */
   rehearsal: Record<string, { last: number; shaky: string[] }>;
-  dailyPick?: { day: string; idx: number };
+  /**
+   * Today's Daily Ride, by line id. It used to be an index into LINES, which
+   * meant adding a line inside one division moved the pick in every division
+   * after it.
+   */
+  dailyPick?: { day: string; id: LineId };
 }

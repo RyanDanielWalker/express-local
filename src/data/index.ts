@@ -6,9 +6,9 @@ import { REACT_LINES, REACT_GUIDE } from './react';
 import { TS_LINES, TS_GUIDE } from './typescript';
 
 /**
- * Every line on the map, grouped by division in map order. New divisions get
- * appended: `save.dailyPick` stores an index, so inserting in the middle would
- * move an in-progress Daily Ride onto a different line.
+ * Every line on the map, grouped by division in map order. Saves refer to
+ * lines by id, so lines and divisions can be added anywhere. Unlock order is
+ * the order within a division.
  */
 export const LINES: Line[] = [...ALGO_LINES, ...NEST_LINES, ...REACT_LINES, ...TS_LINES];
 

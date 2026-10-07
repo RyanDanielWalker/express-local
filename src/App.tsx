@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LINES } from './data';
-import { dailyDone, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
+import { dailyDone, dailyIndex, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isDue, isUnlocked, maxTier, type TripResult } from './engine/progression';
 import { cramPool, cramQuestions, CRAM_SIZE, heartsFor, recordAnswers, shakyQuestions } from './engine/questions';
 import { loadSave, persistSave } from './engine/save';
 import type { Division, Line, Question, SaveData, Tier } from './engine/types';
@@ -57,7 +57,7 @@ export default function App() {
   const line = LINES[current];
   const top = maxTier(save.levels[line.id]);
   const tier = Math.min(picked[line.id] ?? top, top) as Tier;
-  const dailyIdx = dailyDone(save) ? null : (save.dailyPick?.idx ?? null);
+  const dailyIdx = dailyDone(save) ? null : dailyIndex(save);
 
   const board = (t: Tier = tier) => {
     setPicked(p => ({ ...p, [line.id]: t }));

@@ -94,12 +94,22 @@ export function streakStatus(save: SaveData, now = Date.now()) {
  */
 export function ensureDailyPick(save: SaveData, now = Date.now()): number {
   const k = dayKey(now);
-  if (save.dailyPick?.day === k) return save.dailyPick.idx;
+  if (save.dailyPick?.day === k) {
+    const pinned = LINES.findIndex(l => l.id === save.dailyPick!.id);
+    if (pinned > -1) return pinned;
+  }
   const open = LINES.map((_, i) => i).filter(i => isUnlocked(save, i));
   let h = 7;
   for (const c of k) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  save.dailyPick = { day: k, idx: open[h % open.length] };
-  return save.dailyPick.idx;
+  const idx = open[h % open.length];
+  save.dailyPick = { day: k, id: LINES[idx].id };
+  return idx;
+}
+
+/** Where today's Daily Ride sits in LINES, or null when there is no pick. */
+export function dailyIndex(save: SaveData): number | null {
+  const i = LINES.findIndex(l => l.id === save.dailyPick?.id);
+  return i > -1 ? i : null;
 }
 
 export const dailyDone = (save: SaveData, now = Date.now()): boolean => save.daily === dayKey(now);

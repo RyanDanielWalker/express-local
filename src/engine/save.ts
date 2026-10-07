@@ -42,6 +42,9 @@ export function migrate(raw: unknown): SaveData {
     daily: r.daily ?? '',
     questions: r.questions ?? {},
     rehearsal: r.rehearsal ?? {},
+    // An index-based pick from an older save cannot be trusted once lines move,
+    // so drop it and let today's ride be picked again.
+    dailyPick: r.dailyPick && 'id' in r.dailyPick ? r.dailyPick : undefined,
   };
 }
 

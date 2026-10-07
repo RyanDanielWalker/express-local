@@ -15,7 +15,7 @@ Subway-themed drill for algorithms, NestJS, React and TypeScript. React 19 + Typ
 
 - `src/algorithms/`: **pure** game logic as small state machines (`init`, `want/should`, `step` returning `{ ok, state }`). No React, no DOM. Every file gets tests in `algorithms.test.ts`.
 - `src/engine/`: save data (`save.ts`, with `migrate()` for old saves), progression and scoring (`progression.ts`, where `finishTrip()` is pure and returns a new save). Tests in `engine.test.ts`.
-- `src/data/`: one file per division (`lines.ts` + `guide.ts` for algorithms, `nest.ts`, `react.ts`, `typescript.ts`), merged by `index.ts` into `LINES` and `GUIDE`. New divisions get **appended** to `LINES`: `save.dailyPick` stores an index, so inserting in the middle moves someone's Daily Ride. Copy supports `` `code` `` and `**bold**`, rendered by `<Rich />`. `data.test.ts` validates the content.
+- `src/data/`: one file per division (`lines.ts` + `guide.ts` for algorithms, `nest.ts`, `react.ts`, `typescript.ts`), merged by `index.ts` into `LINES` and `GUIDE`. Saves refer to lines by id (including the Daily Ride pick), so a line can be added anywhere in its division; unlock order is the order within the division. Copy supports `` `code` `` and `**bold**`, rendered by `<Rich />`. `data.test.ts` validates the content.
 - Lines declare a `division` (unlock order is per division) and a `kind`:
   - `game`: a hand-built component in `src/games/`, registered in `games/index.ts`
   - `quiz`: multiple choice drawn from `questions`, played by `QuizGame`
