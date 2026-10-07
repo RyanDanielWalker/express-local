@@ -55,6 +55,16 @@ describe('the auditor', () => {
     expect(checks.find(c => c.id === 'guide')!.detail).toBe('no gotcha');
   });
 
+  it('fails a line where the longest option is usually right', () => {
+    const tilted = (n: number): Question[] => Array.from({ length: n }, (_, i) => ({
+      t: 1 as const, q: `q${i}`, opts: ['the long right answer', 'short', 'brief'], a: 'the long right answer', why: 'because',
+    }));
+    const line = quiz([...tilted(6), ...q(2, 2), ...q(3, 2)], { flows: [{ t: 1, title: 'x', steps: ['a', 'b'], note: 'n' }] });
+    const tells = auditLine(line, guide(3)).find(c => c.id === 'tells')!;
+    expect(tells.ok).toBe(false);
+    expect(tells.detail).toBe('answer is the longest option on 6/10');
+  });
+
   it('does not count recognition alone as judgment', () => {
     expect(auditLine(quiz(full), guide(3)).find(c => c.id === 'judgment')!.ok).toBe(false);
     const withFlow = quiz(full, { flows: [{ t: 1, title: 'x', steps: ['a', 'b'], note: 'n' }] });

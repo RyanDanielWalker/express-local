@@ -11,7 +11,7 @@ import type { Division, Guide, Line, Tier } from '../engine/types';
 export const FINISHED: Division[] = [];
 
 export interface BarCheck {
-  id: 'runs' | 'rehearse' | 'guide' | 'judgment';
+  id: 'runs' | 'rehearse' | 'guide' | 'judgment' | 'tells';
   label: string;
   ok: boolean;
   /** What is missing, in a few words. */
@@ -21,8 +21,16 @@ export interface BarCheck {
 const TIERS: Tier[] = [1, 2, 3];
 
 /**
+ * The share of a line's questions where the answer may be the single longest
+ * option. data.test.ts checks this across the whole app, which let individual
+ * lines hide behind the average; this checks each line on its own.
+ */
+export const MAX_LONGEST_SHARE = 0.5;
+
+/**
  * One line against the bar in ROADMAP.md. Check 5 there (content tests) is
- * enforced for every line by data.test.ts already, so it is not repeated here.
+ * mostly enforced for every line by data.test.ts; the one part that has to be
+ * judged per line, answers giving themselves away by length, lives here.
  */
 export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
   // Hand-built games generate their own runs and are judgment puzzles by nature.
@@ -42,6 +50,16 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
   const talking = (guide?.say?.length ?? 0) > 0;
   const gotcha = !!guide?.gotcha;
   const puzzles = (line.flows?.length ?? 0) + (line.sorts?.length ?? 0);
+
+  // How often the right answer is the one longest option. With three options,
+  // chance is about a third; over half means "pick the longest" beats knowing.
+  const pool = line.questions ?? [];
+  const longest = pool.filter(q => {
+    const lens = q.opts.map(o => o.length);
+    const max = Math.max(...lens);
+    return q.a.length === max && lens.filter(n => n === max).length === 1;
+  }).length;
+  const tilted = pool.length > 0 && longest / pool.length > MAX_LONGEST_SHARE;
 
   return [
     {
@@ -67,6 +85,12 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
       label: 'A puzzle beyond recognition',
       ok: game || puzzles > 0,
       detail: game || puzzles > 0 ? '' : 'recognition only',
+    },
+    {
+      id: 'tells',
+      label: 'Answers not guessable by length',
+      ok: !tilted,
+      detail: tilted ? `answer is the longest option on ${longest}/${pool.length}` : '',
     },
   ];
 }
