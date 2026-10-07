@@ -2,7 +2,7 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 29 lines across 4 divisions, 74 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS, then TypeScript, then React.** No new divisions until they clear the bar below.
+Status: 29 lines across 4 divisions, 74 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript, then React.** No new divisions until they clear the bar below.
 
 ## The bar
 
@@ -18,19 +18,23 @@ A division is **done** when every line clears that, and the division could carry
 
 Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 4 (data tests already cover 5), `npm run bar` prints where every line stands, and any division listed in `FINISHED` is enforced by the test suite from then on, so finished stays finished.
 
-## Now: NestJS
+## Done: NestJS
+
+Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any slips. The one Nest-adjacent gap is data access (repositories, transactions in a service), which belongs with the SQL and Postgres division when that is unparked.
 
 - [x] **The bar, as a test ratchet.** First run: NestJS 1 of 6 lines clear. Now 6 of 6.
 - [x] **Mixed runs.** Every quiz line in the app fails the judgment check, because a quiz line can only hold questions. Let a quiz line carry a flow or a sort that plays inside its run, so the DTO line can end on "order the validation pipeline" instead of a ninth recognition question. This is engine work, and it is what makes check 4 reachable at all.
 - [x] **Fill tier 1.** Thirteen new questions, leaning toward what you type: `@Param` versus `@Query`, `useGlobalPipes`, throwing versus returning a 404.
 - [x] **Rehearsal to three prompts a line.** Including "give me a real example of each building block."
-- [ ] **A "what do you actually type" line.** Partly covered now by the new tier 1 questions and the real-packages sort. Still worth a line of its own for interfaces and method signatures: `canActivate`, `transform`, `intercept`, `catch`, `use`.
+- [x] **A "what do you actually type" line.** Tool Shed. Partly covered now by the new tier 1 questions and the real-packages sort. Still worth a line of its own for interfaces and method signatures: `canActivate`, `transform`, `intercept`, `catch`, `use`.
 - [x] **A matching mechanic.** Shipped as sorts that a quiz line ends on, rather than a line kind of their own. Cards are named by the job, never by their box, and a test enforces it. Generalizes beyond Nest: React hooks by what they are for, TypeScript utilities by what they operate on.
-- [ ] **A testing line.** `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
-- [ ] **An auth line.** Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
+- [x] **A testing line.** Test Track. `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
+- [x] **An auth line.** Turnstile. Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
 - [ ] **More flows.** The validation pipeline shipped on the DTO line. DI resolution order is still worth one.
 
-## Then: TypeScript
+## Now: TypeScript
+
+`npm run bar` lists exactly what each line is missing. On top of the gaps below, four TypeScript lines give their answers away by length (any vs unknown: the longest option is right on 9 of 10).
 
 - [ ] Fill tier 1: about 18 questions across the six lines
 - [ ] Rehearsal to three prompts a line
@@ -38,6 +42,8 @@ Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 4 (data
 - [ ] A judgment puzzle per line, so it is not six recognition quizzes in a row
 
 ## Then: React
+
+Three React lines also give their answers away by length (performance: 8 of 9).
 
 - [ ] Fill tier 1: about 19 questions across the six lines
 - [ ] Rehearsal to three prompts a line
@@ -62,6 +68,7 @@ Orthogonal to the content work, and the thing to do when you want a break from w
 - [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
 - [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
 - [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
+- [ ] **Split the bundle by division.** Every question ships in one chunk, now 517 kB (163 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
 
 ## Engine ideas
 
@@ -118,3 +125,6 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-07** Sort puzzles, and quiz runs that end on a puzzle as their last stop
 - **2026-10-07** Answer keys taken off the play screen: quiz side panels use a drill, the guide panel only shows on algorithm games
 - **2026-10-07** NestJS clears the bar on all six lines: full runs at every tier, three rehearsal prompts, a puzzle each
+- **2026-10-07** Daily Ride pinned by line id, so lines can be added anywhere
+- **2026-10-07** The bar checks each line for answers that give themselves away by length
+- **2026-10-07** Tool Shed, Turnstile and Test Track. NestJS finished: nine lines, enforced by the suite

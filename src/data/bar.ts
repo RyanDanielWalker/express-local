@@ -8,7 +8,7 @@ import type { Division, Guide, Line, Tier } from '../engine/types';
  * interview on its own topic; that half of the bar is a judgment call, not a
  * check.
  */
-export const FINISHED: Division[] = [];
+export const FINISHED: Division[] = ['nest'];
 
 export interface BarCheck {
   id: 'runs' | 'rehearse' | 'guide' | 'judgment' | 'tells';

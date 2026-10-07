@@ -40,6 +40,9 @@ Hand-built games. You play the algorithm step by step.
 | **4** | Ticket Check | DTOs and the ValidationPipe |
 | **5** | Dispatch Desk | Guard vs pipe vs interceptor vs filter vs middleware |
 | **6** | Fault Line | Exceptions, status codes, filters |
+| **7** | Tool Shed | What you implement: canActivate, transform, intercept, catch, use |
+| **8** | Turnstile | Auth: tokens, guards, req.user, @Public(), 401 vs 403 |
+| **9** | Test Track | Testing modules, overrideProvider, unit vs e2e |
 
 ### React
 
@@ -118,8 +121,8 @@ Adding a whole division is the same, plus an entry in `DIVISIONS` in `src/engine
 
 Four divisions is enough for now. The work is making the stack divisions deep enough to carry an interview, NestJS first. [ROADMAP.md](ROADMAP.md) has the whole board, including the bar a line has to clear to count as finished.
 
-- [ ] **Finish NestJS:** fill out tier 1, a line on the API you actually type, a testing line, an auth line
-- [ ] **A matching drill:** put real class names in the right bucket, because naming `ValidationPipe` is a different skill from defining a pipe
+- [x] **Finish NestJS:** nine lines, every one clearing the bar, and the test suite now defends it
+- [x] **A matching drill:** sort jobs and signatures into the right box, because naming the tool is a different skill from defining it
 - [ ] **Then TypeScript, then React,** to the same bar
 - [ ] **Reorganize the page:** a Today band, collapsible divisions, a play mode that takes over the screen
 - [ ] **Scenario mode:** read a real-world situation, pick the right tool
