@@ -625,14 +625,14 @@ one(@Param() params) {}`,
       },
       {
         t: 1,
-        q: 'Why does a DTO have to be a class instead of an interface?',
+        q: 'With ValidationPipe and class-validator, why does a DTO have to be a class instead of an interface?',
         opts: [
           'Interfaces vanish at compile time, leaving nothing to read',
           'Classes validate faster than plain objects at runtime',
           'Nest only accepts classes as handler parameters',
         ],
         a: 'Interfaces vanish at compile time, leaving nothing to read',
-        why: 'The pipe reads decorator metadata off the class at runtime. This is the single most common DTO question in interviews.',
+        why: 'The pipe reads decorator metadata off the class at runtime. This is the single most common DTO question in interviews. The schema-first route in Nest 12, a Zod or Valibot schema with StandardSchemaValidationPipe, needs no class at all, because the schema itself exists at runtime.',
       },
       {
         t: 1,
@@ -680,12 +680,12 @@ findOne(@Param('id') id: number) {}`,
         t: 2,
         q: 'What does @IsOptional() actually do?',
         opts: [
-          "Skips that field's validators when it is undefined",
+          'Skips its validators if null or undefined',
           'Strips that field from the validated payload',
           'Marks the matching database column nullable',
         ],
-        a: "Skips that field's validators when it is undefined",
-        why: 'Without it, a missing field fails its validators. With it, the rules only apply when a value is present.',
+        a: 'Skips its validators if null or undefined',
+        why: 'Without it, a missing field fails its validators. With it, a null or undefined value skips them, so the rules only apply when there is a value to check.',
       },
       {
         t: 2,
@@ -696,7 +696,7 @@ findOne(@Param('id') id: number) {}`,
           'type UpdateUserDto = Partial<CreateUserDto>',
         ],
         a: 'class UpdateUserDto extends PartialType(CreateUserDto)',
-        why: 'Mapped types (PartialType, PickType, OmitType) keep the validation rules and stop the two DTOs drifting apart.',
+        why: 'Mapped types (PartialType, PickType, OmitType, from @nestjs/mapped-types) keep the validation rules and stop the two DTOs drifting apart.',
       },
       {
         t: 2,
@@ -770,6 +770,17 @@ findOne(@Param('id') id: number) {}`,
         ],
         a: 'No. Only decorated fields get checked',
         why: 'TypeScript types are erased before the code runs. class-validator only knows what the decorators tell it, so an undecorated field is not checked at all, and with whitelist on it gets stripped.',
+      },
+      {
+        t: 3,
+        q: 'Nest 12. On its own, what does @Body({ schema: createUserSchema }) do?',
+        opts: [
+          'Attaches the schema, until a pipe checks it',
+          'Validates the body against that schema now',
+          'Builds a DTO class out of the schema for you',
+        ],
+        a: 'Attaches the schema, until a pipe checks it',
+        why: 'The decorator only attaches schema metadata. Validation happens once you register StandardSchemaValidationPipe, for example with app.useGlobalPipes(new StandardSchemaValidationPipe()). Same lesson as class-validator: decorators describe, a pipe enforces. It works with any Standard Schema library, like Zod, Valibot or ArkType.',
       },
     ],
   },
@@ -1869,7 +1880,7 @@ export class UsersController {
     ],
   },
   dto: {
-    plain: 'A DTO (data transfer object) is a class that describes what you accept. You decorate its fields with rules from class-validator, and the ValidationPipe checks the incoming JSON against them before your handler runs. If something fails, the client gets a 400 with a list of messages, and your code never sees the bad data. It has to be a class and not an interface, because interfaces disappear when TypeScript compiles and there would be nothing left to read at runtime.',
+    plain: 'A DTO (data transfer object) is a class that describes what you accept. You decorate its fields with rules from class-validator, and the ValidationPipe checks the incoming JSON against them before your handler runs. If something fails, the client gets a 400 with a list of messages, and your code never sees the bad data. For ValidationPipe it has to be a class and not an interface, because interfaces disappear when TypeScript compiles and there would be nothing left to read at runtime. Nest 12 also supports a schema-first route: a Zod, Valibot or ArkType schema, validated by StandardSchemaValidationPipe.',
     words: [
       ['DTO', 'A class describing the shape of input. Not a database entity.'],
       [
@@ -1889,6 +1900,10 @@ export class UsersController {
         'PartialType',
         'Makes every field of another DTO optional. Handy for PATCH.',
       ],
+      [
+        'StandardSchemaValidationPipe',
+        'Nest 12: validates Zod, Valibot or ArkType schemas attached with @Body({ schema }). The schema-first alternative to class-validator, which is still fully supported.',
+      ],
     ],
     code: {
       label: 'the setup that catches bad input',
@@ -1907,16 +1922,17 @@ export class CreateUserDto {
 }`,
     },
     say: [
-      'DTOs are classes, not interfaces, because the ValidationPipe reads decorator metadata at runtime and an interface leaves nothing behind.',
+      'With ValidationPipe, DTOs are classes, not interfaces, because the pipe reads decorator metadata at runtime and an interface leaves nothing behind.',
       'I turn on whitelist and forbidNonWhitelisted globally so unexpected fields never reach the service layer.',
       'Validation failures come back as 400 with a message array, and because the pipe runs before the handler, the handler can trust its input.',
       'DTOs describe the request. Entities describe the database. Keeping them separate stops internal columns leaking into the API.',
+      'Nest 12 adds a schema-first option: a Zod or Valibot schema on @Body({ schema }), checked by StandardSchemaValidationPipe. The class-validator route is still fully supported, so I pick whichever the codebase already uses.',
     ],
     gotcha: 'Validation decorators do nothing until a ValidationPipe is actually applied. Add it with app.useGlobalPipes in main.ts, and remember it needs both class-validator and class-transformer installed.',
     rehearse: [
       {
         prompt: 'What is a DTO, and why does it have to be a class?',
-        answer: 'It describes the shape of the request. It has to be a class because the ValidationPipe reads decorator metadata at runtime, and an interface disappears when TypeScript compiles.',
+        answer: 'It describes the shape of the request. With ValidationPipe it has to be a class, because the pipe reads decorator metadata at runtime and an interface disappears when TypeScript compiles. If the team uses Zod instead, Nest 12 can validate the schema directly with StandardSchemaValidationPipe, and then there is no class at all.',
       },
       {
         prompt: 'How do you keep bad input out of your services?',
