@@ -102,6 +102,7 @@ Learned the hard way, mostly by getting them wrong first.
 - **Recognition is not recall, and recall is not speech.** Hence shaky drills and out-loud rehearsal. The interview tests the third one.
 - **Concepts without the API is half a lesson.** Knowing a pipe validates input and not being able to name `ValidationPipe` is the gap between having read the docs and having used the thing.
 - **Depth before breadth.** A division that cannot carry an interview on its own topic is not finished, and a new division does not fix it.
+- **Check the docs, not memory.** NestJS 12 shipped after the first Nest lines were written. A pass against the current docs found rules stated as universal that were really Express defaults or ValidationPipe specifics. Say which version or adapter a claim depends on, and re-check a division when its framework ships a major version.
 - **No em dashes.**
 
 ## Shipped
@@ -128,3 +129,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-07** Daily Ride pinned by line id, so lines can be added anywhere
 - **2026-10-07** The bar checks each line for answers that give themselves away by length
 - **2026-10-07** Tool Shed, Turnstile and Test Track. NestJS finished: nine lines, enforced by the suite
+- **2026-10-07** NestJS content checked against the v12 docs: route order, schema-first validation, errorCode, serialization, Jest on Node 24.9
