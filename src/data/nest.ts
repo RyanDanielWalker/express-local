@@ -167,6 +167,23 @@ export const NEST_LINES: Line[] = [
     ],
     hook: 'providers is private. exports makes it public. imports is how another module asks for it. All three have to line up.',
     par: 110,
+    drill: 'Ask who needs it and where it comes from. Does this module build it? Should other modules get it too? Does this module need it from somewhere else? Does it answer HTTP requests?',
+    sorts: [
+      {
+        t: 1,
+        title: 'You are writing OrdersModule. Which part of @Module() does each one go in?',
+        buckets: ['imports', 'controllers', 'providers', 'exports'],
+        items: [
+          { name: 'UsersModule, so you can inject UsersService here', bucket: 'imports', why: 'You get another module\'s exported providers by importing that module. Listing UsersService yourself would make a second, separate instance.' },
+          { name: 'TypeOrmModule.forFeature([Order])', bucket: 'imports', why: 'forFeature returns a module that provides the Order repository. Modules always go in imports, including the ones built by a function call.' },
+          { name: 'The class that answers GET /orders', bucket: 'controllers', why: 'Controllers are the only thing Nest scans for routes. Put it anywhere else and the routes never get registered.' },
+          { name: 'OrdersService, so this module can inject it', bucket: 'providers', why: 'providers is what the injector knows how to build for this module. Without it, nothing here can ask for OrdersService.' },
+          { name: 'A pricing helper nothing outside this module uses', bucket: 'providers', why: 'Providers are private by default, which is the point. Export only what another module needs.' },
+          { name: 'OrdersService, so ShippingModule can inject it too', bucket: 'exports', why: 'It stays in providers, and listing it in exports as well is what makes it available to any module that imports this one.' },
+        ],
+        note: 'providers is what this module can build. exports is the subset other modules may have. imports is how this module gets someone else\'s exports. controllers is where the routes live. "Nest can\'t resolve dependencies" almost always means one of those four is missing a line.',
+      },
+    ],
     questions: [
       {
         t: 1,
@@ -374,6 +391,22 @@ export class OrdersModule {}`,
     ],
     hook: '@Controller(prefix) + @Get(path) build the URL. Routes match top to bottom, first match wins.',
     par: 95,
+    sorts: [
+      {
+        t: 1,
+        title: 'POST /orders/7/items?dryRun=true, with a JSON body and an x-api-key header. Which decorator gets you each piece?',
+        buckets: ['@Param', '@Query', '@Body', '@Headers'],
+        items: [
+          { name: 'The 7 in /orders/7/items', bucket: '@Param', why: 'It is part of the path, declared as :id in @Post(":id/items"), so @Param("id"). It arrives as a string unless a pipe converts it.' },
+          { name: 'Both :id and :itemId at once, as one object', bucket: '@Param', why: 'Called with no name, @Param() hands you every route param in one object.' },
+          { name: 'true, from ?dryRun=true', bucket: '@Query', why: 'Everything after the ? is the query string, so @Query("dryRun"). It arrives as the string "true", not a boolean, unless a pipe converts it.' },
+          { name: '?page and ?limit together, as one object', bucket: '@Query', why: 'Called with no name, @Query() gives you the whole query string as an object.' },
+          { name: 'The "A1" sent in the JSON', bucket: '@Body', why: 'The parsed JSON payload is @Body(). @Body("sku") picks one field out of it, though a DTO is the usual way.' },
+          { name: 'The x-api-key value', bucket: '@Headers', why: '@Headers("x-api-key"). Header names are lowercase by the time Nest sees them.' },
+        ],
+        note: 'The URL has two parts you read: the path (@Param) and the query string (@Query). The request has two more: the body (@Body) and the headers (@Headers). Each one, called with no name, gives you the whole object instead of one value.',
+      },
+    ],
     questions: [
       {
         t: 1,
@@ -952,6 +985,23 @@ findOne(@Param('id') id: number) {}`,
     ],
     hook: 'throw new NotFoundException() → 404. Guard returns false → 403. Plain Error → 500 with the message hidden.',
     par: 85,
+    drill: 'Ask what the client needs to learn. That they sent something wrong? That we do not know who they are? That we know who they are, and the answer is no? That the thing is not there? That it clashes with something that already exists?',
+    sorts: [
+      {
+        t: 1,
+        title: 'Which exception does each situation call for?',
+        buckets: ['BadRequestException', 'UnauthorizedException', 'ForbiddenException', 'NotFoundException', 'ConflictException'],
+        items: [
+          { name: 'A ?limit of -5', bucket: 'BadRequestException', why: '400. The client sent something that cannot be right, and they can fix it.' },
+          { name: 'A request with no token at all', bucket: 'UnauthorizedException', why: '401. We have no idea who this is, so we cannot even ask whether they are allowed.' },
+          { name: 'A token that expired an hour ago', bucket: 'UnauthorizedException', why: 'Still 401. An expired token proves nothing about who you are now, so it is the same as no token.' },
+          { name: 'A signed-in viewer tries to delete a project', bucket: 'ForbiddenException', why: '403. We know exactly who this is, and their role does not allow it.' },
+          { name: 'GET /orders/99, and order 99 is not there', bucket: 'NotFoundException', why: '404. The thing they asked for does not exist.' },
+          { name: 'Signup with an email someone already registered', bucket: 'ConflictException', why: '409. Nothing is wrong with the input on its own. It clashes with a record that already exists.' },
+        ],
+        note: 'Read each one as a sentence to the client. 400: you sent something wrong. 401: I do not know who you are. 403: I know who you are, and no. 404: that is not here. 409: that clashes with what already exists.',
+      },
+    ],
     questions: [
       {
         t: 1,
