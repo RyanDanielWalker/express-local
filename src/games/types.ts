@@ -26,4 +26,10 @@ export interface GameProps {
   api: GameApi;
   /** The line being played, so data-driven games can read their own pool. */
   line: Line;
+  /**
+   * Where this game sits in a mixed run. An `opener` hands off to a puzzle
+   * instead of finishing; a `finale` is that puzzle, the run's last stop.
+   * Unset means the game is the whole run.
+   */
+  role?: 'opener' | 'finale';
 }

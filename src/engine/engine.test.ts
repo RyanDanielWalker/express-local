@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DAY, dayKey, DERAIL_COST, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isUnlocked, lineReadiness, maxTier, rankFloor, rankFor, RANKS, readinessOf } from './progression';
 import { cramPool, cramQuestions, CRAM_SIZE, qid, recordAnswers, shakyQuestions } from './questions';
 import { GUIDE, LINES } from '../data';
-import { nextStep, pickFlows, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss } from './questions';
+import { nextStep, pickFlows, pickPuzzle, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss } from './questions';
 import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
 import type { SaveData } from './types';
@@ -337,5 +337,27 @@ describe('flow hints', () => {
     expect(revealAfterMiss(1, 2)).toBe(true);
     expect(revealAfterMiss(2, 2)).toBe(false);
     expect(revealAfterMiss(3, 9)).toBe(false);
+  });
+});
+
+describe('mixed runs', () => {
+  const base = LINES.find(l => l.kind === 'quiz')!;
+  const flow: Flow = { t: 2, title: 'f', steps: ['a', 'b', 'c'], note: 'n' };
+  const sort = { t: 1 as const, title: 's', buckets: ['X', 'Y'], items: [{ name: 'one', bucket: 'X', why: 'w' }], note: 'n' };
+
+  it('ends on nothing when the line has no puzzles', () => {
+    expect(pickPuzzle({ ...base, flows: undefined, sorts: undefined }, 3)).toBeNull();
+  });
+
+  it('only offers puzzles unlocked at this tier', () => {
+    const line = { ...base, flows: [flow], sorts: undefined };
+    expect(pickPuzzle(line, 1)).toBeNull();
+    expect(pickPuzzle(line, 2)).toEqual({ kind: 'flow', flow });
+  });
+
+  it('draws from flows and sorts together', () => {
+    const line = { ...base, flows: [flow], sorts: [sort] };
+    expect(pickPuzzle(line, 3, () => 0)).toEqual({ kind: 'flow', flow });
+    expect(pickPuzzle(line, 3, () => 0.99)).toEqual({ kind: 'sort', sort });
   });
 });

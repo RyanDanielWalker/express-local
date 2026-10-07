@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { GUIDE } from '../data';
 import { GAMES } from '../games';
-import { QuizGame } from '../games/QuizGame';
+import { QuizRun } from '../games/QuizRun';
 import { FlowGame } from '../games/FlowGame';
 import type { GameApi, Tone } from '../games/types';
 import { fmtTime, TIERS } from '../engine/progression';
@@ -109,7 +109,7 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
     };
   }, [tier, later, onArrive, onDerail]);
 
-  const Game = line.kind === 'quiz' ? QuizGame : line.kind === 'flow' ? FlowGame : GAMES[line.id as AlgoLineId];
+  const Game = line.kind === 'quiz' ? QuizRun : line.kind === 'flow' ? FlowGame : GAMES[line.id as AlgoLineId];
   const g = GUIDE[line.id] as typeof GUIDE[keyof typeof GUIDE] | undefined;
 
   return (
@@ -129,8 +129,13 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
           </div>
         </div>
       </div>
-      {/* Flow lines keep the guide off the play screen: `plain` and `words` both spell out the order. */}
-      {g && line.kind !== 'flow' && (
+      {/*
+        Only the algorithm games get the guide on the play screen, where it explains the
+        mechanic. On quiz and flow lines it is the answer key: the glossary for the
+        building blocks line literally lists what each block is for. Study on the intro
+        screen; the play screen is the test.
+      */}
+      {g && line.kind === 'game' && (
         <details className="explain" open={firstTime}>
           <summary>What's going on here?</summary>
           <p>{g.plain}</p>

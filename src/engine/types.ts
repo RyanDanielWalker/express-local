@@ -46,6 +46,20 @@ export interface Flow {
   decoys?: string[];
 }
 
+/**
+ * A matching puzzle: put each item in the bucket it belongs to. Built for the
+ * "give me an example of a pipe" gap: knowing what a pipe is and being able
+ * to name the job one does are different skills.
+ */
+export interface Sort {
+  t: Tier;
+  title: string;
+  buckets: string[];
+  /** Name items by what they do or what you type, never by their bucket. A test enforces it. */
+  items: { name: string; bucket: string; why: string }[];
+  note: string;
+}
+
 export interface QuizQuestion {
   /** Code with a single `___` blank. */
   code: string;
@@ -84,8 +98,14 @@ export interface Line {
   questions?: Question[];
   /** Ask `questions` exactly as given instead of drawing a tier-filtered sample (cram drills). */
   preset?: boolean;
-  /** Ordering puzzles for `kind: 'flow'` lines. */
+  /**
+   * Ordering puzzles. A flow line plays a run of them; a quiz line plays one
+   * as its last stop, so recognition is followed by something you have to
+   * work out.
+   */
   flows?: Flow[];
+  /** Matching puzzles, played as a quiz line's last stop. */
+  sorts?: Sort[];
 }
 
 export interface Guide {

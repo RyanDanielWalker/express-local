@@ -15,7 +15,7 @@ const trayFor = (flow?: Flow): string[] =>
   shuffle([...(flow?.steps.slice(flow.start ?? 0) ?? []), ...(flow?.decoys ?? [])]);
 
 /** Put the steps of a process back in order. A miss says only that it was a miss. */
-export function FlowGame({ api, line }: GameProps) {
+export function FlowGame({ api, line, role }: GameProps) {
   const [flows] = useState<Flow[]>(() => pickFlows(line.flows ?? [], api.tier));
   const [i, setI] = useState(0);
   const [placed, setPlaced] = useState<string[]>(() => given(flows[0]));
@@ -79,10 +79,12 @@ export function FlowGame({ api, line }: GameProps) {
     <>
       <div className="board">
         <div className="qcard">
-          <div className="progress" aria-hidden="true">
-            {flows.map((_, k) => <i key={k} className={k < i ? 'ok' : k === i ? 'now' : ''} />)}
-          </div>
-          <div className="eyebrow">Order {i + 1} of {flows.length}</div>
+          {role !== 'finale' && (
+            <div className="progress" aria-hidden="true">
+              {flows.map((_, k) => <i key={k} className={k < i ? 'ok' : k === i ? 'now' : ''} />)}
+            </div>
+          )}
+          <div className="eyebrow">{role === 'finale' ? 'Last stop' : `Order ${i + 1} of ${flows.length}`}</div>
           <p className="scenario"><Rich text={flow.title} /></p>
           {head > 0 && <p className="hint">That much already happened. Keep it going from there.</p>}
           <div className="flow">

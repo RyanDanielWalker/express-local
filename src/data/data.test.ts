@@ -99,8 +99,33 @@ describe('line data', () => {
     }
   });
 
+  it('keeps sort puzzles solvable and honest', () => {
+    for (const line of LINES) {
+      for (const sort of line.sorts ?? []) {
+        const at = `${line.id}: ${sort.title}`;
+        expect(sort.buckets.length, at).toBeGreaterThanOrEqual(2);
+        expect(sort.items.length, at).toBeGreaterThanOrEqual(4);
+        expect(new Set(sort.items.map(i => i.name)).size, `${at} has duplicate cards`).toBe(sort.items.length);
+        for (const item of sort.items) {
+          expect(sort.buckets, `${at}: ${item.name} points at a missing box`).toContain(item.bucket);
+          expect(item.why.length, `${at}: ${item.name} needs a why`).toBeGreaterThan(20);
+          // The option-length rule, for sorts: a card named after its own box is free.
+          const key = item.bucket.split(' ')[0].toLowerCase();
+          expect(item.name.toLowerCase(), `${at}: "${item.name}" gives away "${item.bucket}"`).not.toContain(key);
+        }
+        // Every box should be the answer at least once, or it is just a decoy with a heading.
+        for (const b of sort.buckets) expect(sort.items.some(i => i.bucket === b), `${at}: nothing goes in ${b}`).toBe(true);
+      }
+    }
+  });
+
   it('keeps em dashes out of player-facing copy', () => {
-    const copy = LINES.flatMap(l => [l.pitch, l.hook, l.drill ?? '', ...l.rules, ...(l.questions ?? []).flatMap(q => [q.q, q.why, ...q.opts])]);
+    const copy = LINES.flatMap(l => [
+      l.pitch, l.hook, l.drill ?? '', ...l.rules,
+      ...(l.questions ?? []).flatMap(q => [q.q, q.why, ...q.opts]),
+      ...(l.flows ?? []).flatMap(f => [f.title, f.note, ...f.steps, ...(f.decoys ?? [])]),
+      ...(l.sorts ?? []).flatMap(s => [s.title, s.note, ...s.buckets, ...s.items.flatMap(i => [i.name, i.why])]),
+    ]);
     expect(copy.filter(t => t.includes('—'))).toEqual([]);
   });
 });

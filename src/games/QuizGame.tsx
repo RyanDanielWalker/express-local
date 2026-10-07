@@ -14,7 +14,7 @@ import type { GameProps } from './types';
  * 1.5 second auto-advance meant you never read it, least of all when you were
  * right, which is exactly when it catches you being right for a bad reason.
  */
-export function QuizGame({ api, line }: GameProps) {
+export function QuizGame({ api, line, role }: GameProps) {
   const [items] = useState<Question[]>(() => (line.preset ? (line.questions ?? []) : pickQuestions(line.questions ?? [], api.tier)));
   const [i, setI] = useState(0);
   const [opts, setOpts] = useState<string[]>(() => shuffle([...(items[0]?.opts ?? [])]));
@@ -92,7 +92,7 @@ export function QuizGame({ api, line }: GameProps) {
               </div>
               <div className="decide">
                 <button className="btn big" onClick={next} autoFocus>
-                  {last ? 'See how you did' : 'Continue'}
+                  {!last ? 'Continue' : role === 'opener' ? 'On to the last stop' : 'See how you did'}
                 </button>
                 <span className="hint" style={{ margin: 0 }}>or press space. The clock is paused.</span>
               </div>
@@ -101,7 +101,12 @@ export function QuizGame({ api, line }: GameProps) {
         </div>
       </div>
       <div className="side">
-        <Panel title="Remember it"><p style={{ margin: 0 }}><Rich text={line.hook} /></p></Panel>
+        {/* A line whose hook is the answer key gives a `drill` instead. Rush Hour gets neither. */}
+        {api.assist && (
+          <Panel title={line.drill ? 'Think it through' : 'Remember it'}>
+            <p style={{ margin: 0 }}><Rich text={line.drill ?? line.hook} /></p>
+          </Panel>
+        )}
         <Panel title="Scoring">
           <div className="mono" style={{ lineHeight: 1.8 }}>
             right = {marks.filter(m => m === 'ok').length}<br />

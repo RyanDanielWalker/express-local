@@ -317,6 +317,21 @@ code{font-family:var(--mono); font-size:.92em}
 .steps button{font-family:var(--mono); font-size:14px; padding:10px 14px; border-radius:8px; border:2px solid var(--rule); background:var(--tile); text-align:left}
 .steps button:hover:not(:disabled){border-color:var(--ink)}
 .steps button:disabled{opacity:.25; cursor:default}
+/* sort: pick a card, then a box */
+.buckets{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px; margin:4px 0 12px}
+.bucket{display:flex; flex-direction:column; align-items:stretch; gap:8px; min-height:92px; padding:10px; border-radius:10px; border:2px dashed var(--rule); background:var(--tile); text-align:left}
+.bucket.armed:hover{border-color:var(--ink); border-style:solid}
+.bucket:disabled{cursor:default}
+.bucket .bh{display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:900; font-size:18px; text-transform:uppercase; letter-spacing:.02em; line-height:1}
+.bucket .chips{display:flex; flex-direction:column; gap:4px}
+/* not .chip: that name belongs to an algorithm game and has a fixed height */
+.bucket .sorted{display:block; font-size:12.5px; line-height:1.35; padding:4px 8px; border-radius:6px; border:1px solid var(--good); background:color-mix(in srgb, var(--good) 13%, var(--panel))}
+.tray{display:flex; flex-wrap:wrap; gap:8px}
+.tray button{font-size:14px; padding:9px 12px; border-radius:8px; border:2px solid var(--rule); background:var(--tile); text-align:left; max-width:100%}
+.tray button:hover{border-color:var(--muted)}
+.tray button.sel{border-color:var(--ink); background:var(--panel); box-shadow:0 0 0 3px color-mix(in srgb, var(--ink) 18%, transparent)}
+.why .fumbles{margin:8px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:6px; font-size:14px}
+.why .fumbles em{font-style:normal; font-weight:600}
 .say{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px}
 .say li::marker{color:var(--c)}
 

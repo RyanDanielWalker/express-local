@@ -41,7 +41,7 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
   const prompts = guide?.rehearse?.length ?? 0;
   const talking = (guide?.say?.length ?? 0) > 0;
   const gotcha = !!guide?.gotcha;
-  const puzzles = line.flows?.length ?? 0;
+  const puzzles = (line.flows?.length ?? 0) + (line.sorts?.length ?? 0);
 
   return [
     {

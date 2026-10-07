@@ -1,5 +1,5 @@
 import { shuffle } from '../lib/random';
-import type { Division, Flow, Line, Question, SaveData, Tier } from './types';
+import type { Division, Flow, Line, Question, SaveData, Sort, Tier } from './types';
 
 export const DIVISIONS: { id: Division; name: string; blurb: string }[] = [
   { id: 'algos', name: 'Algorithms', blurb: 'Be the algorithm. Click it out stop by stop.' },
@@ -28,6 +28,21 @@ export function pickFlows(pool: Flow[], tier: Tier, count = FLOWS_PER_RUN[tier])
 
 /** The step that should be clicked next, or null when the flow is finished. */
 export const nextStep = (flow: Flow, placed: string[]): string | null => flow.steps[placed.length] ?? null;
+
+/** The puzzle a quiz line ends on. */
+export type Puzzle = { kind: 'flow'; flow: Flow } | { kind: 'sort'; sort: Sort };
+
+/**
+ * Pick the one puzzle a quiz line ends on this run, from whatever it offers at
+ * this tier. Null when it offers none, and the run is questions only.
+ */
+export function pickPuzzle(line: Line, tier: Tier, rand: () => number = Math.random): Puzzle | null {
+  const pool: Puzzle[] = [
+    ...(line.flows ?? []).filter(f => f.t <= tier).map(flow => ({ kind: 'flow' as const, flow })),
+    ...(line.sorts ?? []).filter(s => s.t <= tier).map(sort => ({ kind: 'sort' as const, sort })),
+  ];
+  return pool.length ? pool[Math.floor(rand() * pool.length)] : null;
+}
 
 /**
  * Whether a miss should name the step you were looking for.
