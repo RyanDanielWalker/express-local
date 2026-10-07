@@ -1,18 +1,14 @@
 # Express & Local
 
-**Learn it by doing it.** A subway-themed drill for the things I keep having to re-learn: algorithms, NestJS, React and TypeScript. You don't read about BFS here, you *are* BFS, clicking stations in order while the queue fills up next to you. Then the stack lines drill the same way a real interview does, one question at a time, with the reason spelled out when you miss, and an out-loud round so you have said the answer before someone asks for it.
+**Learn it by doing it.** A subway-themed practice app for technical interviews, covering algorithms, NestJS, React and TypeScript. The algorithm lines are interactive: you play BFS by clicking stations in order while the queue fills up beside you. The stack lines drill the way an interview does: a question, a committed answer and the reasoning behind it, a puzzle that has to be worked out rather than recognized (on every NestJS line so far), and an out-loud round so the answer has been spoken before anyone asks for it.
 
-![The map: four divisions, a cram drill at the bottom](docs/map.png)
+![The map: four divisions, a Readiness score per division, and the cram drill](docs/map.png)
 
-## Why this exists
+## What it covers
 
-I spent months trying to make this stuff stick. Videos, articles, flashcards: I'd understand something on Tuesday and forget it by Friday. What finally worked was doing the thing by hand, over and over, until the moves were muscle memory. So I built a game around that, and then kept adding the parts of my actual job I wanted to be sharper on.
+32 lines across four divisions. Each division unlocks in its own order, so NestJS can be started without finishing every sorting line.
 
-## The map
-
-Lines are grouped into divisions. Each division unlocks in its own order, so you can start NestJS without finishing every sorting line.
-
-### Algorithms (lettered lines)
+### Algorithms
 
 Hand-built games. You play the algorithm step by step.
 
@@ -30,14 +26,16 @@ Hand-built games. You play the algorithm step by step.
 | **2** | Both Ends | Two pointers |
 | **J** | Shortest Route | Dijkstra |
 
-### NestJS (numbered lines)
+### NestJS
+
+Checked against the NestJS 12 documentation. Where a behavior depends on the version or the HTTP adapter, the content says which.
 
 | | Line | Topic |
 |---|---|---|
-| **1** | Main Line | Put the request lifecycle in order |
+| **1** | Main Line | The request lifecycle, in order |
 | **2** | Wiring Yard | DI, modules, "Nest can't resolve dependencies" |
 | **3** | Platform Signs | Controllers, routing, params, status codes |
-| **4** | Ticket Check | DTOs and the ValidationPipe |
+| **4** | Ticket Check | DTOs, ValidationPipe, and schema-first validation |
 | **5** | Dispatch Desk | Guard vs pipe vs interceptor vs filter vs middleware |
 | **6** | Fault Line | Exceptions, status codes, filters |
 | **7** | Tool Shed | What you implement: canActivate, transform, intercept, catch, use |
@@ -66,65 +64,88 @@ Hand-built games. You play the algorithm step by step.
 | **Y** | Shape Yard | Structural typing, interfaces vs types |
 | **Z** | Typed Components | Props, events, refs and hooks in React |
 
-## What keeps you coming back
+## How a ride works
 
-- **Three tiers per line.** Local, Express, Rush Hour. Inputs get bigger, question pools get deeper, and Rush Hour takes the helpers away and adds a par time.
-- **Spaced repetition.** Clearing a line schedules a review (1, 3, 7, 14, then 30 days) with a Leitner box. Nail the review and the gap grows, stumble and it shrinks.
-- **Cram drill.** Twelve mixed questions from everything you have opened, five hearts, no tiers, filterable by division. Built for the morning of an interview.
-- **Weak spots come back.** Every question is tracked by id, so the ones you have missed are flagged as shaky, weighted into cram drills, and drillable on their own from the line or the map.
-- **Say it out loud.** The stack lines have rehearsal prompts: answer in full sentences, then check yourself against the model answer. Anything you call shaky is asked first next time. Reading an answer and saying one are different skills, and interviews test the second.
-- **A field guide on every line.** Plain English, vocabulary, real code, and for the stack lines, the talking points to say out loud plus the gotcha people trip on.
-- **Streaks, a daily ride, badges and personal bests.**
+- **Three tiers per line.** Local, Express and Rush Hour ask up to 6, 8 and 10 questions. Rush Hour turns the helper panels off and adds a par time.
+- **NestJS runs end on a puzzle.** After the questions comes a "last stop": a sort (put each job or signature in the right box) or a flow (put the steps of a process in order). Cards are named by what they do, never by their answer, and flows include decoy steps that do not happen in that scenario. Runs that end on a puzzle get a fourth heart. React and TypeScript get puzzles next.
+- **A miss says it was a miss, nothing more.** The explanation comes after the answer is committed, and in puzzles at the end of the run. On Local, a second miss on the same step reveals it, so nobody gets stuck.
+- **You advance, not a timer.** Explanations stay on screen until you continue, and the clock holds while you read. Number keys pick an option or a box, and space continues.
+
+![A sort puzzle at the end of a run: jobs dropped into the building block that does them](docs/sort.png)
+
+## Staying sharp
+
+- **Readiness.** The headline number is a 0 to 100 score per division, built from what has been cleared, at which tier, how far along its review schedule, and how much of the question pool is solid. It falls on its own as reviews go overdue, so it reflects what would come back today rather than what was done once.
+- **Spaced repetition.** Clearing a line schedules a review at 1, 3, 7, 14, then 30 days, using a Leitner box. An on-time review with at most one mistake grows the gap; a rougher one shrinks it.
+- **Shaky questions come back.** Every question is tracked. Missed ones are flagged, weighted into cram drills, and drillable on their own.
+- **Say it out loud.** Every stack line has rehearsal prompts: answer in full sentences, then compare against a model answer. Anything marked shaky is asked first next time.
+- **Cram drill.** Twelve mixed questions from every opened line, five hearts, filterable by division.
+- **Field guide on every line.** Plain-English explanation, vocabulary, real code, talking points, and the common mistake.
+- **XP, ranks, streaks, a daily ride, badges and personal bests.** XP is a lifetime total with ten ranks. Derailing costs 50 XP but never drops a rank, and work on a weak line pays a bonus.
 
 ![Mid-ride on the BFS line](docs/bfs.png)
 ![Dijkstra in dark mode](docs/dijkstra-dark.png)
 
-## Tech
+## Design decisions
 
-- **React 19 + TypeScript + Vite.** No backend. Progress lives in `localStorage`, with a copy/paste save code for moving between browsers.
-- **Game logic is pure.** Algorithms are small state machines in `src/algorithms/`: the UI asks what the right move is, sends the player's move, and renders whatever state comes back. React never decides what's correct.
-- **Content is data.** Quiz and flow lines are entries in `src/data/`, so adding a topic is writing questions, not writing components.
-- **Scoring is pure too.** `finishTrip()` and `finishCram()` take a save plus a run and return a new save with everything the results screen shows.
-- **Tested with Vitest.** The tests play each algorithm perfectly and check the result against a reference, cover progression (streaks, tiers, review scheduling, badges, save migration), validate the content (every answer exists among its options, no em dashes in player-facing copy), and server-render the results screens for every line.
-- **Accessible by default.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced motion, light and dark themes.
+A few choices that shape how the app teaches. [ROADMAP.md](ROADMAP.md) has the full list of principles and how each was arrived at.
+
+- **Readiness over XP.** A total that only goes up measures time spent, and it topped out after a fraction of the content. Readiness is a state that can drop, which is what makes it useful the week before an interview.
+- **Never answer the question for the player.** Naming the correct step after a wrong click turned the most useful moment in a puzzle into reading, and made a wrong click the cheapest hint in the app.
+- **Measure the content, not just the code.** An audit found the correct answer was the longest option in 83% of questions, so "pick the longest" beat knowing the material. Option lengths are now checked per line, sort cards cannot be named after their own box, and the study notes stay off the play screen.
+- **Content is checked against current docs.** NestJS 12 changed defaults and added options after the first lines were written. Claims that depend on a version or an adapter say so.
+
+## Engineering
+
+- **React 19, TypeScript and Vite.** No backend. Progress is saved in `localStorage`, with a copy-and-paste save code for moving between browsers.
+- **Game logic is pure.** Algorithms are small state machines in `src/algorithms/`: the UI asks for the right move, sends the player's move, and renders the state that comes back. Components never decide what is correct.
+- **Content is data.** Quiz lines, flows and sorts are entries in `src/data/`, so adding a topic means writing questions, not components.
+- **Scoring is pure.** `finishTrip()`, `finishCram()`, `finishRehearsal()` and `finishDerail()` take a save and a run and return a new save plus everything the results screen shows. Readiness is computed from the save, never stored.
+- **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier, three rehearsal prompts, talking points and a gotcha in its field guide, a puzzle beyond recognition, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS) fail the build if any line slips.
+- **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration), validate every piece of content, and render the results screen for every line.
+- **Accessible.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced-motion support, and light and dark themes.
 
 ```
 src/
-  algorithms/   pure algorithm logic + tests
-  engine/       save data, progression, scoring, question pools + tests
-  data/         lines.ts + guide.ts (algorithms), nest.ts, react.ts, index.ts
-  games/        one component per algorithm line, plus QuizGame and FlowGame
-  components/   screens: map, intro, play, quiz, results, cram band, badges
+  algorithms/   pure algorithm logic (state machines) and tests
+  engine/       save data, progression, scoring, readiness, question pools, and tests
+  data/         content per division, the quality bar, and content tests
+  games/        one component per algorithm line, plus QuizGame, FlowGame, SortGame and QuizRun
+  components/   screens: header, map, intro, play, results, rehearsal, cram band, badges
+  hooks/        useKeys, useTimers
+  lib/          small helpers
 ```
 
-## Run it
+## Running locally
 
-Needs Node 20.19 or newer.
+Requires Node.js 20.19+ or 22.12+.
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # unit tests
-npm run build      # typecheck + production build into dist/
+npm test           # unit and content tests
+npm run bar        # where each line stands against the quality bar
+npm run build      # typecheck and production build into dist/
 ```
 
 ## Adding a line
 
-1. Add the id to `LineId` in `src/engine/types.ts`.
-2. Add the line to its division's data file (`src/data/nest.ts`, `react.ts`, `typescript.ts`, or `lines.ts`) with `division`, `kind`, copy and content.
-3. Add its field guide entry in the same file.
-4. For a `kind: 'game'` line, write the pure logic in `src/algorithms/` with tests and register the component in `src/games/index.ts`. Quiz and flow lines need no component.
+1. Add the id to the division's id type in `src/engine/types.ts`.
+2. Add the line and its field guide entry to the division's data file in `src/data/` (`lines.ts` and `guide.ts`, `nest.ts`, `react.ts` or `typescript.ts`).
+3. Give it at least one flow or sort, and three rehearsal prompts.
+4. Run `npm test` and `npm run bar`. A line in a finished division has to clear the bar before the tests pass.
+5. A `kind: 'game'` line also needs pure logic with tests in `src/algorithms/` and a component registered in `src/games/index.ts`.
 
-Adding a whole division is the same, plus an entry in `DIVISIONS` in `src/engine/questions.ts`.
+A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-Four divisions is enough for now. The work is making the stack divisions deep enough to carry an interview, NestJS first. [ROADMAP.md](ROADMAP.md) has the whole board, including the bar a line has to clear to count as finished.
+The current focus is bringing TypeScript, then React, up to the same bar as NestJS. [ROADMAP.md](ROADMAP.md) has the full board.
 
-- [x] **Finish NestJS:** nine lines, every one clearing the bar, and the test suite now defends it
-- [x] **A matching drill:** sort jobs and signatures into the right box, because naming the tool is a different skill from defining it
-- [ ] **Then TypeScript, then React,** to the same bar
-- [ ] **Reorganize the page:** a Today band, collapsible divisions, a play mode that takes over the screen
+- [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite
+- [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
+- [ ] **TypeScript, then React,** to the same bar
+- [ ] **Reorganize the page:** a Today band, collapsible divisions, and a play mode that takes over the screen
 - [ ] **Scenario mode:** read a real-world situation, pick the right tool
 
 ## Credits
