@@ -1500,7 +1500,177 @@ findOne(@Param('id') id: number) {}`,
       },
     ],
   },
-
+  {
+    id: 'test',
+    division: 'nest',
+    kind: 'quiz',
+    bullet: '9',
+    color: '--slate',
+    short: 'Testing',
+    name: 'Test Track',
+    topic: 'Testing modules, mocks and e2e',
+    pitch: 'Every Nest interview gets to testing, and the follow-up is always "how would you test that?" The answer is mostly one tool: a testing module that builds just enough of your app, with the parts you do not want swapped for fakes.',
+    rules: [
+      'Know what the testing module gives you.',
+      'Decide what to fake and what to keep real.',
+      'Tell a unit test from an end-to-end one.',
+    ],
+    hook: 'Test.createTestingModule({...}).compile() builds a small app. overrideProvider swaps a dependency. get() pulls out what you are testing. createNestApplication() plus supertest is end to end.',
+    drill: 'Ask what is under test and what is in the way. Build only what the test needs, fake whatever talks to the outside world, and keep the thing you are testing real.',
+    par: 100,
+    questions: [
+      {
+        t: 1,
+        q: 'What does Test.createTestingModule() take?',
+        opts: [
+          'The same metadata you would give @Module()',
+          'A path to the module file it should load first',
+          'The list of spec files it should run',
+        ],
+        a: 'The same metadata you would give @Module()',
+        why: 'It takes a module metadata object, controllers, providers and imports, exactly like @Module(), and returns a builder. Calling compile() on that gives you a TestingModule.',
+      },
+      {
+        t: 1,
+        q: 'OrdersService calls PaymentsService, which calls Stripe. You are unit testing OrdersService. What do you fake?',
+        opts: [
+          'PaymentsService',
+          'OrdersService',
+          'Both, to be safe',
+        ],
+        a: 'PaymentsService',
+        why: 'Keep the thing under test real and fake what it talks to. Faking OrdersService would test nothing, and faking PaymentsService keeps Stripe out of it without caring how payments work inside.',
+      },
+      {
+        t: 1,
+        q: 'After compile(), how do you get the instance you want to test?',
+        opts: [
+          'moduleRef.get(OrdersService)',
+          'new OrdersService()',
+          'moduleRef.create(OrdersService)',
+        ],
+        a: 'moduleRef.get(OrdersService)',
+        why: 'get() returns the instance DI built, with its dependencies, real or overridden, already injected. new OrdersService() skips DI, so you would be wiring dependencies by hand, which is exactly what the testing module saves you from.',
+      },
+      {
+        t: 1,
+        q: 'What does overrideProvider(X).useValue(fake) do?',
+        opts: [
+          'Injects fake wherever X was asked for',
+          'Adds fake as a second copy of X',
+          'Replaces X, but only inside this one test file',
+        ],
+        a: 'Injects fake wherever X was asked for',
+        why: 'Everything in the testing module that injects X gets your fake instead. useClass and useFactory work the same way when a plain object is not enough.',
+      },
+      {
+        t: 1,
+        q: 'What is the difference between a unit test and an e2e test in Nest?',
+        opts: [
+          'One class with fakes, versus real HTTP through the app',
+          'Fast tests, versus slower tests that run against production',
+          'Tests you write, versus tests the CLI generates',
+        ],
+        a: 'One class with fakes, versus real HTTP through the app',
+        why: 'A unit test builds one class with its dependencies faked and calls its methods directly. An e2e test boots the app, sends real HTTP requests with supertest, and checks the responses.',
+      },
+      {
+        t: 1,
+        q: 'How does an e2e test send a request to your app?',
+        opts: [
+          'request(app.getHttpServer()).get("/cats")',
+          'app.get("/cats") on the Nest app instance',
+          'fetch("http://localhost:3000/cats")',
+        ],
+        a: 'request(app.getHttpServer()).get("/cats")',
+        why: 'supertest wraps the underlying HTTP server, so no port needs to be open. app.get() does exist, but it pulls a provider out of the container. It is not an HTTP GET.',
+      },
+      {
+        t: 2,
+        q: 'A route sits behind a JWT guard. In an e2e test of what the route returns, what is the clean way past the guard?',
+        opts: [
+          'overrideGuard with a fake that returns true',
+          'Comment out @UseGuards while the test runs',
+          'Mark the route @Public() for the test suite',
+        ],
+        a: 'overrideGuard with a fake that returns true',
+        why: 'overrideGuard(JwtAuthGuard).useValue({ canActivate: () => true }). The guard gets its own test, and this one stays about the route. Editing the code under test to make a test pass means you are no longer testing that code.',
+      },
+      {
+        t: 2,
+        q: 'New Nest projects default to Vitest. Your team\'s repo uses Jest. What changes about Test.createTestingModule?',
+        opts: [
+          'Nothing. Nest\'s testing API is the same',
+          'You import Test from a different package',
+          'Only the e2e helpers work under Jest',
+        ],
+        a: 'Nothing. Nest\'s testing API is the same',
+        why: 'The docs are explicit that Nest\'s testing APIs do not depend on a runner. What changes is the mock syntax, vi.fn() versus jest.fn(), and the config file. Worth knowing, since plenty of existing codebases are still on Jest.',
+      },
+      {
+        t: 2,
+        q: 'What does useMocker() on the testing module builder do?',
+        opts: [
+          'Creates a mock for any dependency you did not provide',
+          'Replaces every provider in the module with an auto mock',
+          'Records calls so you can assert on them later',
+        ],
+        a: 'Creates a mock for any dependency you did not provide',
+        why: 'Instead of listing a fake for every dependency, useMocker is called with each missing token and returns a mock for it. Handy for classes with many collaborators you do not care about in this test.',
+      },
+      {
+        t: 3,
+        q: 'A provider is request-scoped. How do you get it from the testing module?',
+        opts: [
+          'await moduleRef.resolve(X)',
+          'moduleRef.get(X)',
+          'moduleRef.get(X, { scope: true })',
+        ],
+        a: 'await moduleRef.resolve(X)',
+        why: 'get() is for singletons. Scoped and transient providers are created per context, so you ask for one with resolve(), which is async.',
+      },
+      {
+        t: 3,
+        q: 'Why call app.close() in afterAll in an e2e test?',
+        opts: [
+          'Open handles keep the test runner from exiting',
+          'It resets the database between test files',
+          'It writes a snapshot of every response',
+        ],
+        a: 'Open handles keep the test runner from exiting',
+        why: 'An app that is never closed leaves database connections, timers and the HTTP server open, and the runner hangs or warns about open handles. Closing it runs your shutdown hooks too.',
+      },
+      {
+        t: 3,
+        q: 'You want to unit test RolesGuard. What do you hand canActivate()?',
+        opts: [
+          'A fake ExecutionContext with the request you want',
+          'A real HTTP request sent with supertest',
+          'Nothing. Guards can only be tested end to end',
+        ],
+        a: 'A fake ExecutionContext with the request you want',
+        why: 'A guard is a class with one method. Build an object shaped like an ExecutionContext, with switchToHttp().getRequest() returning your request and getHandler() and getClass() for metadata, and assert on the boolean.',
+      },
+    ],
+    flows: [
+      {
+        t: 1,
+        title: 'Writing an e2e test for GET /orders, with the payment provider faked',
+        steps: [
+          'Test.createTestingModule({ imports: [AppModule] })',
+          'overrideProvider(PaymentsService)',
+          'compile()',
+          'createNestApplication()',
+          'app.init()',
+          'request(app.getHttpServer()).get("/orders")',
+          'Assert on the status and body',
+          'app.close()',
+        ],
+        decoys: ['app.listen(3000)', 'moduleRef.get(OrdersController)'],
+        note: 'Build the module, swap what touches the outside world, compile, then turn it into an app and init it. Overrides belong on the builder, so they come before compile(). supertest talks to the server directly, so you never need app.listen() and a real port. Close it at the end, or the runner hangs.',
+      },
+    ],
+  },
 ];
 
 /** Field guide for the NestJS division, including interview talking points. */
@@ -1996,6 +2166,58 @@ export class JwtAuthGuard implements CanActivate {
       {
         prompt: 'What is the difference between a 401 and a 403, and where does each come from?',
         answer: '401 means we do not know who you are: no token, a bad one or an expired one, and the auth guard throws UnauthorizedException. 403 means we know exactly who you are and the answer is no, like a missing role, which is what a guard returning false gives you.',
+      },
+    ],
+  },
+  test: {
+    plain: 'Nest gives you one tool for testing: a testing module. You describe it like any module, with the providers and controllers you need, swap out anything you do not want to run for real, and compile it. From there you either pull out one class and call its methods, which is a unit test, or turn the whole thing into an app and send it real HTTP requests with supertest, which is an end-to-end test. The runner barely matters: new projects default to Vitest, plenty of codebases use Jest, and the Nest side is identical.',
+    words: [
+      ['Test.createTestingModule', 'Takes @Module() style metadata and returns a builder. compile() gives you a TestingModule.'],
+      ['overrideProvider', 'Swaps a real dependency for a fake with useValue, useClass or useFactory. overrideGuard and friends do the same for the building blocks.'],
+      ['moduleRef.get', 'Pulls a fully wired instance out of the testing module. Use resolve() for request-scoped ones.'],
+      ['supertest', 'Sends real HTTP requests to app.getHttpServer() without opening a port.'],
+      ['e2e test', 'Boots the app and tests it over HTTP, the way a client would.'],
+    ],
+    code: {
+      label: 'a unit test and an e2e test, side by side',
+      snippet: `// unit: one class, its dependencies faked
+const moduleRef = await Test.createTestingModule({
+  providers: [OrdersService, PaymentsService],
+})
+  .overrideProvider(PaymentsService)
+  .useValue({ charge: vi.fn().mockResolvedValue({ ok: true }) })
+  .compile();
+
+const orders = moduleRef.get(OrdersService);
+await expect(orders.place(cart)).resolves.toMatchObject({ status: 'paid' });
+
+// e2e: the whole app, over HTTP
+const app = (await Test.createTestingModule({ imports: [AppModule] }).compile())
+  .createNestApplication();
+await app.init();
+await request(app.getHttpServer()).get('/orders').expect(200);
+await app.close();`,
+      note: 'vi.fn() is Vitest. In a Jest codebase it is jest.fn(), and nothing else here changes.',
+    },
+    say: [
+      'I build a testing module with only what the test needs, override anything that touches the outside world, and pull the class under test out with moduleRef.get.',
+      'The thing I am testing stays real. Its edges, databases, HTTP calls and queues, get faked.',
+      'E2E tests boot the app with createNestApplication and hit it with supertest through app.getHttpServer, so no port is needed.',
+      'Nest\'s testing API does not care about the runner. New projects default to Vitest, plenty are on Jest, and only the mock syntax changes.',
+    ],
+    gotcha: 'overrideProvider lives on the builder, so it has to be chained before compile(). Once the module is compiled the graph is built, and there is nothing left to override.',
+    rehearse: [
+      {
+        prompt: 'How do you unit test a service that depends on a repository?',
+        answer: 'I build a testing module with the service and give the repository a fake, through overrideProvider or a provider with useValue, usually an object of mock functions. Then I get the service with moduleRef.get and call its methods directly, asserting on what comes back and on what the fake was called with. The service is real, everything it talks to is not.',
+      },
+      {
+        prompt: 'Walk me through an e2e test in Nest.',
+        answer: 'createTestingModule importing AppModule, overrideProvider for anything that talks to the outside world, compile, then createNestApplication and init. I send requests with supertest against app.getHttpServer, assert on status and body, and close the app in afterAll so the runner can exit.',
+      },
+      {
+        prompt: 'What do you mock, and what do you leave real?',
+        answer: 'I keep the thing under test real and fake its edges: databases, HTTP calls, queues, the clock. Mocking the code I am testing proves nothing. In e2e tests I keep as much real as I can and only swap what I cannot run in a test, like a payment provider.',
       },
     ],
   },
