@@ -116,13 +116,13 @@ Adding a whole division is the same, plus an entry in `DIVISIONS` in `src/engine
 
 ## Roadmap
 
-The short version. [ROADMAP.md](ROADMAP.md) has the whole board, including the ideas that are still arguments with myself.
+Four divisions is enough for now. The work is making the stack divisions deep enough to carry an interview, NestJS first. [ROADMAP.md](ROADMAP.md) has the whole board, including the bar a line has to clear to count as finished.
 
-- [ ] **Reorganize the page:** a Today band, collapsible divisions, and a play mode that takes over the screen
-- [ ] **Scenario mode:** read a real-world situation, pick the right algorithm or the right Nest building block
-- [ ] **Engineer's Cab:** after Rush Hour, write the algorithm yourself against in-browser tests
-- [ ] More lines: SQL, testing, GraphQL, LRU cache, heaps, Git as a train yard
-- [ ] A NestJS and Postgres backend, if cross-device sync earns its keep
+- [ ] **Finish NestJS:** fill out tier 1, a line on the API you actually type, a testing line, an auth line
+- [ ] **A matching drill:** put real class names in the right bucket, because naming `ValidationPipe` is a different skill from defining a pipe
+- [ ] **Then TypeScript, then React,** to the same bar
+- [ ] **Reorganize the page:** a Today band, collapsible divisions, a play mode that takes over the screen
+- [ ] **Scenario mode:** read a real-world situation, pick the right tool
 
 ## Credits
 

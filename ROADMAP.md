@@ -2,60 +2,83 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 29 lines across 4 divisions, 72 tests, no backend.
+Status: 29 lines across 4 divisions, 74 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS, then TypeScript, then React.** No new divisions until they clear the bar below.
 
-## Next up
+## The bar
 
-The reorganization. The page currently shows everything at once no matter what you're doing, which at 29 lines is too much.
+A line is **done** when:
 
-- [ ] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page. Cheapest change, biggest change in feel.
-- [ ] **A Today band.** Top of the page answers "what should I do right now": reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions sit below it collapsed, each with its readiness bar, and you expand the one you're working on.
-- [ ] **Badges become a count that opens a panel.** Sixteen permanent tiles is a lot of pixels for something you look at twice a week.
-- [ ] **Tabs on the intro screen.** Ride / Field guide / Say it out loud. Right now it's one long scroll and the out-loud band gets buried.
+1. It can fill a full run at every tier it offers: 6 questions on Local, 8 on Express, 10 on Rush Hour
+2. It has at least three rehearsal prompts, written as a spoken answer
+3. Its field guide has the talking points and the gotcha
+4. It has at least one puzzle where order or judgment matters, not just recognition
+5. It passes the content tests: answers not guessable by length, no em dashes, every option set clean
 
-## After that
+A division is **done** when every line clears that, and the division could carry an interview on its own topic. That second half is the one that adds lines rather than questions: NestJS without testing or auth is not a division that could carry a NestJS interview, however deep its other six lines get.
 
-- [ ] **A router.** Back button currently dumps you out of the app mid-ride, and you can't link anyone to a line. `/nest/life` should be a URL. Either react-router (what jobs use) or about 40 lines of hash router by hand (better interview story).
-- [ ] **Split `App.tsx`.** It now owns the screen machine, cram pool assembly, drill line construction and answer recording. Pull out `useRun` and `useDrills`.
-- [ ] **CI on push.** GitHub Actions running typecheck, tests and build. Small, and a green badge on the repo reads well.
-- [ ] **Deploy it.** A live URL makes it a portfolio piece instead of a repo.
-- [ ] **Keyboard shortcuts.** 1/2/3 to pick a quiz option, Enter to continue. Never got done.
+Nothing here is measured by vibes. An `npm run audit` that prints the bar per line is the first thing to build, so "is NestJS done" has an answer.
 
-## Content
+## Now: NestJS
 
-Lines are data, so most of this is writing rather than building.
+- [ ] **Audit script.** Print every line against the five checks. Build it first so the rest of this is measurable.
+- [ ] **Fill tier 1.** Nest lines carry 3 or 4 tier 1 questions against a run of 6, so about 13 new ones across the six lines.
+- [ ] **Rehearsal to three prompts a line.** Currently two.
+- [ ] **A "what do you actually type" line.** The whole division teaches concepts and never the API. The decorator you reach for, the interface you implement, the method you write, and real examples from the framework: `ValidationPipe`, `ParseIntPipe`, `AuthGuard`, `RolesGuard`, `ClassSerializerInterceptor`, `CacheInterceptor`, helmet and cors as middleware, `HttpExceptionFilter`. This is the gap behind "can you give me an example of a pipe".
+- [ ] **A matching mechanic (`kind: 'sort'`).** Buckets across the top, real class and decorator names in a tray, put each one where it belongs. A wrong drop teaches what that thing actually is. Generalizes beyond Nest: React hooks by what they are for, TypeScript utilities by what they operate on.
+- [ ] **A testing line.** `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
+- [ ] **An auth line.** Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
+- [ ] **More flows.** One flow line in the whole app is one too few. DI resolution and the validation pipeline both have an order worth drilling.
 
-- [ ] **Scenario mode.** Read a real situation, pick the right algorithm or the right Nest building block. Tabled early on and still the best idea in this file.
-- [ ] **Engineer's Cab.** After Rush Hour, write the algorithm yourself against in-browser tests.
-- [ ] **SQL / Postgres division.** Joins, indexes, N+1, transactions, what an EXPLAIN is telling you. Directly relevant to the jobs being targeted.
-- [ ] **Testing division.** What to test, mocking, `overrideProvider` in Nest, testing a component without testing React.
-- [ ] **More NestJS.** Auth and JWT, TypeORM or Prisma, config and env, queues.
-- [ ] **More React.** Forms, data fetching, error boundaries, accessibility.
-- [ ] **More algorithms.** LRU cache, heaps, linked lists, topological sort, sliding window.
-- [ ] **GraphQL.** Schema design, resolvers, the N+1 problem again from the other side.
-- [ ] **Git as a train yard.** Rebase vs merge, what a detached HEAD actually is.
+## Then: TypeScript
 
-## Known gaps
+- [ ] Fill tier 1: about 18 questions across the six lines
+- [ ] Rehearsal to three prompts a line
+- [ ] A sort line: utility types by what they operate on, object keys vs union members
+- [ ] A judgment puzzle per line, so it is not six recognition quizzes in a row
 
-- [ ] **Every quiz line is short at tier 1.** A Local run is meant to ask 6 questions, but no line has more than 4 questions tagged `t: 1`, so Local asks 2 to 4 and clearing it is thin evidence of knowing anything. Tier 2 asks 8 against pools of 6 to 9, tier 3 asks 10 against 8 to 12. The fix is mostly writing: about three more tier 1 questions per line, roughly 50 in all. A test should fail a line that cannot fill a run at any tier.
+## Then: React
+
+- [ ] Fill tier 1: about 19 questions across the six lines
+- [ ] Rehearsal to three prompts a line
+- [ ] A sort line: hooks by what they are for, and which ones are allowed where
+- [ ] Likely missing lines: forms and controlled inputs, data fetching and error boundaries
+
+## Parked until those are done
+
+- **Algorithms question pools.** Eleven lines, no question pools, so they contribute almost nothing to cram and their readiness has no recall component. Worth fixing, explicitly not now.
+- **New divisions.** SQL and Postgres, GraphQL, Git as a train yard.
+- **Engineer's Cab.** After Rush Hour, write the algorithm yourself against in-browser tests.
+- **Scenario mode.** Read a real situation, pick the right tool. Still the best idea in this file, and it needs the content above to draw from.
+
+## Interface
+
+Orthogonal to the content work, and the thing to do when you want a break from writing questions.
+
+- [ ] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page.
+- [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar.
+- [ ] **Badges become a count that opens a panel.**
+- [ ] **Tabs on the intro screen.** Ride / Field guide / Say it out loud.
+- [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
+- [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
+- [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
 
 ## Engine ideas
 
-- [ ] **Diminishing returns.** The fourth ride of the same line in one day should pay less. Needs a new save field (rides per line per day), so it was left out rather than quietly changing the save format.
 - [ ] **Interview mode.** Five random rehearsal prompts across divisions, timed, no retries. The closest thing to the real event.
 - [ ] **Study plan.** Give it a date, get a daily plan that walks readiness up to where it needs to be by then.
-- [ ] **"Stuck? Show me."** A voluntary hint button that costs a heart on purpose and marks that step shaky so it comes back. Deciding you are stuck is different from being handed the answer by accident.
-- [ ] **Weekly report.** What decayed since last week, what to drill, nothing else.
+- [ ] **"Stuck? Show me."** A voluntary hint that costs a heart on purpose and marks that step shaky.
+- [ ] **Diminishing returns.** The fourth ride of the same line in one day should pay less. Needs a new save field.
+- [ ] **Weekly report.** What decayed, what to drill, nothing else.
 
 ## The fork
 
 Whether this gets a backend.
 
-**For:** the roles being targeted are NestJS and Postgres, and "this is the tool I built to prepare for this interview, and here's the Nest API behind it" is a strong artifact. Cross-device sync would also mean phone and laptop share progress, which a save code does not really solve.
+**For:** the roles being targeted are NestJS and Postgres, and "this is the tool I built to prepare for this interview, and here is the Nest API behind it" is a strong artifact. Cross-device sync would also mean phone and laptop share progress, which a save code does not really solve.
 
-**Against:** it stops being a static file you can open anywhere, and it's a weekend rather than an afternoon.
+**Against:** it stops being a static file you can open anywhere, and it is a weekend rather than an afternoon.
 
-**Call:** keep it in the back pocket until the frontend reorganization is done. A dashboard with nothing behind it is a better demo than a sync API behind a cluttered map.
+**Call:** after the content bar is met. A thin app with a sync API is still a thin app.
 
 ## Principles
 
@@ -63,12 +86,14 @@ Learned the hard way, mostly by getting them wrong first.
 
 - **Measure, don't eyeball.** The correct answer was the longest option in 83% of questions before anyone counted. A test enforces it now.
 - **A hint panel must never contain the answer.** The lifecycle hook was printed twice on screen while you solved the lifecycle puzzle.
-- **Color means one thing everywhere.** Red is wrong, green is right, the line color is identity. Correct answers tinted with a red line color read as mistakes.
-- **The headline number should be a state you can lose, not a total you accumulate.** XP measures time spent. Readiness measures what you'd recall today.
+- **Color means one thing everywhere.** Red is wrong, green is right, the line color is identity.
+- **The headline number should be a state you can lose, not a total you accumulate.** XP measures time spent. Readiness measures what you would recall today.
 - **Pay for the weak stuff.** If replaying a mastered line is the best XP on the board, the scoring is teaching the wrong habit.
-- **Content is data.** Lines live in `src/data/` and are validated by tests, so adding a topic is writing questions, not writing components.
-- **Never answer the question for them.** Feedback on a miss should say that it was a miss, not what the answer was. The moment right after you find a gap in your own model is the one worth spending on retrieval, and a hint that arrives automatically is a hint you did not choose.
+- **Content is data.** Lines live in `src/data/`, validated by tests, so adding a topic is writing questions and not writing components.
+- **Never answer the question for them.** Feedback on a miss should say that it was a miss, not what the answer was.
 - **Recognition is not recall, and recall is not speech.** Hence shaky drills and out-loud rehearsal. The interview tests the third one.
+- **Concepts without the API is half a lesson.** Knowing a pipe validates input and not being able to name `ValidationPipe` is the gap between having read the docs and having used the thing.
+- **Depth before breadth.** A division that cannot carry an interview on its own topic is not finished, and a new division does not fix it.
 - **No em dashes.**
 
 ## Shipped
@@ -87,3 +112,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-06** Readiness replaced XP as the headline, ranks re-pegged, derailing costs XP
 - **2026-10-06** Flow misses stopped naming the answer, with hints that fade by tier
 - **2026-10-06** Drills advance on a click, not a timer, with keyboard shortcuts and a clock that holds while you read
+- **2026-10-07** Roadmap restructured around a done bar, depth before breadth
