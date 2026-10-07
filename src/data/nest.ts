@@ -1158,6 +1158,177 @@ findOne(@Param('id') id: number) {}`,
       },
     ],
   },
+  {
+    id: 'api',
+    division: 'nest',
+    kind: 'quiz',
+    bullet: '7',
+    color: '--teal',
+    short: 'The API',
+    name: 'Tool Shed',
+    topic: 'What you implement: the interface, the method, how you bind it',
+    pitch: 'Knowing a guard decides yes or no is half an answer. The other half is what you type: the interface you implement, the method Nest calls, what it hands you, and how you hang it on a route. This line is that other half.',
+    rules: [
+      'Pick what you would actually write.',
+      'Signatures and return types matter here.',
+      'Binding is part of the answer.',
+    ],
+    hook: 'canActivate returns a boolean. transform returns the new value. intercept returns next.handle(), piped. catch writes the response. use calls next().',
+    drill: 'Ask what Nest hands the method and what it expects back. Is it deciding? Changing one value? Wrapping the handler? Holding an error? Holding the raw req, res and next?',
+    par: 95,
+    questions: [
+      {
+        t: 1,
+        q: 'What does canActivate() return?',
+        opts: [
+          'A boolean, or a Promise or Observable of one',
+          'The request object, modified or as it came in',
+          'Nothing, since rejecting is done by throwing',
+        ],
+        a: 'A boolean, or a Promise or Observable of one',
+        why: 'canActivate(context: ExecutionContext) returns boolean | Promise<boolean> | Observable<boolean>. True lets the request through. False makes Nest throw ForbiddenException, a 403. Throw UnauthorizedException yourself when you want a 401.',
+      },
+      {
+        t: 1,
+        q: 'Your interceptor never calls next.handle(). What happens?',
+        opts: [
+          'The route handler never runs',
+          'Nest calls the handler for you',
+          'The request fails with a 500',
+        ],
+        a: 'The route handler never runs',
+        why: 'next.handle() is the handler. Not calling it skips the handler entirely, which is exactly how a cache interceptor answers from memory. Forgetting it by accident is a classic bug.',
+      },
+      {
+        t: 1,
+        q: 'A class middleware never calls next() and never sends a response. What happens?',
+        opts: [
+          'The request hangs until it times out',
+          'Nest moves on and runs the guards anyway',
+          'Nest answers with a 404 by default',
+        ],
+        a: 'The request hangs until it times out',
+        why: 'Middleware has to either end the response or call next(). Do neither and the request is left hanging, which is how the Nest docs put it.',
+      },
+      {
+        t: 1,
+        q: 'Which method does a pipe implement?',
+        opts: [
+          'transform(value, metadata)',
+          'validate(value, metadata)',
+          'parse(value, argumentMetadata)',
+        ],
+        a: 'transform(value, metadata)',
+        why: 'PipeTransform has one method, transform(value, metadata). value is the argument on its way in, and metadata says where it came from (body, query, param) and its type. Whatever you return is what the handler receives. Throwing rejects it.',
+      },
+      {
+        t: 1,
+        q: 'How do you put RolesGuard on every route in one controller?',
+        opts: [
+          '@UseGuards(RolesGuard) on the class',
+          '@Guard(RolesGuard) above the class name',
+          'List it in the module providers',
+        ],
+        a: '@UseGuards(RolesGuard) on the class',
+        why: '@UseGuards on the class covers every route in it, on a method it covers that one route. The others follow the same pattern: @UsePipes, @UseInterceptors, @UseFilters.',
+      },
+      {
+        t: 1,
+        q: 'Where do you register class middleware for the cats routes?',
+        opts: [
+          'In configure(), with consumer.apply().forRoutes(\'cats\')',
+          'In @Module({ middleware: [LoggerMiddleware] })',
+          'With @UseMiddleware(LoggerMiddleware) on the controller',
+        ],
+        a: 'In configure(), with consumer.apply().forRoutes(\'cats\')',
+        why: 'Middleware is the odd one out: no decorator and no @Module key. The module implements NestModule and wires it up in configure(consumer: MiddlewareConsumer). Plain app.use() in main.ts works too, but cannot use DI.',
+      },
+      {
+        t: 2,
+        q: 'What does intercept() return?',
+        opts: [
+          'An Observable, usually next.handle() piped',
+          'The plain value the handler returned',
+          'A boolean saying whether the handler may run',
+        ],
+        a: 'An Observable, usually next.handle() piped',
+        why: 'intercept(context, next) returns an Observable. next.handle() gives you the handler result as a stream, and RxJS operators shape it: tap to look, map to change, catchError to recover. That is why interceptors feel different from the rest.',
+      },
+      {
+        t: 2,
+        q: 'Inside an exception filter, how do you get the Express response object?',
+        opts: [
+          'host.switchToHttp().getResponse()',
+          'exception.getResponse() from the error',
+          'this.response, injected by Nest',
+        ],
+        a: 'host.switchToHttp().getResponse()',
+        why: 'catch(exception, host) gets an ArgumentsHost, which knows the transport, so you switch to HTTP and ask for the response. exception.getResponse() is the trap: on an HttpException it returns the error body, not the Express response.',
+      },
+      {
+        t: 2,
+        q: 'Why register a global guard with APP_GUARD instead of app.useGlobalGuards()?',
+        opts: [
+          'APP_GUARD lets the guard inject dependencies',
+          'useGlobalGuards only applies inside one module',
+          'APP_GUARD runs before any middleware',
+        ],
+        a: 'APP_GUARD lets the guard inject dependencies',
+        why: 'useGlobalGuards(new X()) in main.ts takes an instance you built yourself, outside any module, so nothing gets injected. As an APP_GUARD provider it is built by DI and can inject Reflector or a service. APP_PIPE, APP_INTERCEPTOR and APP_FILTER work the same way.',
+      },
+      {
+        t: 3,
+        q: 'Roles are set on both the controller and the method, and the method should win. Which call does the guard make?',
+        opts: [
+          'getAllAndOverride(Roles, [handler, class])',
+          'getAllAndMerge(Roles, [handler, class])',
+          'get(Roles, context.getClass())',
+        ],
+        a: 'getAllAndOverride(Roles, [handler, class])',
+        why: 'getAllAndOverride checks the targets in the order you pass them and returns the first one that is defined, so the method beats the class. getAllAndMerge combines both, and get reads a single target.',
+      },
+      {
+        t: 3,
+        q: 'What does ExecutionContext add on top of ArgumentsHost?',
+        opts: [
+          'getHandler() and getClass()',
+          'switchToHttp() and getArgs()',
+          'getRequest() and getResponse()',
+        ],
+        a: 'getHandler() and getClass()',
+        why: 'ArgumentsHost wraps the handler arguments and gives you switchToHttp(). ExecutionContext extends it with getHandler() and getClass(), which is what lets a guard or interceptor read metadata off the route.',
+      },
+      {
+        t: 3,
+        q: 'You want the default error handling, plus logging. What does the filter do?',
+        opts: [
+          'Extend BaseExceptionFilter and call super.catch()',
+          'Implement ExceptionFilter and rethrow the error',
+          'Catch it, log it, then call next(exception)',
+        ],
+        a: 'Extend BaseExceptionFilter and call super.catch()',
+        why: 'BaseExceptionFilter is the built-in behavior. Extend it, log, then hand off with super.catch(exception, host) so the client still gets the standard response.',
+      },
+    ],
+    sorts: [
+      {
+        t: 1,
+        title: 'You are writing one of each. Which building block is each piece of code for?',
+        buckets: ['Middleware', 'Guard', 'Pipe', 'Interceptor', 'Exception filter'],
+        items: [
+          { name: 'canActivate(context)', bucket: 'Guard', why: 'The one method on CanActivate. It gets an ExecutionContext and returns a boolean.' },
+          { name: 'Returning false sends back a 403', bucket: 'Guard', why: 'A guard returning false makes Nest throw ForbiddenException. Throw UnauthorizedException yourself for a 401.' },
+          { name: 'transform(value, metadata)', bucket: 'Pipe', why: 'The one method on PipeTransform. Whatever it returns is what the handler receives.' },
+          { name: 'intercept(context, next)', bucket: 'Interceptor', why: 'The one method on NestInterceptor. next is a CallHandler, and next.handle() runs the route handler.' },
+          { name: 'Returns next.handle().pipe(map(...))', bucket: 'Interceptor', why: 'That pipe is RxJS, not a Nest pipe. Shaping the handler result on the way out is interceptor work.' },
+          { name: 'catch(err, host)', bucket: 'Exception filter', why: 'The one method on ExceptionFilter. host is an ArgumentsHost, and switchToHttp() gets you the response to write.' },
+          { name: 'use(req, res, next)', bucket: 'Middleware', why: 'The one method on NestMiddleware. Raw Express objects, and it has to call next() or end the response.' },
+        ],
+        note: 'Five interfaces, five methods. CanActivate.canActivate decides. PipeTransform.transform changes one value. NestInterceptor.intercept wraps the handler and returns a stream. ExceptionFilter.catch turns an error into a response. NestMiddleware.use gets the raw req, res and next.',
+      },
+    ],
+  },
+
 ];
 
 /** Field guide for the NestJS division, including interview talking points. */
@@ -1529,6 +1700,67 @@ export class AllExceptionsFilter implements ExceptionFilter {
       {
         prompt: 'Which exceptions do you actually reach for, and when?',
         answer: 'NotFoundException when the thing does not exist, BadRequestException when the input is wrong, UnauthorizedException when I do not know who you are, ForbiddenException when I do and you are not allowed, ConflictException when it already exists. I throw them from services and let Nest turn them into responses.',
+      },
+    ],
+  },
+  api: {
+    plain: 'Every building block in Nest is a small class with one method that Nest calls for you. A guard implements canActivate and returns true or false. A pipe implements transform and returns the value the handler should get. An interceptor implements intercept, gets a handle on the route handler itself, and returns a stream of its result. A filter implements catch and writes the response for an error. Middleware implements use and gets the raw request, response and next. Then you bind it: @UseGuards, @UsePipes, @UseInterceptors or @UseFilters for the four that know about routes, and configure() for middleware.',
+    words: [
+      ['ExecutionContext', 'What guards and interceptors get. The request, plus getHandler() and getClass() for reading route metadata.'],
+      ['ArgumentsHost', 'What filters get. Wraps the handler arguments, and switchToHttp() gets you req and res.'],
+      ['CallHandler', 'What an interceptor gets as next. next.handle() runs the handler and returns an Observable.'],
+      ['Reflector', 'Reads metadata you attached with a decorator, like roles or @Public().'],
+      ['APP_GUARD and friends', 'Register a global guard, pipe, interceptor or filter as a provider, so it can inject dependencies.'],
+    ],
+    code: {
+      label: 'all five, signatures only',
+      snippet: `@Injectable()
+class RolesGuard implements CanActivate {
+  canActivate(ctx: ExecutionContext): boolean { /* true or false */ }
+}
+
+@Injectable()
+class TrimPipe implements PipeTransform {
+  transform(value: unknown, meta: ArgumentMetadata) { return value; }
+}
+
+@Injectable()
+class TimingInterceptor implements NestInterceptor {
+  intercept(ctx: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const start = Date.now();
+    return next.handle().pipe(tap(() => log(Date.now() - start)));
+  }
+}
+
+@Catch()
+class AllErrorsFilter implements ExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) { /* write the response */ }
+}
+
+@Injectable()
+class RequestIdMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) { next(); }
+}`,
+    },
+    say: [
+      'Each building block is one interface with one method: canActivate, transform, intercept, catch and use.',
+      'A guard returns a boolean, and false becomes a 403. When I want a 401, I throw UnauthorizedException myself.',
+      'An interceptor returns next.handle() piped through RxJS, so anything after the handler lives in operators like tap and map.',
+      'Global ones that need dependencies go in as APP_GUARD, APP_PIPE, APP_INTERCEPTOR or APP_FILTER providers instead of in main.ts.',
+    ],
+    gotcha: 'app.useGlobalGuards() in main.ts takes an instance you build yourself, so the guard gets nothing from DI. The moment it needs Reflector or a service, register it as an APP_GUARD provider instead.',
+    rehearse: [
+      {
+        prompt: 'Sketch a guard from scratch.',
+        answer: 'An @Injectable class that implements CanActivate. canActivate gets an ExecutionContext, I call switchToHttp().getRequest() to read the request, check what I need, and return true or false. False becomes a 403. If I need route metadata like roles, I inject Reflector and read it with getAllAndOverride on the handler and the class, and to bind it globally with dependencies I provide it as APP_GUARD.',
+      },
+      {
+        prompt: 'How does an interceptor actually wrap the handler?',
+        answer: 'intercept gets the context and a CallHandler. Code before next.handle() runs before the handler. next.handle() returns an Observable of the result, so code after goes in RxJS operators: tap to log, map to reshape, catchError to recover. If I never call next.handle(), the handler never runs, which is how a cache can answer from memory.',
+      },
+      {
+        prompt: 'Walk me through writing an exception filter.',
+        answer: 'A class decorated with @Catch, listing the exception types it handles or nothing to catch everything, implementing ExceptionFilter. catch(exception, host) switches the host to HTTP to get the response and request, works out the status, usually exception.getStatus() on an HttpException, and writes the JSON. If I only want logging on top of the default, I extend BaseExceptionFilter and call super.catch.',
       },
     ],
   },
