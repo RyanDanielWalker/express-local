@@ -32,6 +32,7 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [x] **A testing line.** Test Track. `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
 - [x] **An auth line.** Turnstile. Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
 - [x] **More flows.** The validation pipeline on the DTO line, DI resolution order on Wiring Yard, an exception's trip to the client on Fault Line, and an interceptor wrapping a handler on Tool Shed.
+- [ ] **A clarity pass, line by line.** The NestJS copy was written before the clarity standard in CLAUDE.md. Rewrite each line's explanations, field guide and notes to it, starting with whichever lines have been hardest to get through.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
 
 ## Now: TypeScript
@@ -109,6 +110,7 @@ Learned the hard way, mostly by getting them wrong first.
 - **Concepts without the API is half a lesson.** Knowing a pipe validates input and not being able to name `ValidationPipe` is the gap between having read the docs and having used the thing.
 - **Depth before breadth.** A division that cannot carry an interview on its own topic is not finished, and a new division does not fix it.
 - **Check the docs, not memory.** NestJS 12 shipped after the first Nest lines were written. A pass against the current docs found rules stated as universal that were really Express defaults or ValidationPipe specifics. Say which version or adapter a claim depends on, and re-check a division when its framework ships a major version.
+- **Clear beats clever.** If a sentence needs reading twice, it failed. One idea per sentence, the example before the name for it, and every term defined the first time it matters. Taking longer to write it clearly is fine: this is a months-long project, and the goal is being able to say it in an interview.
 - **No em dashes.**
 
 ## Shipped

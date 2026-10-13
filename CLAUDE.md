@@ -44,6 +44,21 @@ A new division also needs an entry in `DIVISIONS` (`engine/questions.ts`).
 
 ## Content rules
 
+### Clarity comes first
+
+The point of every line is that the idea clicks and can then be explained out loud in an interview. If a sentence needs reading twice, the sentence failed, not the reader. Ryan understands the concepts; dense wording is what slows him down. Every piece of copy (questions, options, explanations, field guides, puzzle notes, rehearsal answers) follows these:
+
+1. **One idea per sentence.** Split anything held together by a colon or three commas.
+2. **Example first, then the name.** Show `if (!user) return;`, then say "that is narrowing." Not the other way around.
+3. **Define a term in plain words the first time it matters.** "Discriminant", "falsy", "metatype" and friends get a short definition or get replaced.
+4. **Say what actually happens.** "The app crashes" beats "fails at runtime". "TypeScript forgets your check" beats "narrowing does not survive".
+5. **Explain both sides.** A `why` says why the right answer is right and why the tempting wrong one is wrong.
+6. **Clear, not long.** Cut any word that is not helping. No metaphors that need decoding.
+
+This standard is new as of October 2026. Older lines are being brought up to it one at a time (see ROADMAP.md).
+
+### The rest
+
 - Every question needs its answer among its options, at least two options, and a `why` that teaches rather than restates.
 - Tier 1 questions are the ones a junior should get. Tier 3 is the deep cut.
 - Keep claims checkable: stack answers follow the current docs, and version-specific behavior says which version.
