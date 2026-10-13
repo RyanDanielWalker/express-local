@@ -1,7 +1,7 @@
 import { GUIDE } from '../data';
 import type { Line } from '../engine/types';
 import { lineStyle } from './Bullet';
-import { Rich } from './Rich';
+import { Prose, Rich } from './Rich';
 
 export function Words({ words }: { words: [string, string][] }) {
   return (
@@ -24,7 +24,7 @@ export function FieldGuide({ line }: { line: Line }) {
       <div className="ggrid">
         <div className="gwide plain">
           <div className="eyebrow">In plain English</div>
-          <p>{g.plain}</p>
+          <Prose text={g.plain} />
         </div>
         <div>
           <div className="eyebrow">Words to know</div>
@@ -56,7 +56,7 @@ export function FieldGuide({ line }: { line: Line }) {
         {g.gotcha && (
           <div className="gwide hook">
             <b>Gotcha</b>
-            <Rich text={g.gotcha} />
+            <p><Rich text={g.gotcha} /></p>
           </div>
         )}
         {g.lore && (

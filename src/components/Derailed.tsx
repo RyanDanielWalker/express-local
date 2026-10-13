@@ -1,7 +1,7 @@
 import { GUIDE } from '../data';
 import type { Line, Question } from '../engine/types';
 import { lineStyle } from './Bullet';
-import { Rich } from './Rich';
+import { Prose, Rich } from './Rich';
 
 interface Props {
   line: Line;
@@ -20,7 +20,7 @@ export function Derailed({ line, missed = [], cost = 0, onAgain, onMap }: Props)
       <h2>Service suspended</h2>
       {cost > 0 && <p className="cost">The ride cost you <b>{cost} XP</b>. Clearing it once pays that back several times over.</p>}
       <p>Mistakes are the fastest teacher. Here's the idea to lock in before you ride again:</p>
-      {GUIDE[line.id] && <div className="hook"><b>In plain English</b>{GUIDE[line.id].plain}</div>}
+      {GUIDE[line.id] && <div className="hook"><b>In plain English</b><Prose text={GUIDE[line.id].plain} /></div>}
       {missed.length > 0 && (
         <div>
           <div className="eyebrow">What you missed</div>

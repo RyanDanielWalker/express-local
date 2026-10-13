@@ -9,6 +9,7 @@ import type { AlgoLineId, Line, Question, QuestionStat, Tier } from '../engine/t
 import { useTimers } from '../hooks/useTimers';
 import { Bullet, lineStyle } from './Bullet';
 import { Words } from './FieldGuide';
+import { Prose } from './Rich';
 
 export interface RideStats {
   tier: Tier;
@@ -141,7 +142,7 @@ export function PlayScreen({ line, tier, hearts: maxHearts = DEFAULT_HEARTS, fir
       {g && line.kind === 'game' && (
         <details className="explain" open={firstTime}>
           <summary>What's going on here?</summary>
-          <p>{g.plain}</p>
+          <Prose text={g.plain} />
           <Words words={g.words} />
         </details>
       )}

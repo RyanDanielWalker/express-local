@@ -256,6 +256,8 @@ pre.code{background:var(--code); border-radius:10px; padding:14px 16px; overflow
 .ggrid p{margin:0; max-width:70ch}
 .gwide{grid-column:1 / -1}
 .plain p{font-size:18px; line-height:1.55}
+.plain p + p{margin-top:12px}
+.hook p{margin:6px 0 0}
 @media (max-width:720px){ .ggrid{grid-template-columns:1fr} }
 dl.words{margin:0; display:grid; grid-template-columns:max-content minmax(0,1fr); gap:7px 14px}
 dl.words dt{font-family:var(--mono); font-weight:600; font-size:14px}
@@ -285,6 +287,8 @@ body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
 code{font-family:var(--mono); font-size:.92em}
+/* Show === as three characters. Ligatures merge it into one glyph, which is hard to read while learning. */
+code, pre{font-variant-ligatures:none}
 
 /* save transfer */
 .transfer{display:flex; flex-direction:column; gap:10px}

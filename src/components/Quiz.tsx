@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Rich } from './Rich';
 import type { Line, QuizQuestion } from '../engine/types';
 import { shuffle } from '../lib/random';
 import { useTimers } from '../hooks/useTimers';
@@ -37,7 +38,7 @@ export function Quiz({ line, onDone }: { line: Line; onDone: (correct: boolean) 
       {picked && (
         <p className="hint">
           {picked === q.a ? <b>Right. </b> : <b>It's <code>{q.a}</code>. </b>}
-          {q.why}
+          <Rich text={q.why} />
         </p>
       )}
     </div>

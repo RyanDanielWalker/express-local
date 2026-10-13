@@ -19,3 +19,17 @@ export function Rich({ text }: { text: string }) {
     </>
   );
 }
+
+/**
+ * Longer copy: a blank line starts a new paragraph, and each paragraph gets
+ * the same `code` and **bold** formatting as <Rich />.
+ */
+export function Prose({ text, className }: { text: string; className?: string }) {
+  return (
+    <>
+      {text.split(/\n\s*\n/).map((para, i) => (
+        <p key={i} className={className}><Rich text={para} /></p>
+      ))}
+    </>
+  );
+}
