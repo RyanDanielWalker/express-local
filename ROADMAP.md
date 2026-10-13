@@ -36,9 +36,12 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 
 ## Now: TypeScript
 
-`npm run bar` lists exactly what each line is missing. On top of the gaps below, four TypeScript lines give their answers away by length (any vs unknown: the longest option is right on 9 of 10).
+`npm run bar` lists exactly what each line is missing. On top of the gaps below, three TypeScript lines give their answers away by length (any vs unknown: the longest option is right on 9 of 10). Checked against TypeScript 6.0 and 7.0: `strict` is on by default since 6.0, and 7.0 is the same checker ported to Go, so the type rules carry over.
 
-- [ ] Fill tier 1 to 9 questions a line, so replays differ: about 36 across the six lines
+One line at a time, played before the next one starts.
+
+- [x] **Narrow Gauge** clears the bar: 9 Local questions, two sorts (which check narrows which union, and the type at each spot in a function), a type predicate rehearsal, and the 5.5 inferred predicates on filter
+- [ ] Fill tier 1 to 9 questions a line, so replays differ: about 30 across the other five lines
 - [ ] Rehearsal to three prompts a line
 - [ ] A sort line: utility types by what they operate on, object keys vs union members
 - [ ] Two Local puzzles per line, so it is not six recognition quizzes in a row
@@ -134,3 +137,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-07** Tool Shed, Turnstile and Test Track. NestJS finished: nine lines, enforced by the suite
 - **2026-10-07** NestJS content checked against the v12 docs: route order, schema-first validation, errorCode, serialization, Jest on Node 24.9
 - **2026-10-07** Replays differ: unseen and shaky questions first, puzzles rotate, and the bar checks pool size. 24 new Local questions and 9 Local puzzles across NestJS
+- **2026-10-13** Narrow Gauge clears the bar, the first TypeScript line to do it
