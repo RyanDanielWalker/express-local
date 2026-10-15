@@ -37,7 +37,7 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [x] **A clarity pass, line by line.** All nine lines rewritten to the clarity standard in CLAUDE.md: one idea per sentence, terms defined where they appear, and explanations that say why the tempting wrong answer is wrong. Three reviewers then ran all 201 changed fields against Nest 12.1.3 and flagged 19, all fixed.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
 - [x] **Independent review.** Three reviewers that had not seen the content ran its claims as real code against Nest 12.1.3. They found wrong answers or explanations on most lines, and many more misleading ones. The worst: a missing `@Injectable()` listed as a cause of "can't resolve dependencies" (it boots, with an undefined dependency), `overrideGuard` advised for a global `APP_GUARD` it cannot reach, `transform: true` said to convert DTO fields, and a catch-all filter example that dropped every error message. Each finding was reproduced, fixed line by line, then a second set of reviewers re-checked all 122 changed fields and flagged 16 more, also fixed.
-- [ ] **Gaps the reviewers flagged.** Dynamic modules (`forRoot`, `forRootAsync`), custom decorators with `SetMetadata` and `Reflector` beyond `@Public()`, lifecycle and shutdown hooks, guards on GraphQL (`GqlExecutionContext`), where a client should keep its token, why e2e tests must re-apply global pipes set in `main.ts`, and injecting dependencies into an `APP_FILTER` filter.
+- [x] **Gaps the reviewers flagged.** 13 new questions: dynamic modules (`forRoot`, `forFeature`, `forRootAsync`) and lifecycle and shutdown hooks on Wiring Yard, an `APP_FILTER` filter with dependencies on Fault Line, custom decorators (`Reflector.createDecorator`, `applyDecorators`, `createParamDecorator`) on Tool Shed, GraphQL guards and token storage on Turnstile, and global pipes in e2e tests on Test Track. Each was run against Nest 12.1.3, then checked by an independent reviewer.
 
 ## Done: TypeScript
 
@@ -57,7 +57,7 @@ All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Chec
 Both divisions clear the bar, but each has open items above. React starts once these are done, in this order:
 
 1. ~~**The NestJS clarity pass.**~~ Done.
-2. **The NestJS gaps.** Most become new questions on existing lines. Dynamic modules may need a line of their own.
+2. ~~**The NestJS gaps.**~~ Done, as questions on existing lines.
 3. **The TypeScript gaps.** New questions on existing lines, each proved with `tsc`.
 
 ## Then: React
@@ -164,3 +164,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** Independent review of TypeScript: 8 wrong and about 20 misleading items found and fixed, re-checked, and TypeScript added to `FINISHED`
 - **2026-10-15** Independent review of NestJS against running Nest 12.1.3 code: wrong and misleading items fixed across all nine lines, then re-checked
 - **2026-10-15** NestJS clarity pass: all nine lines rewritten to the clarity standard, then reviewed against running code
+- **2026-10-15** NestJS gaps closed: 13 questions on dynamic modules, lifecycle hooks, custom decorators, GraphQL guards, token storage and e2e pipes
