@@ -423,6 +423,86 @@ export class OrdersModule {}`,
         a: 'One instance, built once and reused',
         why: 'Singleton is the default, and almost always what you want. Nest builds the provider once and hands that same instance to everything that injects it. One catch: if two modules each list it in providers, each gets its own, which is why you provide it once and export it. Request scope builds a new one per request, and it spreads to everything that injects it. Transient gives each consumer its own copy.',
       },
+      {
+        t: 1,
+        q: 'CacheService has to connect to Redis before anything can use it. Where does that async setup go?',
+        opts: [
+          'In onModuleInit(), which Nest awaits',
+          'In the constructor, with await',
+          'In a method marked @OnStartup()',
+        ],
+        a: 'In onModuleInit(), which Nest awaits',
+        why: 'A constructor cannot be async, so it cannot await the connection. Implement OnModuleInit instead. Nest calls onModuleInit() after building the provider, and waits for its promise before startup finishes. There is no @OnStartup() decorator in Nest.',
+      },
+      {
+        t: 2,
+        q: 'A provider implements both OnModuleInit and OnApplicationBootstrap. At startup, which runs first?',
+        opts: [
+          'onApplicationBootstrap, then onModuleInit',
+          'onModuleInit, then onApplicationBootstrap',
+          'Both at once, in parallel with each other',
+        ],
+        a: 'onModuleInit, then onApplicationBootstrap',
+        why: 'Nest first builds every provider, which runs the constructors. Then it calls onModuleInit, module by module. onApplicationBootstrap only starts once every onModuleInit has finished, including any promise it returned. So by bootstrap time, everything in the app is initialized.',
+      },
+      {
+        t: 3,
+        q: 'A provider closes its queue connection in onApplicationShutdown(). In production, Kubernetes sends SIGTERM, and the hook never runs. Why?',
+        opts: [
+          'main.ts never called app.enableShutdownHooks()',
+          'Shutdown hooks only run when NODE_ENV is test',
+          'SIGTERM skips the hooks, and only SIGINT runs them',
+        ],
+        a: 'main.ts never called app.enableShutdownHooks()',
+        why: 'Nest only listens for signals like SIGTERM after app.enableShutdownHooks(), and it is off by default. Without it, the process just exits, and no hook runs. app.close() runs the shutdown hooks either way, which is why they work in tests. Once enabled, SIGTERM and SIGINT both trigger them.',
+      },
+      {
+        t: 2,
+        q: 'AppModule has imports: [MailModule.forRoot({ from: \'hi@shop.com\' })]. What does forRoot() return?',
+        code: `@Module({})
+export class MailModule {
+  static forRoot(options: MailOptions): DynamicModule {
+    return {
+      module: MailModule,
+      providers: [{ provide: MAIL_OPTIONS, useValue: options }, MailService],
+      exports: [MailService],
+    };
+  }
+}`,
+        opts: [
+          'A dynamic module: module metadata built from your options',
+          'A provider that AppModule can now inject directly',
+          'A setup hook that Nest calls later, once the app starts',
+        ],
+        a: 'A dynamic module: module metadata built from your options',
+        why: 'forRoot() is a plain static method you write. It returns an object shaped like @Module() metadata, plus a module key naming the class. That is called a dynamic module. Nest imports it like any other module, with providers built from your options. You call forRoot() yourself, inside imports, so Nest does not call it later. And it is a module, not something you inject.',
+      },
+      {
+        t: 2,
+        q: 'AppModule imports TypeOrmModule.forRoot({ ... }), and OrdersModule imports TypeOrmModule.forFeature([Order]). Why two calls?',
+        opts: [
+          'forRoot sets up the connection, forFeature adds repositories',
+          'forFeature opens a second connection just for that module',
+          'They are the same call, named differently for readability',
+        ],
+        a: 'forRoot sets up the connection, forFeature adds repositories',
+        why: 'By convention, forRoot() configures a module once for the whole app. Here it opens the database connection. forFeature() is called in each feature module to add what that module needs, here the Order repository. It reuses the connection forRoot made instead of opening its own. Both return a dynamic module for TypeOrmModule, but with different contents, so they are not the same call. Many Nest libraries follow this forRoot and forFeature naming.',
+      },
+      {
+        t: 3,
+        q: 'The mail API key lives in ConfigService. Why import MailModule with forRootAsync() like this, instead of forRoot()?',
+        code: `MailModule.forRootAsync({
+  useFactory: (config: ConfigService) => ({ apiKey: config.get('MAIL_KEY') }),
+  inject: [ConfigService],
+})`,
+        opts: [
+          'forRoot only gets plain values, before Nest can inject',
+          'forRootAsync makes MailService load its key lazily',
+          'forRoot cannot be used once ConfigModule is global',
+        ],
+        a: 'forRoot only gets plain values, before Nest can inject',
+        why: 'MailModule.forRoot({ ... }) runs when the file loads, while AppModule\'s decorator is being read. Nest has not built anything yet, so there is no ConfigService to ask. forRootAsync() takes a factory instead. During startup, Nest builds ConfigService, passes it in through inject, and uses what the factory returns as the options. MailService does not become lazy, and @Global() has nothing to do with it. Nest\'s ConfigurableModuleBuilder can generate both methods for you. Call setClassMethodName(\'forRoot\') to get these names instead of register and registerAsync.',
+      },
     ],
   },
   {
