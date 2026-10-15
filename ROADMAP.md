@@ -2,7 +2,7 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 32 lines across 4 divisions, 92 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript, then React.** No new divisions until they clear the bar below.
+Status: 32 lines across 4 divisions, 94 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript, then React.** No new divisions until they clear the bar below.
 
 ## The bar
 
@@ -17,17 +17,19 @@ A line is **done** when:
 
 A division is **done** when every line clears that, and the division could carry an interview on its own topic. That second half is the one that adds lines rather than questions: NestJS without testing or auth is not a division that could carry a NestJS interview, however deep its other six lines get.
 
-Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 5 (data tests already cover 6), `npm run bar` prints where every line stands, and any division listed in `FINISHED` is enforced by the test suite from then on, so finished stays finished.
+Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 5 and the length part of 6 (data tests cover the rest of 6), `npm run bar` prints where every line stands, and any division listed in `FINISHED` is enforced by the test suite from then on, so finished stays finished.
+
+Algorithms shows 0 of 11 in `npm run bar` because the game lines have no rehearsal prompts or talking points yet. That is expected while the division is parked, not a regression.
 
 ## Done: NestJS
 
 Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any slips. The one Nest-adjacent gap is data access (repositories, transactions in a service), which belongs with the SQL and Postgres division when that is unparked.
 
-- [x] **The bar, as a test ratchet.** First run: NestJS 1 of 6 lines clear. Now 6 of 6.
+- [x] **The bar, as a test ratchet.** First run: NestJS 1 of 6 lines clear. Now 9 of 9.
 - [x] **Mixed runs.** Every quiz line in the app fails the judgment check, because a quiz line can only hold questions. Let a quiz line carry a flow or a sort that plays inside its run, so the DTO line can end on "order the validation pipeline" instead of a ninth recognition question. This is engine work, and it is what makes check 4 reachable at all.
 - [x] **Fill tier 1.** Thirteen new questions, leaning toward what you type: `@Param` versus `@Query`, `useGlobalPipes`, throwing versus returning a 404.
 - [x] **Rehearsal to three prompts a line.** Including "give me a real example of each building block."
-- [x] **A "what do you actually type" line.** Tool Shed. Partly covered now by the new tier 1 questions and the real-packages sort. Still worth a line of its own for interfaces and method signatures: `canActivate`, `transform`, `intercept`, `catch`, `use`.
+- [x] **A "what do you actually type" line.** Tool Shed: the interfaces and method signatures behind each building block, `canActivate`, `transform`, `intercept`, `catch`, `use`.
 - [x] **A matching mechanic.** Shipped as sorts that a quiz line ends on, rather than a line kind of their own. Cards are named by the job, never by their box, and a test enforces it. Generalizes beyond Nest: React hooks by what they are for, TypeScript utilities by what they operate on.
 - [x] **A testing line.** Test Track. `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
 - [x] **An auth line.** Turnstile. Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
@@ -37,9 +39,9 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 
 ## Now: TypeScript
 
-`npm run bar` lists exactly what each line is missing. On top of the gaps below, three TypeScript lines give their answers away by length (any vs unknown: the longest option is right on 9 of 10). Checked against TypeScript 6.0 and 7.0: `strict` is on by default since 6.0, and 7.0 is the same checker ported to Go, so the type rules carry over.
+`npm run bar` lists exactly what each line is missing. On top of the gaps below, any vs unknown gives its answers away by length: the longest option is right on 9 of 10. Checked against TypeScript 6.0 and 7.0: `strict` is on by default since 6.0, and 7.0 is the same checker ported to Go, so the type rules carry over.
 
-One line at a time, played before the next one starts.
+One line at a time, played before the next one starts. Each one gets content to the bar, writing to the clarity standard, and every claim checked with the compiler.
 
 - [x] **Narrow Gauge** clears the bar: 9 Local questions, two sorts (which check narrows which union, and the type at each spot in a function), a type predicate rehearsal, and the 5.5 inferred predicates on filter
 - [x] **Generic Line** clears the bar: everyday generics (Promise, Array, Set), inferred vs written type arguments, constraints, and a sort on which calls compile
@@ -75,7 +77,8 @@ Orthogonal to the content work, and the thing to do when you want a break from w
 - [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
 - [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
 - [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
-- [ ] **Split the bundle by division.** Every question ships in one chunk, now 517 kB (163 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
+- [ ] **Upgrade the repo to TypeScript 6.** The app is built with 5.9 while its content teaches 6.0 behavior, like `strict` on by default.
+- [ ] **Split the bundle by division.** Every question ships in one chunk, now 564 kB (177 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
 
 ## Engine ideas
 
@@ -110,6 +113,7 @@ Learned the hard way, mostly by getting them wrong first.
 - **Recognition is not recall, and recall is not speech.** Hence shaky drills and out-loud rehearsal. The interview tests the third one.
 - **Concepts without the API is half a lesson.** Knowing a pipe validates input and not being able to name `ValidationPipe` is the gap between having read the docs and having used the thing.
 - **Depth before breadth.** A division that cannot carry an interview on its own topic is not finished, and a new division does not fix it.
+- **Prove it with the compiler.** Rereading TypeScript content missed two wrong claims that `tsc` caught in seconds: a wrong answer that actually worked, and an explanation that predated 5.5. Every claim gets written as code with an assertion, and the probe gets a deliberate wrong assertion first, to prove it can fail.
 - **Check the docs, not memory.** NestJS 12 shipped after the first Nest lines were written. A pass against the current docs found rules stated as universal that were really Express defaults or ValidationPipe specifics. Say which version or adapter a claim depends on, and re-check a division when its framework ships a major version.
 - **Clear beats clever.** If a sentence needs reading twice, it failed. One idea per sentence, the example before the name for it, and every term defined the first time it matters. Taking longer to write it clearly is fine: this is a months-long project, and the goal is being able to say it in an interview.
 - **No em dashes.**
