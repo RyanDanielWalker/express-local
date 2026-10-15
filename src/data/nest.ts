@@ -1236,7 +1236,7 @@ findOne(@Param('id') id: number) {}`,
     flows: [
       {
         t: 1,
-        title: 'GET /orders/99. OrdersService throws NotFoundException, and there is no custom filter',
+        title: 'GET /orders/99. OrdersService throws new NotFoundException(\'Order 99 not found\'), and there is no custom filter',
         start: 1,
         steps: [
           'Service throws NotFoundException',
@@ -1247,7 +1247,7 @@ findOne(@Param('id') id: number) {}`,
           '404 sent with statusCode, message, error',
         ],
         decoys: ['Converted to a 500 first', 'Handler sends an empty 200'],
-        note: 'You do not catch HTTP exceptions in the handler. They travel up, and the exceptions layer turns them into a response using the status and message they carry. With no filter of your own, the built-in global one does it. Only errors that are not HttpException become a 500.',
+        note: 'You do not catch HTTP exceptions in the handler. They travel up, and the exceptions layer turns them into a response using the status and message they carry. With no filter of your own, the built-in global one does it. Errors that are not HttpException become a 500.',
       },
     ],
     questions: [
@@ -1260,7 +1260,7 @@ findOne(@Param('id') id: number) {}`,
           'They are not allowed to do that',
         ],
         a: 'Something broke on the server',
-        why: '5xx means the server failed. 4xx means the client sent something wrong or is not allowed. In Nest, any error that is not an HttpException ends up as a 500, which is why "not found" should be thrown as NotFoundException.',
+        why: '5xx means the server failed. 4xx means the client sent something wrong or is not allowed. In Nest, an error that is not an HttpException ends up as a 500. The one exception is errors made by the http-errors package, which Express body parsing throws. Those keep their own status. That is why "not found" should be thrown as NotFoundException.',
       },
       {
         t: 1,
@@ -1311,7 +1311,7 @@ findOne(@Param('id') id: number) {}`,
           '400 with the error message attached',
         ],
         a: '500 with a generic message, text hidden',
-        why: 'Nest only trusts HttpException. Everything else becomes a safe 500, which is why you log the original in a global filter.',
+        why: 'Nest only sends the details of an HttpException. Anything else becomes a 500 with the generic message "Internal server error", so internal details never leak. Nest\'s built-in filter still logs the original error with its stack, so you can find it in your logs.',
       },
       {
         t: 2,
@@ -1358,7 +1358,7 @@ findOne(@Param('id') id: number) {}`,
           '{ status, title, detail }',
         ],
         a: '{ statusCode, message, error }',
-        why: 'Built-in exceptions send statusCode, message and an error name, and a bare HttpException sends just statusCode and message. message can be a string or an array (validation). Nest 12 adds an optional errorCode field. Teams usually standardize the shape with a global filter.',
+        why: 'A built-in exception given a message, like new NotFoundException(\'Order 99 not found\'), sends statusCode, message and an error name. With no message, it sends just statusCode and message, and so does a bare HttpException. message can be a string or an array (validation). Nest 12 adds an optional errorCode field. Teams usually standardize the shape with a global filter.',
       },
       {
         t: 2,
@@ -1384,25 +1384,25 @@ findOne(@Param('id') id: number) {}`,
       },
       {
         t: 3,
-        q: 'Where should domain errors like "user not found" be thrown?',
+        q: 'A common Nest convention: the service throws NotFoundException when a user is missing. What is the trade-off?',
         opts: [
-          'In the service, and let Nest map it to a response',
-          'In the controller, after checking the result',
-          'In middleware, before the handler is picked',
+          'The service now depends on HTTP status codes',
+          'Nest can no longer turn it into a 404 response',
+          'The controller has to catch it and rethrow it',
         ],
-        a: 'In the service, and let Nest map it to a response',
-        why: 'It keeps controllers thin and the rule in one place. The service throws, Nest translates.',
+        a: 'The service now depends on HTTP status codes',
+        why: 'NotFoundException is an HTTP class, so the service now knows about HTTP. For most REST apps that is fine, and it keeps controllers thin, since Nest turns the throw into a 404 with no catch needed. If the same service also runs from a queue worker or a GraphQL resolver, throw your own error, like UserNotFoundError, and map it to a 404 in one exception filter.',
       },
       {
         t: 3,
         q: 'You want a guard to return 401 with "token expired" instead of a bare 403.',
         opts: [
-          'throw new UnauthorizedException() from the guard',
+          "throw new UnauthorizedException('token expired')",
           'return false and set res.status(401) yourself',
           'throw it from a pipe bound to that route',
         ],
-        a: 'throw new UnauthorizedException() from the guard',
-        why: 'Guards can throw as well as return false, and throwing is how you control the status and the message.',
+        a: "throw new UnauthorizedException('token expired')",
+        why: 'Guards can throw as well as return false, and throwing is how you control the status and the message. The string you pass becomes message in the response body.',
       },
       {
         t: 1,
@@ -1435,7 +1435,7 @@ findOne(@Param('id') id: number) {}`,
           'res.status(404).send(\'No such order\')',
         ],
         a: 'throw new NotFoundException(\'No such order\')',
-        why: 'Throw it and let Nest build the response. Returning an object sends a 200 with that object as the body, and reaching for res means you have taken over the response yourself.',
+        why: 'Throw it and let Nest build the response. Returning an object sends it as the body with a success status (200, or 201 on a POST), and reaching for res means you have taken over the response yourself.',
       },
       {
         t: 3,
@@ -1446,7 +1446,7 @@ findOne(@Param('id') id: number) {}`,
           'cause: \'WEAK_PASSWORD\' in the options',
         ],
         a: 'errorCode: \'WEAK_PASSWORD\' in the options',
-        why: 'new BadRequestException("Password is too weak", { errorCode: "WEAK_PASSWORD" }). Nest serializes errorCode into the response body. cause is different: it is for your logs and is not sent to the client.',
+        why: 'new BadRequestException("Password is too weak", { errorCode: "WEAK_PASSWORD" }). Nest adds errorCode to the response body, as long as the message is a string. cause is different: it is for your logs and is not sent to the client.',
       },
     ],
   },
@@ -2445,7 +2445,7 @@ export class WrapInterceptor implements NestInterceptor {
       ],
       [
         '@Catch(HttpException)',
-        'Only catches that type. Bare @Catch() catches everything.',
+        'Catches HttpException and every subclass, like NotFoundException. Bare @Catch() catches everything.',
       ],
       [
         '401 vs 403',
@@ -2453,7 +2453,7 @@ export class WrapInterceptor implements NestInterceptor {
       ],
       [
         'errorCode',
-        'Nest 12: a stable, machine-readable code passed in the exception options and sent in the response body, so clients branch on it instead of the message.',
+        'Nest 12: a stable, machine-readable code passed in the exception options and sent in the response body, so clients branch on it instead of the message. Only added when the message is a string.',
       ],
     ],
     code: {
@@ -2463,22 +2463,33 @@ const user = await this.repo.findOne({ where: { id } });
 if (!user) throw new NotFoundException(\`User \${id} not found\`);
 // response: 404 { statusCode: 404, message: "User 7 not found", error: "Not Found" }
 
+// one error shape for the whole API, registered with APP_FILTER
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger('Errors');
+  constructor(private readonly adapterHost: HttpAdapterHost) {}
+
   catch(err: unknown, host: ArgumentsHost) {
-    const res = host.switchToHttp().getResponse();
-    const status = err instanceof HttpException ? err.getStatus() : 500;
-    res.status(status).json({ ok: false, status, at: new Date().toISOString() });
+    const { httpAdapter } = this.adapterHost; // works on Express or Fastify
+    const ctx = host.switchToHttp();
+    const isHttp = err instanceof HttpException;
+    const status = isHttp ? err.getStatus() : 500;
+    if (!isHttp) this.logger.error(err); // this filter replaces Nest's own logging
+    httpAdapter.reply(ctx.getResponse(), {
+      ok: false,
+      status,
+      detail: isHttp ? err.getResponse() : 'Internal server error', // keeps your message
+    }, status);
   }
 }`,
     },
     say: [
-      'I throw domain exceptions from the service layer and let Nest map them to status codes. Controllers stay thin.',
+      'I throw Nest\'s HTTP exceptions, like NotFoundException, from the service and let Nest turn them into responses. Controllers stay thin. If a service is also used outside HTTP, I throw my own error classes and map them in one filter.',
       'A guard returning false produces a 403. If I need a different message or a 401, I throw the exception from the guard instead of returning false.',
-      'Unknown errors become a 500 with the message stripped, which is the right default. A global filter is where I add logging and a consistent error shape.',
+      'Unknown errors become a 500 with the message stripped, which is the right default, and Nest logs the original. A global filter is where I add a consistent error shape. If it catches everything, it has to log too, because it replaces Nest\'s logging.',
       'I keep 401 and 403 straight: not authenticated versus authenticated but not allowed.',
     ],
-    gotcha: 'Throwing a plain Error gives the client a generic 500 and hides your message. That is good for safety and terrible for debugging, so log the original error in a global filter.',
+    gotcha: 'Throwing a plain Error gives the client a generic 500 and hides your message. That is good for safety, and Nest\'s built-in filter still logs the original with its stack. If you replace it with your own catch-all filter, that logging is gone unless you add it back.',
     rehearse: [
       {
         prompt: 'How do you handle errors in a Nest service?',
@@ -2486,7 +2497,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       },
       {
         prompt: 'What happens when something throws that is not an HttpException?',
-        answer: 'It comes back as a 500 with the message hidden, which is the right default for safety. That is exactly why I log the original error inside a global filter.',
+        answer: 'It comes back as a 500 with the message hidden, which is the right default for safety. Nest\'s built-in filter logs the original error with its stack, so I can still debug it. If I write my own catch-all filter, I make sure it logs too, because it replaces that built-in one.',
       },
       {
         prompt: 'Which exceptions do you actually reach for, and when?',
