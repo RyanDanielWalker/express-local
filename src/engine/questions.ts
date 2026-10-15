@@ -49,6 +49,26 @@ export function pickFlows(pool: Flow[], tier: Tier, count = FLOWS_PER_RUN[tier])
 /** The step that should be clicked next, or null when the flow is finished. */
 export const nextStep = (flow: Flow, placed: string[]): string | null => flow.steps[placed.length] ?? null;
 
+const listOf = (xs: string[]): string =>
+  xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`;
+
+/**
+ * The recap for one step the player slipped on in a flow, shown once the order is complete:
+ * where the step sits, and what they reached for instead. The step's own name is left for the
+ * caller to show, so it reads as `<step> comes right after ...`.
+ */
+export function flowSlip(flow: Flow, want: string, tried: string[]): string {
+  const at = flow.steps.indexOf(want);
+  const where = at <= 0 ? 'runs first.' : `comes right after ${flow.steps[at - 1]}.`;
+  const decoys = new Set(flow.decoys ?? []);
+  const later = tried.filter(t => !decoys.has(t));
+  const never = tried.filter(t => decoys.has(t));
+  const parts: string[] = [];
+  if (later.length) parts.push(`${listOf(later)}, which ${later.length > 1 ? 'come' : 'comes'} later`);
+  if (never.length) parts.push(`${listOf(never)}, which ${never.length > 1 ? 'do' : 'does'} not happen in this run`);
+  return parts.length ? `${where} You tried ${parts.join(', and ')}.` : where;
+}
+
 /** The puzzle a quiz line ends on. */
 export type Puzzle = { kind: 'flow'; flow: Flow } | { kind: 'sort'; sort: Sort };
 

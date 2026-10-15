@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DAY, dayKey, DERAIL_COST, ensureDailyPick, finishCram, finishDerail, finishRehearsal, finishTrip, isUnlocked, lineReadiness, maxTier, rankFloor, rankFor, RANKS, readinessOf } from './progression';
 import { cramPool, cramQuestions, CRAM_SIZE, qid, recordAnswers, shakyQuestions } from './questions';
 import { GUIDE, LINES } from '../data';
-import { heartsFor, nextStep, pickFlows, pickPuzzle, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss, solidIn } from './questions';
+import { flowSlip, heartsFor, nextStep, pickFlows, pickPuzzle, pickQuestions, QUESTIONS_PER_RUN, revealAfterMiss, solidIn } from './questions';
 import type { Flow, Question, Tier } from './types';
 import { emptySave, exportSave, importSave, migrate } from './save';
 import type { SaveData } from './types';
@@ -163,6 +163,16 @@ describe('question pools', () => {
     expect(nextStep(flow, ['one', 'two'])).toBe('three');
     expect(nextStep(flow, ['one', 'two', 'three'])).toBeNull();
     expect(pickFlows([flow], 1)).toHaveLength(1);
+  });
+
+  it('explains a flow slip by position, and by what was tried instead', () => {
+    const flow: Flow = { t: 1, title: 'a request', steps: ['Middleware', 'Guard', 'Pipe'], decoys: ['Filter'], note: '' };
+    expect(flowSlip(flow, 'Middleware', [])).toBe('runs first.');
+    expect(flowSlip(flow, 'Guard', ['Pipe'])).toBe('comes right after Middleware. You tried Pipe, which comes later.');
+    expect(flowSlip(flow, 'Guard', ['Filter'])).toBe('comes right after Middleware. You tried Filter, which does not happen in this run.');
+    expect(flowSlip(flow, 'Middleware', ['Pipe', 'Guard', 'Filter'])).toBe(
+      'runs first. You tried Pipe and Guard, which come later, and Filter, which does not happen in this run.',
+    );
   });
 });
 

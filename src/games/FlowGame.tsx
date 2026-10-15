@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { nextStep, pickFlows, revealAfterMiss } from '../engine/questions';
+import { flowSlip, nextStep, pickFlows, revealAfterMiss } from '../engine/questions';
 import type { Flow } from '../engine/types';
 import { useKeys } from '../hooks/useKeys';
 import { Rich } from '../components/Rich';
@@ -21,8 +21,8 @@ export function FlowGame({ api, line, role }: GameProps) {
   const [placed, setPlaced] = useState<string[]>(() => given(flows[0]));
   const [tray, setTray] = useState<string[]>(() => trayFor(flows[0]));
   const [done, setDone] = useState(false);
-  /** Misses per slot, keyed by the step that was wanted. Drives the hint and the recap. */
-  const [misses, setMisses] = useState<Record<string, number>>({});
+  /** Wrong picks per slot, keyed by the step that was wanted. Drives the hint and the recap. */
+  const [misses, setMisses] = useState<Record<string, string[]>>({});
   useEffect(() => api.say('Click the stages in the order they actually run.'), [api]);
 
   const flow = flows[i];
@@ -45,8 +45,9 @@ export function FlowGame({ api, line, role }: GameProps) {
       // One message for every miss. Saying "not yet" would give away that the
       // step happens later, and naming the decoy would give away that it never
       // does. Which kind of wrong you were is the thing being drilled.
-      const n = (misses[want ?? ''] ?? 0) + 1;
-      setMisses(m => ({ ...m, [want ?? '']: n }));
+      const tried = misses[want ?? ''] ?? [];
+      const n = tried.length + 1;
+      setMisses(m => ({ ...m, [want ?? '']: tried.includes(step) ? tried : [...tried, step] }));
       return api.wrong(
         revealAfterMiss(api.tier, n)
           ? <>Not that one. <b>{want}</b> comes next.</>
@@ -103,7 +104,9 @@ export function FlowGame({ api, line, role }: GameProps) {
               <b>Why that order</b>
               <Rich text={flow.note} />
               {fumbled.length > 0 && (
-                <p className="fumbled">Worth saying out loud before you move on: <em>{fumbled.join(', ')}</em>.</p>
+                <ul className="fumbles">
+                  {fumbled.map(want => <li key={want}><em>{want}</em> {flowSlip(flow, want, misses[want])}</li>)}
+                </ul>
               )}
             </div>
           )}
