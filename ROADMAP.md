@@ -77,6 +77,7 @@ Orthogonal to the content work, and the thing to do when you want a break from w
 - [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
 - [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
 - [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
+- [ ] **Fresh screenshots** for the README, once the interface work above is done. The current ones predate the TypeScript puzzles and the clarity rewrite.
 - [ ] **Upgrade the repo to TypeScript 6.** The app is built with 5.9 while its content teaches 6.0 behavior, like `strict` on by default.
 - [ ] **Split the bundle by division.** Every question ships in one chunk, now 564 kB (177 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
 
