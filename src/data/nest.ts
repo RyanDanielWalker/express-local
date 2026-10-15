@@ -688,7 +688,7 @@ one(@Param() params) {}`,
       'Decide what the API sends back.',
       'Pay attention to extra fields and to types.',
     ],
-    hook: 'DTO must be a class (interfaces vanish at runtime). ValidationPipe fails with 400 and a message array.',
+    hook: 'For ValidationPipe, a DTO must be a class (interfaces vanish at runtime). It fails with 400 and a message array.',
     par: 95,
     flows: [
       {
@@ -731,7 +731,7 @@ one(@Param() params) {}`,
           { name: 'Fail with 400 when an unknown field shows up', bucket: 'forbidNonWhitelisted', why: 'forbidNonWhitelisted turns stripping into an error. It only does anything with whitelist on too.' },
           { name: 'Tell the client exactly which extra field was the problem', bucket: 'forbidNonWhitelisted', why: 'The 400 says "property isAdmin should not exist", so the client can fix the request.' },
           { name: 'Turn the "42" in /users/42 into a number', bucket: 'transform', why: 'With transform on, params are converted to the type you annotated, so id: number really is a number. Without it, it is the string "42".' },
-          { name: 'Hand the handler a real CreateUserDto instance', bucket: 'transform', why: 'Without transform, the handler gets a plain object. With it, the handler gets the class instance, so its methods and defaults work.' },
+          { name: 'Hand the handler a real CreateUserDto instance', bucket: 'transform', why: 'Without transform, the handler gets a plain object. With it, the handler gets the class instance, so its methods work, and a field the client left out keeps the default written in the class.' },
         ],
         note: 'whitelist strips, forbidNonWhitelisted rejects, transform converts. A common setup turns on all three: unknown fields fail loudly, and the handler gets typed values it can trust.',
       },
@@ -757,7 +757,7 @@ one(@Param() params) {}`,
           'It passes, and age stays the string "30"',
         ],
         a: '400, because "30" is a string',
-        why: 'The number annotation is a type, not a conversion. JSON keeps "30" as a string, and @IsInt() rejects strings. Fix it on the client, or turn on transform with enableImplicitConversion if you want the pipe to coerce it.',
+        why: 'The number annotation is a type, not a conversion. JSON keeps "30" as a string, and @IsInt() rejects strings. Fix it on the client, or have the pipe convert it. That takes transform: true plus transformOptions: { enableImplicitConversion: true }. The conversion option alone converts a copy for validation, but the handler still gets the string.',
       },
       {
         t: 1,
@@ -798,7 +798,7 @@ one(@Param() params) {}`,
       },
       {
         t: 1,
-        q: 'Your DTO has validation decorators, but main.ts never calls useGlobalPipes and no route uses @UsePipes. What happens?',
+        q: 'Your DTO has validation decorators, but no ValidationPipe is registered anywhere: not in useGlobalPipes, not as APP_PIPE, not in @UsePipes() or @Body(). What happens?',
         opts: [
           'Nothing is validated. The decorators just sit there',
           'Nest applies a default ValidationPipe anyway',
@@ -836,7 +836,7 @@ one(@Param() params) {}`,
 findOne(@Param('id') id: number) {}`,
         opts: ['The number 42', 'The string "42"', '400 Bad Request'],
         a: 'The number 42',
-        why: 'transform builds a real instance and converts primitives to the declared types. Without it, you get the string.',
+        why: 'With transform on, a single route param or query value is converted to its declared type, here Number. Without it, you get the string "42". This only covers lone values like this one. Fields inside a DTO are not converted unless you add @Type(() => Number) or enableImplicitConversion.',
       },
       {
         t: 2,
@@ -858,7 +858,7 @@ findOne(@Param('id') id: number) {}`,
           'type UpdateUserDto = Partial<CreateUserDto>',
         ],
         a: 'class UpdateUserDto extends PartialType(CreateUserDto)',
-        why: 'Mapped types (PartialType, PickType, OmitType, from @nestjs/mapped-types) keep the validation rules and stop the two DTOs drifting apart.',
+        why: 'Mapped types (PartialType, PickType, OmitType, from @nestjs/mapped-types) keep the validation rules and stop the two DTOs drifting apart. With Swagger, import them from @nestjs/swagger instead.',
       },
       {
         t: 2,
@@ -876,7 +876,7 @@ findOne(@Param('id') id: number) {}`,
           'Nothing. Nested DTOs validate automatically',
         ],
         a: '@ValidateNested() plus @Type(() => AddressDto)',
-        why: 'Nest needs to know what class to build for the nested value, and @Type is how you tell it.',
+        why: '@ValidateNested() says to check the inner object against its own rules. @Type(() => AddressDto) says which class to build it as, because JSON arrives as a plain object with no rules attached. Leave out @Type and an invalid address passes without an error. @IsObject() only checks that the value is an object, not what is inside it.',
       },
       {
         t: 3,
@@ -887,7 +887,7 @@ findOne(@Param('id') id: number) {}`,
           'Inside the service, when the DTO is used',
         ],
         a: 'After guards and interceptors, before the handler',
-        why: 'Pipes are stage 5. Auth rejection should not cost you a validation pass, which is part of why guards run first.',
+        why: 'Pipes run after guards and the before-half of interceptors, right before the handler. A request that fails auth should not cost you a validation pass, which is part of why guards run first.',
       },
       {
         t: 3,
@@ -2312,15 +2312,15 @@ export class UsersController {
       ],
       [
         'transform',
-        'Turns the plain JSON into a real instance of the DTO class, and converts primitives to the declared types.',
+        'Turns the plain JSON into a real instance of the DTO class. It also converts a lone route param or query value to its declared type, like number. Fields inside a DTO need @Type(() => Number) or enableImplicitConversion to be converted.',
       ],
       [
         'PartialType',
-        'Makes every field of another DTO optional. Handy for PATCH.',
+        'Makes every field of another DTO optional. Handy for PATCH. With Swagger, import it from @nestjs/swagger so the docs see the fields.',
       ],
       [
         'StandardSchemaValidationPipe',
-        'Nest 12: validates Zod, Valibot or ArkType schemas attached with @Body({ schema }). The schema-first alternative to class-validator, which is still fully supported.',
+        'Nest 12: built in. Validates Zod, Valibot or ArkType schemas attached with @Body({ schema }), and the same option works on @Query and @Param. The schema-first alternative to class-validator, which is still fully supported.',
       ],
     ],
     code: {
@@ -2329,7 +2329,7 @@ export class UsersController {
 app.useGlobalPipes(new ValidationPipe({
   whitelist: true,            // drop unknown fields
   forbidNonWhitelisted: true, // or 400 on them
-  transform: true,            // real class instance + type coercion
+  transform: true,            // real instance, params converted
 }));
 
 // create-user.dto.ts
