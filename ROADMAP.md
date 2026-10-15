@@ -2,7 +2,7 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 32 lines across 4 divisions, 95 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done), then React.** No new divisions until they clear the bar below.
+Status: 32 lines across 4 divisions, 95 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS, then TypeScript, then React.** NestJS and TypeScript clear the bar and have been independently reviewed, but React waits until both have no loose threads left. No new divisions until all three clear the bar below.
 
 ## The bar
 
@@ -52,7 +52,15 @@ All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Chec
 - [x] **Independent review.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in CLAUDE.md: prove the wrong options, not just the right one.
 - [ ] **Gaps the reviewers flagged.** Assertion functions (`asserts x is User`), `x == null` as a null-and-undefined check, generic type aliases like `Box<T>`, Omit on a union of objects losing its tags, `.catch()` callbacks still getting any, typing React context, and extending native element props with `ComponentProps<'button'>`.
 
-## Next: React
+## Next: tie off NestJS and TypeScript
+
+Both divisions clear the bar, but each has open items above. React starts once these are done, in this order:
+
+1. **The NestJS clarity pass**, one line at a time, starting with Main Line. Rewriting copy can break a claim, so each line is re-checked against running Nest code before it is committed, and an independent reviewer checks the changed fields at the end.
+2. **The NestJS gaps.** Most become new questions on existing lines. Dynamic modules may need a line of their own.
+3. **The TypeScript gaps.** New questions on existing lines, each proved with `tsc`.
+
+## Then: React
 
 Three React lines also give their answers away by length (performance: 8 of 9).
 
