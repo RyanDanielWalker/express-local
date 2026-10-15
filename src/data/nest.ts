@@ -2592,8 +2592,10 @@ export class JwtAuthGuard implements CanActivate {
     if (open) return true;
 
     const req = ctx.switchToHttp().getRequest();
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) throw new UnauthorizedException();
+    const [type, token] = req.headers.authorization?.split(' ') ?? [];
+    if (type?.toLowerCase() !== 'bearer' || !token) {
+      throw new UnauthorizedException();
+    }
     try {
       req.user = await this.jwt.verifyAsync(token);
     } catch {
@@ -2605,15 +2607,15 @@ export class JwtAuthGuard implements CanActivate {
 
 // registered once, for the whole app:
 // providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }]`,
-      note: 'The Nest docs now lead with @nestjs/authentication, a first-party package with its own global guard, @Public() and @CurrentUser(). Passport with @nestjs/jwt is what most existing codebases use. The shape is the same either way.',
+      note: 'The Nest docs now lead with @nestjs/authentication, a newer first-party package (still 0.x). It ships its own global guard, @Public() and @CurrentUser(), and it still puts the user on req.user. It also adds AuthenticationContext, which any service can inject to read the current user without being handed the request. Passport with @nestjs/jwt is what most existing codebases use. The shape is the same either way.',
     },
     say: [
       'Authentication is who you are and fails with a 401. Authorization is what you may do and fails with a 403.',
       'I put auth in a guard, registered globally with APP_GUARD, so everything is locked by default and open routes opt out with a @Public() decorator.',
       'The guard verifies the token and puts the user on req.user, and a @CurrentUser() decorator hands it to handlers.',
-      'Passwords are stored as a slow, salted hash and compared at login. Nothing ever decrypts them.',
+      'Passwords are stored as a slow, salted hash, like bcrypt or argon2, and compared at login. Nothing ever decrypts them.',
     ],
-    gotcha: 'A JWT is signed, not encrypted. Anyone holding one can decode the payload and read it, so it should carry an id and maybe roles, never anything secret.',
+    gotcha: 'A JWT is signed, not encrypted. Anyone holding one can decode the payload and read it, so it should carry an id and maybe roles, never anything secret. Roles in a token can also go stale. Demote an admin, and their old token still says admin until it expires. Keep tokens short-lived, or check the database for anything sensitive.',
     rehearse: [
       {
         prompt: 'Walk me through JWT auth in a Nest app, from login to a protected request.',
