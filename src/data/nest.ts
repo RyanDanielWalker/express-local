@@ -2005,6 +2005,28 @@ remove() {}`,
         a: 'Config or env, read through ConfigService',
         why: 'A secret in the repo is a secret everyone with repo access has. Read it from the environment, typically with ConfigService and JwtModule.registerAsync, so each environment has its own and it can be rotated.',
       },
+      {
+        t: 3,
+        q: 'Your JwtAuthGuard works on REST routes. On a GraphQL resolver, context.switchToHttp().getRequest() returns undefined. What do you do?',
+        opts: [
+          'Re-read the context with GqlExecutionContext',
+          'Switch to RPC with context.switchToRpc()',
+          'Add @Req() to the resolver, then read it there',
+        ],
+        a: 'Re-read the context with GqlExecutionContext',
+        why: 'A GraphQL call reaches the guard as resolver arguments, not as an HTTP handler call, so switchToHttp() finds no request. GqlExecutionContext.create(context).getContext() returns the GraphQL context, and the request sits on it as req. context.getType() tells you which kind of call it is. switchToRpc() is for microservices. The guard runs before the resolver, so anything in the resolver is too late. With Passport, override getRequest() in your AuthGuard(\'jwt\') to return that req.',
+      },
+      {
+        t: 2,
+        q: 'A browser app gets a JWT at login. Where is it safest from being stolen by XSS, a script injected into your page?',
+        opts: [
+          'An httpOnly cookie, which page scripts cannot read',
+          'localStorage, since it survives a page refresh',
+          'A global variable in the frontend bundle',
+        ],
+        a: 'An httpOnly cookie, which page scripts cannot read',
+        why: 'The browser sends an httpOnly cookie with each request, but no script on the page can read it, so injected code cannot copy the token out. localStorage and global variables are readable by any script on the page. The trade-off is that cookies go out automatically, so you need CSRF protection, like SameSite=Lax or Strict. Your Nest guard then reads the token from the cookie instead of the Authorization header.',
+      },
     ],
     flows: [
       {
