@@ -2,7 +2,7 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 32 lines across 4 divisions, 94 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done, pending review), then React.** No new divisions until they clear the bar below.
+Status: 32 lines across 4 divisions, 94 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done), then React.** No new divisions until they clear the bar below.
 
 ## The bar
 
@@ -37,9 +37,9 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [ ] **A clarity pass, line by line.** The NestJS copy was written before the clarity standard in CLAUDE.md. Rewrite each line's explanations, field guide and notes to it, starting with whichever lines have been hardest to get through.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
 
-## Done (pending review): TypeScript
+## Done: TypeScript
 
-All six lines clear the bar. Checked against TypeScript 6.0 and 7.0 (`strict` on by default since 6.0; 7.0 is the same checker ported to Go) and against `@types/react` 19.3. Every claim on every line was written as code and run through `tsc`, with a probe shown to fail first. Not yet listed in `FINISHED`: that waits for the independent review below.
+All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Checked against TypeScript 6.0 and 7.0 (`strict` on by default since 6.0; 7.0 is the same checker ported to Go) and against `@types/react` 19.3. Every claim on every line was written as code and run through `tsc`, with a probe shown to fail first.
 
 - [x] **Narrow Gauge:** narrowing checks, the else branch, the truthiness trap, type predicates (including 5.5 inferred ones on filter), and two sorts
 - [x] **Generic Line:** everyday generics (Promise, Array, Set), inferred vs written type arguments, constraints, and a sort on which calls compile
@@ -47,7 +47,12 @@ All six lines clear the bar. Checked against TypeScript 6.0 and 7.0 (`strict` on
 - [x] **Unknown Territory:** any vs unknown, how any spreads, as and ! as claims not checks, satisfies (fixed: it does not keep literals, it keeps exact keys)
 - [x] **Shape Yard:** structural typing, the excess property check, declaration merging, extends vs &, branded types
 - [x] **Typed Components:** props, children, events, refs and hook type arguments on React 19 types. Found along the way: the global JSX namespace is gone, FormEvent is deprecated in favor of SubmitEvent, and ref is a normal prop
-- [ ] **Independent review.** A separate agent that did not write the content tries to break every claim: recompile every snippet, check library claims against current docs, flag opinion stated as fact and anything unclear. Every finding is verified before anything changes. Then add `ts` to `FINISHED`.
+- [x] **Independent review.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in CLAUDE.md: prove the wrong options, not just the right one.
+- [ ] **Gaps the reviewers flagged.** Assertion functions (`asserts x is User`), `x == null` as a null-and-undefined check, generic type aliases like `Box<T>`, Omit on a union of objects losing its tags, `.catch()` callbacks still getting any, typing React context, and extending native element props with `ComponentProps<'button'>`.
+
+## Next: an independent review of NestJS
+
+NestJS was checked against the v12 docs on 2026-10-07, but never by a reviewer that did not write it. The TypeScript review found real errors in content that had already passed every test, so NestJS gets the same treatment before React starts: reviewers try to break every claim against the current docs, every finding is verified, then fixed.
 
 ## Then: React
 
@@ -150,3 +155,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** The bar checks for any length giveaway (longest, middle or shortest), not just the longest. Tool Shed and Test Track rebalanced
 - **2026-10-15** Utility Yard clears the bar. TypeScript at 3 of 6
 - **2026-10-15** Unknown Territory, Shape Yard and Typed Components clear the bar. TypeScript at 6 of 6, pending independent review
+- **2026-10-15** Independent review of TypeScript: 8 wrong and about 20 misleading items found and fixed, re-checked, and TypeScript added to `FINISHED`
