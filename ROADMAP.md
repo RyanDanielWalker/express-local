@@ -34,7 +34,7 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [x] **A testing line.** Test Track. `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
 - [x] **An auth line.** Turnstile. Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
 - [x] **More flows.** The validation pipeline on the DTO line, DI resolution order on Wiring Yard, an exception's trip to the client on Fault Line, and an interceptor wrapping a handler on Tool Shed.
-- [ ] **A clarity pass, line by line.** The NestJS copy was written before the clarity standard in CLAUDE.md. Rewrite each line's explanations, field guide and notes to it, starting with whichever lines have been hardest to get through.
+- [x] **A clarity pass, line by line.** All nine lines rewritten to the clarity standard in CLAUDE.md: one idea per sentence, terms defined where they appear, and explanations that say why the tempting wrong answer is wrong. Three reviewers then ran all 201 changed fields against Nest 12.1.3 and flagged 19, all fixed.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
 - [x] **Independent review.** Three reviewers that had not seen the content ran its claims as real code against Nest 12.1.3. They found wrong answers or explanations on most lines, and many more misleading ones. The worst: a missing `@Injectable()` listed as a cause of "can't resolve dependencies" (it boots, with an undefined dependency), `overrideGuard` advised for a global `APP_GUARD` it cannot reach, `transform: true` said to convert DTO fields, and a catch-all filter example that dropped every error message. Each finding was reproduced, fixed line by line, then a second set of reviewers re-checked all 122 changed fields and flagged 16 more, also fixed.
 - [ ] **Gaps the reviewers flagged.** Dynamic modules (`forRoot`, `forRootAsync`), custom decorators with `SetMetadata` and `Reflector` beyond `@Public()`, lifecycle and shutdown hooks, guards on GraphQL (`GqlExecutionContext`), where a client should keep its token, why e2e tests must re-apply global pipes set in `main.ts`, and injecting dependencies into an `APP_FILTER` filter.
@@ -56,7 +56,7 @@ All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Chec
 
 Both divisions clear the bar, but each has open items above. React starts once these are done, in this order:
 
-1. **The NestJS clarity pass**, one line at a time, starting with Main Line. Rewriting copy can break a claim, so each line is re-checked against running Nest code before it is committed, and an independent reviewer checks the changed fields at the end.
+1. ~~**The NestJS clarity pass.**~~ Done.
 2. **The NestJS gaps.** Most become new questions on existing lines. Dynamic modules may need a line of their own.
 3. **The TypeScript gaps.** New questions on existing lines, each proved with `tsc`.
 
@@ -163,3 +163,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** Unknown Territory, Shape Yard and Typed Components clear the bar. TypeScript at 6 of 6, pending independent review
 - **2026-10-15** Independent review of TypeScript: 8 wrong and about 20 misleading items found and fixed, re-checked, and TypeScript added to `FINISHED`
 - **2026-10-15** Independent review of NestJS against running Nest 12.1.3 code: wrong and misleading items fixed across all nine lines, then re-checked
+- **2026-10-15** NestJS clarity pass: all nine lines rewritten to the clarity standard, then reviewed against running code
