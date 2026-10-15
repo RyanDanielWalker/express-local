@@ -1742,6 +1742,49 @@ findOne(@Param('id') id: number) {}`,
         a: 'Extend BaseExceptionFilter and call super.catch()',
         why: 'BaseExceptionFilter is the built-in behavior. Extend it, log, then hand off with super.catch(exception, host), so the client still gets the standard response. It needs the HTTP adapter to send that response. Register it with APP_FILTER and Nest supplies it, or pass it in yourself: new MyFilter(httpAdapter). Built with a bare new MyFilter(), super.catch() crashes and the client gets a 500. Rethrowing is not a real hand-off. From a global filter, the error escapes Nest, and Express sends its own HTML error page.',
       },
+      {
+        t: 2,
+        q: 'Roles is made with Reflector.createDecorator. How does the guard read the roles off the handler?',
+        code: `export const Roles = Reflector.createDecorator<string[]>();
+
+@Get() @Roles(['admin'])
+remove() {}`,
+        opts: [
+          'this.reflector.get(Roles, context.getHandler())',
+          'this.reflector.get(\'roles\', context.getHandler())',
+          'Roles.read(context.getHandler())',
+        ],
+        a: 'this.reflector.get(Roles, context.getHandler())',
+        why: 'Reflector.createDecorator() returns a decorator that carries its own generated key, on Roles.KEY. Pass the decorator to reflector.get(), and Nest reads that key for you. The result comes back typed as string[]. No \'roles\' string is involved, so reading with that string finds nothing. Roles has no read() method. The older way, SetMetadata(\'roles\', roles) with a string key, still works.',
+      },
+      {
+        t: 3,
+        q: 'You want one @Auth(\'admin\') decorator that sets the roles and also adds @UseGuards(JwtAuthGuard, RolesGuard). What builds it?',
+        opts: [
+          'applyDecorators(), with the decorators to combine',
+          'createParamDecorator(), wrapping the other two',
+          'SetMetadata(\'decorators\', [Roles, UseGuards])',
+        ],
+        a: 'applyDecorators(), with the decorators to combine',
+        why: 'applyDecorators() takes any number of decorators and returns one that applies them all: export const Auth = (...roles) => applyDecorators(SetMetadata(\'roles\', roles), UseGuards(JwtAuthGuard, RolesGuard)). createParamDecorator() is for handler parameters like @CurrentUser(), not for routes. SetMetadata only stores data, and nothing would read a list of decorators back out of it.',
+      },
+      {
+        t: 2,
+        q: 'In @CurrentUser(\'email\'), where does \'email\' end up?',
+        code: `export const CurrentUser = createParamDecorator(
+  (data: string | undefined, ctx: ExecutionContext) => {
+    const user = ctx.switchToHttp().getRequest().user;
+    return data ? user?.[data] : user;
+  },
+);`,
+        opts: [
+          'As data, the factory\'s first argument',
+          'As a request header name for Nest to read',
+          'As a pipe that Nest runs on the user',
+        ],
+        a: 'As data, the factory\'s first argument',
+        why: 'The first argument you pass to the decorator arrives as data, the first argument of the factory. This factory returns user[data] when data is set. So @CurrentUser(\'email\') gives you just the email, and @CurrentUser() gives you the whole user. \'email\' is a plain string, so it is not a pipe. Nest only treats extra arguments after it as pipes. Nothing here reads a header.',
+      },
     ],
     sorts: [
       {
