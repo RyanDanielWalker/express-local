@@ -76,5 +76,8 @@ This standard is new as of October 2026. Older lines are being brought up to it 
 Rereading is not enough: it missed real errors that `tsc` caught. For every TypeScript line:
 
 1. Write each claim (every question, explanation, puzzle card and field guide example) as code in a scratch probe, with an `Expect<A, B>` type assertion or a `// @ts-expect-error` where something should fail.
-2. Add one deliberately wrong assertion first and confirm the probe fails, so a pass means something.
-3. Run it with `strict` on, then fix the content wherever the compiler disagrees. Version-dependent behavior says which version (for example, inferred type predicates since 5.5).
+2. Prove every **wrong** option is wrong too, not just that the right one is right. A wrong option a knowledgeable person could defend is a bug. The first independent review found two of these that a right-answers-only probe passed.
+3. Add one deliberately wrong assertion first and confirm the probe fails, so a pass means something.
+4. Run it with `strict` on, then fix the content wherever the compiler disagrees. Version-dependent behavior says which version (for example, inferred type predicates since 5.5), and anything that depends on `strict` or another setting says so.
+5. Any later edit to an option, including rebalancing lengths, gets re-proved. Rebalancing once turned a wrong option into a true one.
+6. When a division is done, an independent agent that did not write it reviews it, trying to break every claim. Verify each finding before changing anything.
