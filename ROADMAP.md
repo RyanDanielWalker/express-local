@@ -42,7 +42,8 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 One line at a time, played before the next one starts.
 
 - [x] **Narrow Gauge** clears the bar: 9 Local questions, two sorts (which check narrows which union, and the type at each spot in a function), a type predicate rehearsal, and the 5.5 inferred predicates on filter
-- [ ] Fill tier 1 to 9 questions a line, so replays differ: about 30 across the other five lines
+- [x] **Generic Line** clears the bar: everyday generics (Promise, Array, Set), inferred vs written type arguments, constraints, and a sort on which calls compile
+- [ ] Fill tier 1 to 9 questions a line, so replays differ: about 24 across the other four lines
 - [ ] Rehearsal to three prompts a line
 - [ ] A sort line: utility types by what they operate on, object keys vs union members
 - [ ] Two Local puzzles per line, so it is not six recognition quizzes in a row
@@ -98,7 +99,7 @@ Whether this gets a backend.
 
 Learned the hard way, mostly by getting them wrong first.
 
-- **Measure, don't eyeball.** The correct answer was the longest option in 83% of questions before anyone counted. A test enforces it now.
+- **Measure, don't eyeball.** The correct answer was the longest option in 83% of questions before anyone counted. A test enforces it now. Then the fix for that, padding the wrong answers, quietly made the middle-length option right more than half the time on four lines. The bar now checks every length position, not just the one we thought of first.
 - **A hint panel must never contain the answer.** The lifecycle hook was printed twice on screen while you solved the lifecycle puzzle.
 - **Color means one thing everywhere.** Red is wrong, green is right, the line color is identity.
 - **The headline number should be a state you can lose, not a total you accumulate.** XP measures time spent. Readiness measures what you would recall today.
@@ -140,3 +141,6 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-07** NestJS content checked against the v12 docs: route order, schema-first validation, errorCode, serialization, Jest on Node 24.9
 - **2026-10-07** Replays differ: unseen and shaky questions first, puzzles rotate, and the bar checks pool size. 24 new Local questions and 9 Local puzzles across NestJS
 - **2026-10-13** Narrow Gauge clears the bar, the first TypeScript line to do it
+- **2026-10-15** Clarity standard for all copy; Narrow Gauge rewritten to it
+- **2026-10-15** Generic Line clears the bar, every claim checked with tsc
+- **2026-10-15** The bar checks for any length giveaway (longest, middle or shortest), not just the longest. Tool Shed and Test Track rebalanced
