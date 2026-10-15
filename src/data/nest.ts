@@ -2247,6 +2247,17 @@ remove() {}`,
         a: 'A fake ExecutionContext with the request you want',
         why: 'A guard is a class with one method, so you can call it directly. Build an object shaped like an ExecutionContext. Its switchToHttp().getRequest() returns your fake request, and getHandler() and getClass() return what Reflector reads. Then assert on the boolean. No HTTP needed.',
       },
+      {
+        t: 2,
+        q: 'main.ts calls app.useGlobalPipes(new ValidationPipe()). Your e2e test builds the app from AppModule and posts a bad body. It gets a 201. Why?',
+        opts: [
+          'main.ts never runs in the test, so no pipe is set',
+          'ValidationPipe turns itself off when NODE_ENV is test',
+          'supertest sends the body as text, so it is skipped',
+        ],
+        a: 'main.ts never runs in the test, so no pipe is set',
+        why: 'The test builds its own app with createNestApplication(). It never runs main.ts, so nothing in main.ts applies, useGlobalPipes included. Call app.useGlobalPipes() on the test app too, or register the pipe in a module with APP_PIPE, so every app built from AppModule gets it. Nest has no special test mode, and supertest\'s .send() with an object sends JSON.',
+      },
     ],
     flows: [
       {
