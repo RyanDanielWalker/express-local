@@ -1528,6 +1528,17 @@ findOne(@Param('id') id: number) {}`,
         a: 'errorCode: \'WEAK_PASSWORD\' in the options',
         why: 'new BadRequestException("Password is too weak", { errorCode: "WEAK_PASSWORD" }). Nest adds errorCode to the response body, unless you pass your own object as the body. cause is different: it is for your logs and is not sent to the client.',
       },
+      {
+        t: 2,
+        q: 'Your global exception filter injects a LoggerService. How do you register it so Nest builds it with that dependency?',
+        opts: [
+          '{ provide: APP_FILTER, useClass: AllExceptionsFilter }',
+          'app.useGlobalFilters(AllExceptionsFilter) in main.ts',
+          '@Catch(LoggerService) on the filter class itself',
+        ],
+        a: '{ provide: APP_FILTER, useClass: AllExceptionsFilter }',
+        why: 'As an APP_FILTER provider in a module, the filter is built by DI, so its LoggerService gets injected. useGlobalFilters() takes an instance you built yourself, not a class, so you would have to write new AllExceptionsFilter(app.get(LoggerService)) by hand. @Catch() lists the errors a filter handles, and has nothing to do with injection.',
+      },
     ],
   },
   {
