@@ -2,7 +2,7 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 32 lines across 4 divisions, 95 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS, then TypeScript, then React.** NestJS and TypeScript clear the bar and have been independently reviewed, but React waits until both have no loose threads left. No new divisions until all three clear the bar below.
+Status: 32 lines across 4 divisions, 95 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done), then React.** NestJS and TypeScript are finished, with no loose threads left. No new divisions until all three clear the bar below.
 
 ## The bar
 
@@ -50,17 +50,11 @@ All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Chec
 - [x] **Shape Yard:** structural typing, the excess property check, declaration merging, extends vs &, branded types
 - [x] **Typed Components:** props, children, events, refs and hook type arguments on React 19 types. Found along the way: the global JSX namespace is gone, FormEvent is deprecated in favor of SubmitEvent, and ref is a normal prop
 - [x] **Independent review.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in CLAUDE.md: prove the wrong options, not just the right one.
-- [ ] **Gaps the reviewers flagged.** Assertion functions (`asserts x is User`), `x == null` as a null-and-undefined check, generic type aliases like `Box<T>`, Omit on a union of objects losing its tags, `.catch()` callbacks still getting any, typing React context, and extending native element props with `ComponentProps<'button'>`.
+- [x] **Gaps the reviewers flagged.** 8 new questions: assertion functions and `x == null` on Narrow Gauge, generic type aliases and defaults on Generic Line, Omit on a union on Utility Yard, `.catch()` callbacks on Unknown Territory, and context and `ComponentProps<'button'>` on Typed Components. Each was proved with `tsc`, then checked by an independent reviewer.
 
-## Next: tie off NestJS and TypeScript
+## Next: React
 
-Both divisions clear the bar, but each has open items above. React starts once these are done, in this order:
-
-1. ~~**The NestJS clarity pass.**~~ Done.
-2. ~~**The NestJS gaps.**~~ Done, as questions on existing lines.
-3. **The TypeScript gaps.** New questions on existing lines, each proved with `tsc`.
-
-## Then: React
+NestJS and TypeScript have no open items: both clear the bar, both were independently reviewed against running code or the compiler, and the gaps the reviewers found are closed.
 
 Three React lines also give their answers away by length (performance: 8 of 9).
 
@@ -165,3 +159,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** Independent review of NestJS against running Nest 12.1.3 code: wrong and misleading items fixed across all nine lines, then re-checked
 - **2026-10-15** NestJS clarity pass: all nine lines rewritten to the clarity standard, then reviewed against running code
 - **2026-10-15** NestJS gaps closed: 13 questions on dynamic modules, lifecycle hooks, custom decorators, GraphQL guards, token storage and e2e pipes
+- **2026-10-15** TypeScript gaps closed: 8 questions, each proved with tsc. NestJS and TypeScript have no open items
