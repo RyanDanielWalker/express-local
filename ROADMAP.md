@@ -36,12 +36,12 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [x] **More flows.** The validation pipeline on the DTO line, DI resolution order on Wiring Yard, an exception's trip to the client on Fault Line, and an interceptor wrapping a handler on Tool Shed.
 - [x] **A clarity pass, line by line.** All nine lines rewritten to the clarity standard in CLAUDE.md: one idea per sentence, terms defined where they appear, and explanations that say why the tempting wrong answer is wrong. Three reviewers then ran all 201 changed fields against Nest 12.1.3 and flagged 19, all fixed.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
-- [x] **Independent review.** Three reviewers that had not seen the content ran its claims as real code against Nest 12.1.3. They found wrong answers or explanations on most lines, and many more misleading ones. The worst: a missing `@Injectable()` listed as a cause of "can't resolve dependencies" (it boots, with an undefined dependency), `overrideGuard` advised for a global `APP_GUARD` it cannot reach, `transform: true` said to convert DTO fields, and a catch-all filter example that dropped every error message. Each finding was reproduced, fixed line by line, then a second set of reviewers re-checked all 122 changed fields and flagged 16 more, also fixed.
+- [x] **Independent review.** Three reviewers that had not seen the content ran its claims as real code against Nest 12.1.3. They found wrong answers or explanations on most lines, and many more misleading ones. The worst: a missing `@Injectable()` listed as a cause of "can't resolve dependencies" (it boots, with an undefined dependency), `overrideGuard` advised for a global `APP_GUARD` it cannot reach, `transform: true` said to convert DTO fields, and a catch-all filter example that dropped every error message. Each finding was checked against the Nest source or a probe, fixed line by line, then a second set of reviewers re-checked all 122 changed fields and flagged 16 more, also fixed.
 - [x] **Gaps the reviewers flagged.** 13 new questions: dynamic modules (`forRoot`, `forFeature`, `forRootAsync`) and lifecycle and shutdown hooks on Wiring Yard, an `APP_FILTER` filter with dependencies on Fault Line, custom decorators (`Reflector.createDecorator`, `applyDecorators`, `createParamDecorator`) on Tool Shed, GraphQL guards and token storage on Turnstile, and global pipes in e2e tests on Test Track. Each was run against Nest 12.1.3, then checked by an independent reviewer.
 
 ## Done: TypeScript
 
-All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Checked against TypeScript 6.0 and 7.0 (`strict` on by default since 6.0; 7.0 is the same checker ported to Go) and against `@types/react` 19.3. Every claim on every line was written as code and run through `tsc`, with a probe shown to fail first.
+All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Every claim on every line was written as code and proved with `tsc`, with each probe shown to fail first. The probes pass under TypeScript 5.9 (what the repo builds with), 6.0 and 7.0 (`strict` on by default since 6.0; 7.0 is the same checker ported to Go), against `@types/react` 19.3.
 
 - [x] **Narrow Gauge:** narrowing checks, the else branch, the truthiness trap, type predicates (including 5.5 inferred ones on filter), and two sorts
 - [x] **Generic Line:** everyday generics (Promise, Array, Set), inferred vs written type arguments, constraints, and a sort on which calls compile
@@ -82,8 +82,8 @@ Orthogonal to the content work, and the thing to do when you want a break from w
 - [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
 - [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
 - [ ] **Fresh screenshots** for the README, once the interface work above is done. The current ones predate the TypeScript puzzles and the clarity rewrite.
-- [ ] **Upgrade the repo to TypeScript 6.** The app is built with 5.9 while its content teaches 6.0 behavior, like `strict` on by default.
-- [ ] **Split the bundle by division.** Every question ships in one chunk, now 564 kB (177 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
+- [ ] **Upgrade the repo to TypeScript 6.** The app is built with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The content's probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
+- [ ] **Split the bundle by division.** Every question ships in one chunk, now 638 kB (200 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
 
 ## Engine ideas
 
@@ -119,7 +119,7 @@ Learned the hard way, mostly by getting them wrong first.
 - **Concepts without the API is half a lesson.** Knowing a pipe validates input and not being able to name `ValidationPipe` is the gap between having read the docs and having used the thing.
 - **Depth before breadth.** A division that cannot carry an interview on its own topic is not finished, and a new division does not fix it.
 - **Prove it with the compiler.** Rereading TypeScript content missed two wrong claims that `tsc` caught in seconds: a wrong answer that actually worked, and an explanation that predated 5.5. Every claim gets written as code with an assertion, and the probe gets a deliberate wrong assertion first, to prove it can fail.
-- **Check the docs, not memory.** NestJS 12 shipped after the first Nest lines were written. A pass against the current docs found rules stated as universal that were really Express defaults or ValidationPipe specifics. Say which version or adapter a claim depends on, and re-check a division when its framework ships a major version.
+- **Check the docs, then run it.** NestJS 12 shipped after the first Nest lines were written. A pass against the current docs found rules stated as universal that were really Express defaults or ValidationPipe specifics. Running the claims as real code found more, including spots where the docs and the code disagree. Say which version or adapter a claim depends on, run it, and re-check a division when its framework ships a major version.
 - **Clear beats clever.** If a sentence needs reading twice, it failed. One idea per sentence, the example before the name for it, and every term defined the first time it matters. Taking longer to write it clearly is fine: this is a months-long project, and the goal is being able to say it in an interview.
 - **No em dashes.**
 

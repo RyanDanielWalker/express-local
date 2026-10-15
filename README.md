@@ -33,12 +33,12 @@ Checked against the NestJS 12 documentation, then reviewed claim by claim agains
 | | Line | Topic |
 |---|---|---|
 | **1** | Main Line | The request lifecycle, in order |
-| **2** | Wiring Yard | DI, modules, "Nest can't resolve dependencies" |
+| **2** | Wiring Yard | DI, modules, dynamic modules, lifecycle hooks, "Nest can't resolve dependencies" |
 | **3** | Platform Signs | Controllers, routing, params, status codes |
 | **4** | Ticket Check | DTOs, ValidationPipe, and schema-first validation |
 | **5** | Dispatch Desk | Guard vs pipe vs interceptor vs filter vs middleware |
 | **6** | Fault Line | Exceptions, status codes, filters |
-| **7** | Tool Shed | What you implement: canActivate, transform, intercept, catch, use |
+| **7** | Tool Shed | What you implement: canActivate, transform, intercept, catch, use, and custom decorators |
 | **8** | Turnstile | Auth: tokens, guards, req.user, @Public(), 401 vs 403 |
 | **9** | Test Track | Testing modules, overrideProvider, unit vs e2e |
 
@@ -54,6 +54,8 @@ Checked against the NestJS 12 documentation, then reviewed claim by claim agains
 | **N** | Hook Junction | Hook rules and the React 19 APIs |
 
 ### TypeScript
+
+Every claim is proven with the compiler, with `strict` on, under TypeScript 5.9, 6.0 and 7.0 and `@types/react` 19.3.
 
 | | Line | Topic |
 |---|---|---|
@@ -94,9 +96,9 @@ A few choices that shape how the app teaches. [ROADMAP.md](ROADMAP.md) has the f
 - **Readiness over XP.** A total that only goes up measures time spent, and it topped out after a fraction of the content. Readiness is a state that can drop, which is what makes it useful the week before an interview.
 - **Never answer the question for the player.** Naming the correct step after a wrong click turned the most useful moment in a puzzle into reading, and made a wrong click the cheapest hint in the app.
 - **Measure the content, not just the code.** An audit found the correct answer was the longest option in 83% of questions, so "pick the longest" beat knowing the material. Fixing that by padding the wrong answers made the middle-length option right more than half the time instead. The bar now checks every length position on every line, sort cards cannot be named after their own box, and the study notes stay off the play screen.
-- **Content is checked against current docs.** NestJS 12 changed defaults and added options after the first lines were written. Claims that depend on a version or an adapter say so.
-- **TypeScript claims are proven with the compiler.** Every example and explanation on a TypeScript line is written out as code and run through `tsc` with assertions that can fail. It has caught real errors, like a wrong answer that actually narrowed correctly, and an empty `new Map()` turning out to be `Map<any, any>`.
-- **Clear beats clever.** One idea per sentence, the example before the name for it, and every term defined the first time it matters. Every explanation says why the right answer is right and why the tempting wrong one is wrong. Older lines are being rewritten to it one at a time.
+- **NestJS claims are proven by running them.** NestJS 12 changed defaults and added options after the first lines were written, and the docs do not always match what the code does. Every claim, including why each wrong option is wrong, is run as a small Nest 12.1.3 app. Claims that depend on a version or an adapter say so.
+- **TypeScript claims are proven with the compiler.** Every example and explanation on a TypeScript line is written out as code and run through `tsc` with assertions that can fail, under TypeScript 5.9, 6.0 and 7.0. It has caught real errors, like a wrong answer that actually narrowed correctly, and an empty `new Map()` turning out to be `Map<any, any>`.
+- **Clear beats clever.** One idea per sentence, the example before the name for it, and every term defined the first time it matters. Every explanation says why the right answer is right and why the tempting wrong one is wrong. NestJS and TypeScript are written to it, and React is next.
 
 ## Engineering
 
@@ -136,7 +138,7 @@ npm run build      # typecheck and production build into dist/
 1. Add the id to the division's id type in `src/engine/types.ts`.
 2. Add the line and its field guide entry to the division's data file in `src/data/` (`lines.ts` and `guide.ts`, `nest.ts`, `react.ts` or `typescript.ts`).
 3. Give it at least 9 / 12 / 15 questions available on Local / Express / Rush Hour, two Local puzzles (flows or sorts), and three rehearsal prompts.
-4. Write to the clarity standard in [CLAUDE.md](CLAUDE.md), and for a TypeScript line, check every claim with the compiler.
+4. Write to the clarity standard in [CLAUDE.md](CLAUDE.md). For a TypeScript line, check every claim with the compiler. For a NestJS line, run every claim against real Nest code.
 5. Run `npm test` and `npm run bar`. A line in a finished division has to clear the bar before the tests pass.
 6. A `kind: 'game'` line also needs pure logic with tests in `src/algorithms/` and a component registered in `src/games/index.ts`.
 
@@ -144,11 +146,11 @@ A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-The current focus is bringing TypeScript, then React, up to the same bar as NestJS. [ROADMAP.md](ROADMAP.md) has the full board.
+NestJS and TypeScript are finished. React is next, then the interface work. [ROADMAP.md](ROADMAP.md) has the full board.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
-- [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler
+- [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and independently reviewed
 - [ ] **React** to the same bar
 - [ ] **Reorganize the page:** a Today band, collapsible divisions, and a play mode that takes over the screen
 - [ ] **Scenario mode:** read a real-world situation, pick the right tool

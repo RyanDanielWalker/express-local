@@ -56,13 +56,13 @@ The point of every line is that the idea clicks and can then be explained out lo
 5. **Explain both sides.** A `why` says why the right answer is right and why the tempting wrong one is wrong.
 6. **Clear, not long.** Cut any word that is not helping. No metaphors that need decoding.
 
-This standard is new as of October 2026. Older lines are being brought up to it one at a time (see ROADMAP.md).
+NestJS and TypeScript are written to it. React and the algorithm lines are not yet, and get brought up to it when their turn comes (see ROADMAP.md).
 
 ### The rest
 
 - Every question needs its answer among its options, at least two options, and a `why` that teaches rather than restates.
 - Tier 1 questions are the ones a junior should get. Tier 3 is the deep cut.
-- Keep claims checkable: stack answers follow the current docs, and version-specific behavior says which version.
+- Keep claims checkable: stack answers follow current behavior, and version-specific behavior says which version. The docs are where to start, not proof: compile TypeScript claims and run NestJS claims (sections below).
 - Options must not give the answer away by length. `data.test.ts` fails a question whose answer is 1.35x its distractors. The bar fails a line where the answer sits in the same length position (longest, middle or shortest) more than half the time: fixing "always the longest" by padding the wrong answers just moves the giveaway to the middle. Write every option as a parallel claim, vary which one is longest, and put the nuance in `why`.
 - Non-algorithm lines need at least three `rehearse` prompts in their guide, written as a full spoken answer.
 - The bar: `src/data/bar.ts` audits each line against the checks in ROADMAP.md. Run `npm run bar` to see where every division stands before proposing content work. Add a division to `FINISHED` only once it could carry an interview on its own topic; from then on the tests fail if any of its lines slips below the bar.
@@ -78,6 +78,18 @@ Rereading is not enough: it missed real errors that `tsc` caught. For every Type
 1. Write each claim (every question, explanation, puzzle card and field guide example) as code in a scratch probe, with an `Expect<A, B>` type assertion or a `// @ts-expect-error` where something should fail.
 2. Prove every **wrong** option is wrong too, not just that the right one is right. A wrong option a knowledgeable person could defend is a bug. The first independent review found two of these that a right-answers-only probe passed.
 3. Add one deliberately wrong assertion first and confirm the probe fails, so a pass means something.
-4. Run it with `strict` on, then fix the content wherever the compiler disagrees. Version-dependent behavior says which version (for example, inferred type predicates since 5.5), and anything that depends on `strict` or another setting says so.
+4. Run it with `strict` on, under every TypeScript version the content claims to cover (currently 5.9, 6.0 and 7.0), then fix the content wherever the compiler disagrees. Version-dependent behavior says which version (for example, inferred type predicates since 5.5), and anything that depends on `strict` or another setting says so.
 5. Any later edit to an option, including rebalancing lengths, gets re-proved. Rebalancing once turned a wrong option into a true one.
 6. When a division is done, an independent agent that did not write it reviews it, trying to break every claim. Verify each finding before changing anything.
+
+### Checking NestJS claims against running code
+
+The docs are not enough either. The independent review found claims the docs supported but Nest 12.1.3 did not, like `@HttpCode()` still applying alongside `@Res()`. For every NestJS line:
+
+1. Keep a throwaway project on the current Nest version, outside the repo, with `@nestjs/testing` and supertest.
+2. Write each claim as a small module, built with `Test.createTestingModule` and hit with supertest. Print what actually happens: the status, the body, which hooks and filters ran.
+3. Prove every wrong option is wrong too, the same as for TypeScript.
+4. Add one check that should fail, and confirm it does.
+5. Say which adapter a claim assumes. Express is the default, so call out anything Fastify does differently.
+6. Re-run whatever a rewrite touches. The clarity pass added new "why the wrong option is wrong" sentences, and reviewers found some of them false.
+7. When a pass is done, an independent agent that did not write it reviews the changed fields against running code. Verify each finding before changing anything.
