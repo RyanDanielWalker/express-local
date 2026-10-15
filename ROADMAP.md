@@ -45,9 +45,9 @@ One line at a time, played before the next one starts. Each one gets content to 
 
 - [x] **Narrow Gauge** clears the bar: 9 Local questions, two sorts (which check narrows which union, and the type at each spot in a function), a type predicate rehearsal, and the 5.5 inferred predicates on filter
 - [x] **Generic Line** clears the bar: everyday generics (Promise, Array, Set), inferred vs written type arguments, constraints, and a sort on which calls compile
-- [ ] Fill tier 1 to 9 questions a line, so replays differ: about 24 across the other four lines
+- [x] **Utility Yard** clears the bar: Partial, Pick, Omit, Record, Readonly, the Pick vs Omit typo trap, and the object-keys vs union-members sort
+- [ ] Fill tier 1 to 9 questions a line, so replays differ: about 18 across the other three lines
 - [ ] Rehearsal to three prompts a line
-- [ ] A sort line: utility types by what they operate on, object keys vs union members
 - [ ] Two Local puzzles per line, so it is not six recognition quizzes in a row
 
 ## Then: React
@@ -149,3 +149,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** Clarity standard for all copy; Narrow Gauge rewritten to it
 - **2026-10-15** Generic Line clears the bar, every claim checked with tsc
 - **2026-10-15** The bar checks for any length giveaway (longest, middle or shortest), not just the longest. Tool Shed and Test Track rebalanced
+- **2026-10-15** Utility Yard clears the bar. TypeScript at 3 of 6
