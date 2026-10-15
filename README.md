@@ -28,7 +28,7 @@ Hand-built games. You play the algorithm step by step.
 
 ### NestJS
 
-Checked against the NestJS 12 documentation. Where a behavior depends on the version or the HTTP adapter, the content says which.
+Checked against the NestJS 12 documentation, then reviewed claim by claim against running Nest 12.1.3 code. Where a behavior depends on the version or the HTTP adapter, the content says which.
 
 | | Line | Topic |
 |---|---|---|
@@ -146,7 +146,7 @@ A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 The current focus is bringing TypeScript, then React, up to the same bar as NestJS. [ROADMAP.md](ROADMAP.md) has the full board.
 
-- [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite
+- [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
 - [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler
 - [ ] **React** to the same bar

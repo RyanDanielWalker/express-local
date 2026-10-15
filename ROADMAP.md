@@ -2,7 +2,7 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 32 lines across 4 divisions, 94 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done), then React.** No new divisions until they clear the bar below.
+Status: 32 lines across 4 divisions, 95 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done), then React.** No new divisions until they clear the bar below.
 
 ## The bar
 
@@ -36,6 +36,8 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [x] **More flows.** The validation pipeline on the DTO line, DI resolution order on Wiring Yard, an exception's trip to the client on Fault Line, and an interceptor wrapping a handler on Tool Shed.
 - [ ] **A clarity pass, line by line.** The NestJS copy was written before the clarity standard in CLAUDE.md. Rewrite each line's explanations, field guide and notes to it, starting with whichever lines have been hardest to get through.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
+- [x] **Independent review.** Three reviewers that had not seen the content ran its claims as real code against Nest 12.1.3. They found wrong answers or explanations on most lines, and many more misleading ones. The worst: a missing `@Injectable()` listed as a cause of "can't resolve dependencies" (it boots, with an undefined dependency), `overrideGuard` advised for a global `APP_GUARD` it cannot reach, `transform: true` said to convert DTO fields, and a catch-all filter example that dropped every error message. Each finding was reproduced, fixed line by line, then a second set of reviewers re-checked all 122 changed fields and flagged 16 more, also fixed.
+- [ ] **Gaps the reviewers flagged.** Dynamic modules (`forRoot`, `forRootAsync`), custom decorators with `SetMetadata` and `Reflector` beyond `@Public()`, lifecycle and shutdown hooks, guards on GraphQL (`GqlExecutionContext`), where a client should keep its token, why e2e tests must re-apply global pipes set in `main.ts`, and injecting dependencies into an `APP_FILTER` filter.
 
 ## Done: TypeScript
 
@@ -50,11 +52,7 @@ All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Chec
 - [x] **Independent review.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in CLAUDE.md: prove the wrong options, not just the right one.
 - [ ] **Gaps the reviewers flagged.** Assertion functions (`asserts x is User`), `x == null` as a null-and-undefined check, generic type aliases like `Box<T>`, Omit on a union of objects losing its tags, `.catch()` callbacks still getting any, typing React context, and extending native element props with `ComponentProps<'button'>`.
 
-## Next: an independent review of NestJS
-
-NestJS was checked against the v12 docs on 2026-10-07, but never by a reviewer that did not write it. The TypeScript review found real errors in content that had already passed every test, so NestJS gets the same treatment before React starts: reviewers try to break every claim against the current docs, every finding is verified, then fixed.
-
-## Then: React
+## Next: React
 
 Three React lines also give their answers away by length (performance: 8 of 9).
 
@@ -156,3 +154,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** Utility Yard clears the bar. TypeScript at 3 of 6
 - **2026-10-15** Unknown Territory, Shape Yard and Typed Components clear the bar. TypeScript at 6 of 6, pending independent review
 - **2026-10-15** Independent review of TypeScript: 8 wrong and about 20 misleading items found and fixed, re-checked, and TypeScript added to `FINISHED`
+- **2026-10-15** Independent review of NestJS against running Nest 12.1.3 code: wrong and misleading items fixed across all nine lines, then re-checked
