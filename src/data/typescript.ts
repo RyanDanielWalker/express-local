@@ -361,21 +361,64 @@ export const TS_LINES: Line[] = [
     short: 'TS + React',
     name: 'Typed Components',
     topic: 'TypeScript in React code',
-    pitch: 'This is where the two halves of your day meet: props, events, refs and hooks. The questions here are the ones that actually come up while writing a component.',
-    rules: ['Pick what you would really write.', 'Props, events, refs and hook generics.', 'Modern React types, not the 2019 ones.'],
-    hook: 'Type the props object directly, use ReactNode for children, name events by their element, and give useState or useRef a type argument when the first value cannot tell the compiler enough.',
+    pitch: 'Where TypeScript meets the code you write every day: props, children, events, refs and hooks. These are the questions that come up while actually writing a component.',
+    rules: [
+      'Each question asks what you would really write.',
+      'Props, children, events, refs, and the type arguments hooks need.',
+      'Current React 19 types, not the old ones.',
+    ],
+    hook: 'Type the props object directly. children is ReactNode. Events are named for what happened, like ChangeEvent<HTMLInputElement>. Give useState and useRef a type argument when the first value cannot tell TypeScript enough.',
     par: 95,
+    drill: 'Ask what kind of thing it is: props, children, an event, a ref, or state. Then ask what TypeScript can already work out on its own, and what you have to tell it.',
+    sorts: [
+      {
+        t: 1,
+        title: 'Which event type does each handler get?',
+        buckets: ['ChangeEvent', 'MouseEvent', 'SubmitEvent', 'KeyboardEvent'],
+        items: [
+          { name: 'onChange on an <input>', bucket: 'ChangeEvent', why: 'ChangeEvent<HTMLInputElement>. Its target.value is always a string.' },
+          { name: 'onChange on a <select>', bucket: 'ChangeEvent', why: 'ChangeEvent<HTMLSelectElement>. Same event, different element.' },
+          { name: 'onClick on a <button>', bucket: 'MouseEvent', why: 'MouseEvent<HTMLButtonElement>, with things like clientX.' },
+          { name: 'onDoubleClick on a <div>', bucket: 'MouseEvent', why: 'Any click-style handler gets a MouseEvent.' },
+          { name: 'onSubmit on a <form>', bucket: 'SubmitEvent', why: 'SubmitEvent<HTMLFormElement> in current React types. Older code uses FormEvent, which is now deprecated.' },
+          { name: 'onKeyDown on an <input>', bucket: 'KeyboardEvent', why: 'KeyboardEvent<HTMLInputElement>, with e.key telling you which key.' },
+        ],
+        note: 'React names each event for what happened, and takes the element as a type argument. Write the handler inline and TypeScript works all of this out. You only type it yourself when the handler is a separate function.',
+      },
+      {
+        t: 1,
+        title: 'Which type fits each prop?',
+        buckets: ['ReactNode', 'string', 'Function type', 'Literal union'],
+        items: [
+          { name: 'children, which can be text, elements or nothing', bucket: 'ReactNode', why: 'Anything React can render.' },
+          { name: 'An icon slot that takes any JSX', bucket: 'ReactNode', why: 'A slot for rendered content is ReactNode too, not just children.' },
+          { name: 'A button label that is always text', bucket: 'string', why: 'Plain text, nothing else.' },
+          { name: 'A placeholder for an input', bucket: 'string', why: 'Inputs only take text placeholders.' },
+          { name: 'onClose, called with no arguments', bucket: 'Function type', why: 'A function type that takes nothing: () => void.' },
+          { name: 'onSelect, called with the chosen id', bucket: 'Function type', why: 'A function type that takes the id: (id: string) => void.' },
+          { name: 'size, which can only be \'sm\' or \'lg\'', bucket: 'Literal union', why: '\'sm\' | \'lg\'. A typo like \'md\' becomes a compile error.' },
+        ],
+        note: 'Rendered content is ReactNode. Text is string. Callbacks are function types that list their arguments. A prop with a fixed set of values is a union of exact strings, so typos fail to compile.',
+      },
+    ],
     questions: [
-      { t: 1, q: 'How do you type a component with props?', opts: ['function Card({ title }: { title: string })', 'const Card: React.FC = ({ title }) => ...', 'function Card(props: any) { ... }'], a: 'function Card({ title }: { title: string })', why: 'Plain annotation. React.FC lost its main advantage when implicit children went away in the React 18 types.' },
-      { t: 1, q: 'What type do you give children?', opts: ['ReactNode', 'JSX.Element', 'string'], a: 'ReactNode', why: 'ReactNode covers elements, strings, numbers, arrays, null. JSX.Element is only a single element.' },
-      { t: 1, q: 'What is the type of this state?', code: `const [user, setUser] = useState<User | null>(null);`, opts: ['User | null, as written', 'User, narrowed after load', 'null, forever and always'], a: 'User | null, as written', why: 'Without the argument it infers null and nothing else can be set. This is the most common useState annotation.' },
-      { t: 2, q: 'How do you type this handler?', code: `<input onChange={e => ...} />`, opts: ['ChangeEvent<HTMLInputElement>', 'InputEvent<HTMLInputElement>', 'DOMEvent<HTMLInputElement>'], a: 'ChangeEvent<HTMLInputElement>', why: 'Inline handlers get it for free. You only name the type when the function lives outside the JSX.' },
-      { t: 2, q: 'What is the type of a DOM ref?', code: `const inputRef = useRef<HTMLInputElement>(null);`, opts: ['current is HTMLInputElement | null', 'current is HTMLInputElement always', 'current is any until it mounts'], a: 'current is HTMLInputElement | null', why: 'React fills it after mount, so you check it before use. That null is honest, not an inconvenience.' },
-      { t: 2, q: 'How do you reuse a prop type from another component?', opts: ['ComponentProps<typeof Button>', 'ReturnType<typeof Button>', 'InferProps<typeof Button>'], a: 'ComponentProps<typeof Button>', why: 'Great for wrappers: take everything Button takes, add one prop, pass the rest through.' },
-      { t: 2, q: 'How do you type a component that takes children plus props?', opts: ['{ title: string; children: ReactNode }', 'React.FC, which adds children for you', 'PropsWithChildren is now required'], a: '{ title: string; children: ReactNode }', why: 'Just declare it. PropsWithChildren<Props> works too, but spelling it out reads better in errors.' },
-      { t: 3, q: 'How do you type a reducer action?', code: `type Action =\n  | { type: 'add'; text: string }\n  | { type: 'remove'; id: string };`, opts: ['A discriminated union on type', 'An interface with optional fields', 'Record<string, unknown>'], a: 'A discriminated union on type', why: 'Inside the switch each case narrows to exactly its payload, which is the whole reason useReducer feels good in TypeScript.' },
-      { t: 3, q: 'What does this generic component give you?', code: `function Select<T>({ options, onPick }: { options: T[]; onPick: (value: T) => void })`, opts: ['onPick knows the option type', 'Fewer re-renders of the list', 'Automatic memoization of options'], a: 'onPick knows the option type', why: 'Without the generic you end up with any in the callback, which is exactly where a wrong assumption hides.' },
-      { t: 3, q: 'A prop should be required only when another is set. How?', opts: ['Union of the valid prop shapes', 'Make both optional and check at runtime', 'Use any for both'], a: 'Union of the valid prop shapes', why: 'Same discriminated union trick as state. The compiler rejects the combination instead of a runtime warning.' },
+      { t: 1, q: 'How do you type a component with props?', opts: ['function Card({ title }: { title: string })', 'const Card: React.FC = ({ title }) => ...', 'function Card(props: any)'], a: 'function Card({ title }: { title: string })', why: 'Type the props object like any other function parameter. React.FC adds little since the React 18 types stopped adding children for you, and with no props type here, it does not even know title exists. props: any switches off checking for every prop.' },
+      { t: 1, q: 'What type do you give children?', opts: ['ReactNode', 'React.JSX.Element', 'string'], a: 'ReactNode', why: 'ReactNode covers everything React can render: elements, text, numbers, arrays, null. React.JSX.Element is only a single element, so plain text would not fit. string would reject elements. In React 19 types the old global JSX.Element is gone, so it is React.JSX.Element now.' },
+      { t: 1, q: 'What is the type of this state?', code: `const [user, setUser] = useState<User | null>(null);`, opts: ['User | null, as written', 'User, narrowed after load', 'null, forever and always'], a: 'User | null, as written', why: 'The type argument says exactly what the state can hold. Without it, useState(null) would infer just null, and setUser(user) would be a compile error. Nothing narrows it for you after loading, so check for null before you use it.' },
+      { t: 1, q: 'How do you make a prop optional?', opts: ['Put a ? after its name: size?: \'sm\' | \'lg\'', 'Give it the type undefined: size: undefined', 'Wrap the props in Partial<> every time'], a: 'Put a ? after its name: size?: \'sm\' | \'lg\'', why: 'size? means the caller may leave it out, so <Badge /> compiles. Inside the component, size is \'sm\' | \'lg\' | undefined, unless you give it a default like { size = \'sm\' }. Typing it as undefined would make it useless, and Partial would make every prop optional, not just this one.' },
+      { t: 1, q: 'How do you type an onSave prop that receives a string?', opts: ['(value: string) => void', 'Function<string, void>', 'Callback<string>'], a: '(value: string) => void', why: 'A function type lists its parameters and what it returns. void means the component ignores the return value. TypeScript has no built-in Function<> or Callback<> generic, and the plain Function type would accept any function at all.' },
+      { t: 1, q: 'Do you need to write the type of `e` here?', code: `<button onClick={e => console.log(e.clientX)}>Save</button>`, opts: ['No, it is worked out from onClick', 'Yes, or e is typed as any and unchecked', 'Only when strict mode is turned on in tsconfig'], a: 'No, it is worked out from onClick', why: 'React already says what onClick receives, so TypeScript types e for you, as a MouseEvent for that button. You only write the event type when the handler is a separate function, away from the JSX.' },
+      { t: 1, q: 'What happens with `<Button variant="primay" />`?', code: `function Button(props: { variant: 'primary' | 'secondary' }) { ... }`, opts: ['A compile error: not a valid variant', 'It renders, with no variant class applied', 'It works, because \'primay\' is still a string'], a: 'A compile error: not a valid variant', why: 'variant only allows \'primary\' or \'secondary\', so a typo fails right where you wrote it. That is the point of a union of exact strings instead of plain string: the editor can also suggest the valid values as you type.' },
+      { t: 1, q: 'In an input\'s onChange, what type is `e.target.value`?', opts: ['string, even on type="number"', 'number, on a number input', 'Whatever type the input holds'], a: 'string, even on type="number"', why: 'Input values are always strings, including on a number input, so TypeScript types value as string. If you need a number, convert it: Number(e.target.value), or e.target.valueAsNumber.' },
+      { t: 1, q: 'Where can you safely read `inputRef.current`?', opts: ['In an effect or an event handler', 'Anywhere in the component body', 'Only inside the JSX it is passed to'], a: 'In an effect or an event handler', why: 'React fills the ref after it puts the element on the page. During render, it is still null on the first pass. Effects run after that, and event handlers run when the user does something, so the element is there. That is why the type includes null.' },
+      { t: 2, q: 'How do you type this handler, written as its own function?', code: `function handleChange(e: ???) {\n  setName(e.target.value);\n}\n\n<input onChange={handleChange} />`, opts: ['ChangeEvent<HTMLInputElement>', 'InputEvent<HTMLInputElement>', 'DOMEvent<HTMLInputElement>'], a: 'ChangeEvent<HTMLInputElement>', why: 'onChange gets a ChangeEvent, with the element as the type argument. InputEvent is real, but it is for onInput, and TypeScript rejects it on onChange. There is no DOMEvent. Written inline, you would not need to type it at all.' },
+      { t: 2, q: 'What type does a form\'s onSubmit handler get, in current React types?', opts: ['SubmitEvent<HTMLFormElement>', 'FormEvent<HTMLFormElement>', 'MouseEvent<HTMLFormElement>'], a: 'SubmitEvent<HTMLFormElement>', why: 'In @types/react 19.3, onSubmit gets a SubmitEvent. Most tutorials still use FormEvent, and it still compiles, but it is now marked deprecated: the types say it does not match any real event. It is not a MouseEvent, because a form can also be submitted with Enter.' },
+      { t: 2, q: 'What is the type of `current` on this ref?', code: `const inputRef = useRef<HTMLInputElement>(null);`, opts: ['HTMLInputElement | null', 'HTMLInputElement, always', 'any, until it mounts'], a: 'HTMLInputElement | null', why: 'React fills the ref after the element is on the page, and empties it when the element goes away. So current is the element or null, and you check it before use. That null is honest, not an inconvenience. In React 19, useRef also needs a starting value, which is why the null is written in.' },
+      { t: 2, q: 'How do you reuse the props of another component?', opts: ['ComponentProps<typeof Button>', 'ReturnType<typeof Button>', 'InferProps<typeof Button>'], a: 'ComponentProps<typeof Button>', why: 'ComponentProps<typeof Button> is every prop Button takes. Great for a wrapper that adds one prop and passes the rest through. ReturnType would give you what Button renders, not what it takes. InferProps comes from the old prop-types package.' },
+      { t: 2, q: 'React 19. How does a function component accept a ref?', opts: ['As a normal prop named ref', 'Only by wrapping it in forwardRef', 'Through useRef inside the component'], a: 'As a normal prop named ref', why: 'Since React 19, ref is passed to function components like any other prop, so forwardRef is no longer needed. Type it as ref?: Ref<HTMLInputElement> and hand it straight to the element. forwardRef still works in older code. useRef creates a ref, it does not receive one.' },
+      { t: 3, q: 'How do you type a reducer action?', code: `type Action =\n  | { type: 'add'; text: string }\n  | { type: 'remove'; id: string };`, opts: ['A union with type as the shared field', 'An interface with optional fields', 'Record<string, unknown>'], a: 'A union with type as the shared field', why: 'Every action has a type field with a different value. Inside a switch on action.type, case \'add\' knows it has text, and case \'remove\' knows it has id. That is a discriminated union, and it is the reason useReducer feels good in TypeScript. Optional fields would let any action carry any field.' },
+      { t: 3, q: 'What does making this component generic give you?', code: `function Select<T>({ options, onPick }: {\n  options: T[];\n  onPick: (value: T) => void;\n})`, opts: ['onPick knows the option type', 'Fewer re-renders of the list', 'Automatic memoization of options'], a: 'onPick knows the option type', why: 'TypeScript works out T from the options you pass, and onPick gets the same T. So the value in your callback is fully typed. Without the generic, you end up with any in the callback, which is where wrong assumptions hide. Generics change nothing about rendering.' },
+      { t: 3, q: 'A prop should be required only when another prop is set. How?', opts: ['A union of the valid prop shapes', 'Make both optional and check at runtime', 'Use any for both of them'], a: 'A union of the valid prop shapes', why: 'Write one shape per valid combination: { kind: \'link\'; href: string } | { kind: \'button\'; onClick: () => void }. Now a link without an href is a compile error. Making both optional only catches the mistake when the code runs, if at all.' },
     ],
   },
 ];
@@ -523,37 +566,32 @@ export const TS_GUIDE: Record<TsLineId, Guide> = {
     ],
   },
   reactts: {
-    plain: "Typing React is mostly four things: the props object, the children, the events, and the hook generics. Annotate the props parameter directly rather than reaching for React.FC. Use ReactNode for children. Event types are named after the element, and you usually get them for free on inline handlers. useState and useRef need a type argument when the first value cannot tell the compiler the whole story, which is why useState<User | null>(null) shows up everywhere.",
+    plain: 'Typing React comes down to a few things. Props are a plain object type: `function Card({ title }: { title: string })`. No special React type needed.\n\n`children` is `ReactNode`, which covers anything React can render: elements, text, numbers, null.\n\nEvents are named for what happened, with the element as a type argument: `ChangeEvent<HTMLInputElement>`. Write the handler inline, and TypeScript works it out for you.\n\nHooks need help when the first value is not the whole story. `useState(null)` would only ever allow null, so you write `useState<User | null>(null)`. Same for refs: `useRef<HTMLInputElement>(null)`.',
     words: [
-      ['ReactNode', 'Anything renderable: elements, strings, numbers, arrays, null.'],
-      ['ComponentProps<typeof X>', "Reuse another component's props, great for wrappers."],
-      ['ChangeEvent<HTMLInputElement>', 'Event types are named by the element they came from.'],
-      ['useRef<HTMLInputElement>(null)', 'current is the element or null, so you check before use.'],
-      ['generic component', '<T,> so a render prop or callback keeps the item type.'],
+      ['ReactNode', 'Anything React can render: elements, text, numbers, arrays, null. The type for children.'],
+      ['React.JSX.Element', 'A single rendered element. Narrower than ReactNode. In React 19 types, the old global JSX.Element is gone.'],
+      ['ComponentProps<typeof X>', 'Every prop that component X takes. Handy for wrappers.'],
+      ['ChangeEvent<HTMLInputElement>', 'Event types are named for what happened, with the element as the type argument.'],
+      ['SubmitEvent', 'What onSubmit gets in current React types. The older FormEvent still compiles but is deprecated.'],
+      ['useRef<HTMLInputElement>(null)', 'A ref to an element. current is the element or null, so check it before use.'],
+      ['ref as a prop', 'Since React 19, function components receive ref like any other prop. forwardRef is no longer needed.'],
+      ['generic component', 'A component with a type parameter, like Select<T>, so callbacks keep the item type.'],
     ],
-    code: { label: 'the shapes you write all day', snippet: `type CardProps = {
-  title: string;
-  children: ReactNode;
-  onSave?: (value: string) => void;
-};
-
-function Card({ title, children, onSave }: CardProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => setDraft(e.target.value);
-  return <section>{children}</section>;
-}` },
+    code: {
+      label: 'the shapes you write all day',
+      snippet: `type CardProps = {\n  title: string;\n  children: ReactNode;\n  onSave?: (value: string) => void;\n};\n\nfunction Card({ title, children, onSave }: CardProps) {\n  const [draft, setDraft] = useState('');\n  const inputRef = useRef<HTMLInputElement>(null);\n\n  function onChange(e: ChangeEvent<HTMLInputElement>) {\n    setDraft(e.target.value);\n  }\n\n  return (\n    <section>\n      <h2>{title}</h2>\n      <input\n        ref={inputRef}\n        value={draft}\n        onChange={onChange}\n      />\n      <button onClick={() => onSave?.(draft)}>Save</button>\n      {children}\n    </section>\n  );\n}`,
+    },
     say: [
-      'I annotate the props object directly. React.FC lost its main benefit when implicit children went away in the React 18 types.',
-      'children is ReactNode, because JSX.Element only covers a single element.',
-      'useState<User | null>(null) is the common one: without the argument it infers null and nothing else can be set.',
-      'For props with rules, like a status that only sometimes has data, a discriminated union makes the bad combination fail to compile.',
+      'I type the props object directly. React.FC lost its main benefit when the React 18 types stopped adding children for you.',
+      'children is ReactNode, because React.JSX.Element only covers a single element.',
+      'useState<User | null>(null) is the common one: without the type argument, it infers null and nothing else can be set.',
+      'For props with rules, like a status that only sometimes has data, a union of the valid shapes makes the bad combination fail to compile.',
     ],
-    gotcha: 'useRef<HTMLInputElement>(null) gives you `current: HTMLInputElement | null`, and that null is real: the ref is empty until after mount, so effects are where you touch it.',
+    gotcha: 'useRef<HTMLInputElement>(null) gives you `current: HTMLInputElement | null`, and the null is real. The ref is empty until React puts the element on the page, so read it in effects and event handlers, not during render.',
     rehearse: [
-      { prompt: 'How do you type a React component and its props?', answer: 'I annotate the destructured props directly with a type alias, use ReactNode for children, and skip React.FC since it lost its advantage in the React 18 types. Events get their element-specific type, and hooks like useState take a type argument when the initial value cannot describe the whole state.' },
-      { prompt: 'How would you stop a component from being used in an invalid way?', answer: 'Model the props as a discriminated union of the valid shapes, so loading has no data field and done requires it. Then the wrong combination fails to compile instead of being caught by a reviewer or a runtime warning.' },
+      { prompt: 'How do you type a React component and its props?', answer: 'I type the props object directly, usually with a type alias, and use ReactNode for children. I skip React.FC, since it stopped adding children in the React 18 types. Events get their element-specific type, like ChangeEvent<HTMLInputElement>, and hooks like useState take a type argument when the starting value cannot describe the whole state.' },
+      { prompt: 'How would you stop a component from being used in an invalid way?', answer: 'Model the props as a union of the valid shapes. For example, a link needs an href and a button needs an onClick, and each shape only has its own fields. Then the wrong combination fails to compile, instead of being caught by a reviewer or a runtime warning.' },
+      { prompt: 'What changed about refs in React 19?', answer: 'Function components can take ref as a normal prop now, so forwardRef is no longer needed. You type it like any other prop, for example ref?: Ref<HTMLInputElement>, and pass it straight to the element. useRef also needs a starting value in the React 19 types, so useRef<HTMLInputElement>(null) is the usual way to make one.' },
     ],
   },
 };
