@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIVISIONS } from '../engine/questions';
 import type { Guide, Line, Question } from '../engine/types';
-import { auditLine, barReport, clears, FINISHED } from './bar';
+import { auditLine, barReport, clears, FINISHED, lengthPosition } from './bar';
 import { GUIDE, LINES } from './index';
 
 /**
@@ -77,6 +77,25 @@ describe('the auditor', () => {
     const tells = auditLine(line, guide(3)).find(c => c.id === 'tells')!;
     expect(tells.ok).toBe(false);
     expect(tells.detail).toBe('answer is the longest option on 9/15');
+  });
+
+  it('fails a line where the middle-length option is usually right', () => {
+    const middle = (n: number): Question[] => Array.from({ length: n }, (_, i) => ({
+      t: 1 as const, q: `q${i}`, opts: ['a right answer', 'short', 'a much longer wrong answer'], a: 'a right answer', why: 'because',
+    }));
+    const line = quiz([...middle(9), ...q(2, 3), ...q(3, 3)], { flows: [flow(), flow()] });
+    const tells = auditLine(line, guide(3)).find(c => c.id === 'tells')!;
+    expect(tells.ok).toBe(false);
+    expect(tells.detail).toBe('answer is the middle option on 9/15');
+  });
+
+  it('reads where the answer sits by length, and gives up on ties', () => {
+    const at = (opts: string[], a: string) => lengthPosition({ t: 1, q: 'q', opts, a, why: 'w' });
+    expect(at(['aaa', 'bb', 'c'], 'aaa')).toBe('longest');
+    expect(at(['aaa', 'bb', 'c'], 'bb')).toBe('middle');
+    expect(at(['aaa', 'bb', 'c'], 'c')).toBe('shortest');
+    expect(at(['aa', 'bb', 'c'], 'aa')).toBeNull();
+    expect(at(['aaa', 'bb'], 'bb')).toBe('shortest');
   });
 
   it('does not count recognition alone as judgment', () => {

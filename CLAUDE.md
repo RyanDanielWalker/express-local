@@ -62,7 +62,7 @@ This standard is new as of October 2026. Older lines are being brought up to it 
 - Every question needs its answer among its options, at least two options, and a `why` that teaches rather than restates.
 - Tier 1 questions are the ones a junior should get. Tier 3 is the deep cut.
 - Keep claims checkable: stack answers follow the current docs, and version-specific behavior says which version.
-- Options must not give the answer away by length. `data.test.ts` fails a question whose answer is 1.35x its distractors, or a line where the answer is the longest option more than half the time. Write every option as a parallel claim and put the nuance in `why`.
+- Options must not give the answer away by length. `data.test.ts` fails a question whose answer is 1.35x its distractors. The bar fails a line where the answer sits in the same length position (longest, middle or shortest) more than half the time: fixing "always the longest" by padding the wrong answers just moves the giveaway to the middle. Write every option as a parallel claim, vary which one is longest, and put the nuance in `why`.
 - Non-algorithm lines need at least two `rehearse` prompts in their guide, written as a full spoken answer.
 - The bar: `src/data/bar.ts` audits each line against the checks in ROADMAP.md. Run `npm run bar` to see where every division stands before proposing content work. Add a division to `FINISHED` only once it could carry an interview on its own topic; from then on the tests fail if any of its lines slips below the bar.
 - Replays have to differ. The bar wants every tier's pool at least 1.5x a run (9 / 12 / 15 questions for a quiz line) and two puzzles on Local. `pickQuestions` puts unseen and shaky questions first, and `pickPuzzle` rotates by ride count.

@@ -1,5 +1,5 @@
 import { FLOWS_PER_RUN, QUESTIONS_PER_RUN } from '../engine/questions';
-import type { Division, Guide, Line, Tier } from '../engine/types';
+import type { Division, Guide, Line, Question, Tier } from '../engine/types';
 
 /**
  * Divisions declared finished. Every line in one of these has to clear the
@@ -21,11 +21,31 @@ export interface BarCheck {
 const TIERS: Tier[] = [1, 2, 3];
 
 /**
- * The share of a line's questions where the answer may be the single longest
- * option. data.test.ts checks this across the whole app, which let individual
- * lines hide behind the average; this checks each line on its own.
+ * The most a line's answers may sit in one length position. With three
+ * options, each position (longest, middle, shortest) gets the answer about a
+ * third of the time by chance. Over half means a rule like "pick the longest"
+ * or "pick the middle one" beats knowing the material.
  */
-export const MAX_LONGEST_SHARE = 0.5;
+export const MAX_POSITION_SHARE = 0.5;
+
+export type LengthPosition = 'longest' | 'middle' | 'shortest';
+
+/**
+ * Where the answer sits when the options are sorted by length, or null when a
+ * tie means no length rule could pick it out.
+ */
+export function lengthPosition(q: Question): LengthPosition | null {
+  const lens = q.opts.map(o => o.length);
+  const a = q.a.length;
+  const only = (n: number) => lens.filter(x => x === n).length === 1;
+  const hi = Math.max(...lens);
+  const lo = Math.min(...lens);
+  if (a === hi && only(a)) return 'longest';
+  if (a === lo && only(a)) return 'shortest';
+  // A "middle" rule only works with exactly three options, all different lengths.
+  if (q.opts.length === 3 && a > lo && a < hi && only(hi) && only(lo)) return 'middle';
+  return null;
+}
 
 /**
  * How much bigger than a run a tier's pool has to be. A pool exactly the size
@@ -67,15 +87,16 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
   const gotcha = !!guide?.gotcha;
   const puzzles = (line.flows?.length ?? 0) + (line.sorts?.length ?? 0);
 
-  // How often the right answer is the one longest option. With three options,
-  // chance is about a third; over half means "pick the longest" beats knowing.
+  // Where the answer sits by length. If one position holds it on more than
+  // half the questions, a length rule beats knowing the material.
   const pool = line.questions ?? [];
-  const longest = pool.filter(q => {
-    const lens = q.opts.map(o => o.length);
-    const max = Math.max(...lens);
-    return q.a.length === max && lens.filter(n => n === max).length === 1;
-  }).length;
-  const tilted = pool.length > 0 && longest / pool.length > MAX_LONGEST_SHARE;
+  const counts: Record<LengthPosition, number> = { longest: 0, middle: 0, shortest: 0 };
+  for (const q of pool) {
+    const pos = lengthPosition(q);
+    if (pos) counts[pos]++;
+  }
+  const [worst, hits] = (Object.entries(counts) as [LengthPosition, number][]).sort((x, y) => y[1] - x[1])[0];
+  const tilted = pool.length > 0 && hits / pool.length > MAX_POSITION_SHARE;
 
   return [
     {
@@ -115,7 +136,7 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
       id: 'tells',
       label: 'Answers not guessable by length',
       ok: !tilted,
-      detail: tilted ? `answer is the longest option on ${longest}/${pool.length}` : '',
+      detail: tilted ? `answer is the ${worst} option on ${hits}/${pool.length}` : '',
     },
   ];
 }
