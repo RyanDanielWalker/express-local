@@ -20,8 +20,8 @@ export const NEST_LINES: Line[] = [
       'Some requests never reach the handler. Follow where the request actually goes.',
       'On the way out, the order reverses.',
     ],
-    hook: 'Middleware → Guards → Interceptors (before) → Pipes → Handler → Service → Interceptors (after) → Response. If anything throws, an exception filter turns it into the response instead.',
-    drill: 'Two passes. On the way in, each layer gets its shot at stopping the request, from the most generic (it does not even know which handler yet) to the most specific (it is checking one argument). Then your code runs. On the way back out, only the layers that wrapped the handler get another turn, and whatever threw gets turned into a response last.',
+    hook: 'Middleware → Guards → Interceptors (before) → Pipes → Handler → Service → Interceptors (after) → Response. If anything throws, an exception filter builds the response instead.',
+    drill: 'Think of it as two trips. On the way in, each layer can stop the request. They go from general to specific. The first layer does not even know which handler will run yet. The last one checks a single argument. Then your code runs. On the way out, only the layers that wrapped your code get another turn. If something threw, the error is turned into a response last.',
     par: 95,
     flows: [
       {
@@ -38,14 +38,14 @@ export const NEST_LINES: Line[] = [
           'Response sent',
         ],
         decoys: ['Exception filter'],
-        note: 'The full happy path. Notice the interceptor appears twice: once on the way in, once on the way out. Nothing threw, so no filter runs.',
+        note: 'The full happy path. The interceptor shows up twice, once on the way in and once on the way out. Nothing threw, so no exception filter runs.',
       },
       {
         t: 1,
         title: 'GET /admin, and the auth guard returns false',
         steps: ['Middleware', 'Guard', 'Exception filter', 'Response sent'],
         decoys: ['Interceptor (before)', 'Pipe / ValidationPipe', 'Route handler'],
-        note: 'A guard rejection short-circuits everything. Pipes never run, the handler never runs, and the 403 comes from a filter.',
+        note: 'A guard that returns false stops everything after it. The interceptor, the pipes and the handler never run. Nest turns the false into a ForbiddenException, and the exception filter sends it back as a 403.',
       },
       {
         t: 1,
@@ -60,7 +60,7 @@ export const NEST_LINES: Line[] = [
           'Response sent',
         ],
         decoys: ['Route handler', 'Service'],
-        note: 'Guards already passed and the interceptor already started, so the pipe throwing lands in the filter on the way out. Your handler never sees the bad body.',
+        note: 'The guard already said yes, and the interceptor already started. Then ValidationPipe throws a BadRequestException. That goes straight to the exception filter, which sends a 400. Your handler never sees the bad body.',
       },
       {
         t: 1,
@@ -75,14 +75,14 @@ export const NEST_LINES: Line[] = [
           'Response sent',
         ],
         decoys: ['Guard'],
-        note: 'Nothing is being skipped here. There is no guard registered, so there is no guard step. The lifecycle is a list of what you attached, not a fixed set of nine stages.',
+        note: 'Nothing is skipped here. This app has no guard, so there is no guard step. The lifecycle is only the pieces you attached, not a fixed list of stages.',
       },
       {
         t: 1,
         title: 'A rate limiter in middleware answers the request itself and never calls next()',
         steps: ['Middleware', 'Response sent'],
         decoys: ['Guard', 'Interceptor (before)', 'Pipe / ValidationPipe', 'Route handler', 'Exception filter'],
-        note: 'On the default Express adapter, middleware is plain req/res/next. End the response there and Nest never gets involved, which is also why no filter shapes this one. Handy for rate limits, dangerous for anything you want logged by an interceptor.',
+        note: 'On the default Express adapter, middleware gets Express\'s plain req, res and next. If it sends the response and never calls next(), Nest never gets the request. So no guard, interceptor or exception filter sees it. Fine for a rate limit. Bad for anything you want an interceptor to log.',
       },
       {
         t: 2,
@@ -99,21 +99,21 @@ export const NEST_LINES: Line[] = [
           'Response sent',
         ],
         decoys: ['Interceptor (after)'],
-        note: 'The handler ran, so the error still ends up in a filter, which is why you never touch res.status in a service. The interceptor does not get its normal after-hook either: an uncaught error skips the rest of the lifecycle and goes to the filter. An interceptor sees the error only if it listens for it, with catchError or the error callback of tap. finalize also runs when something throws, but it does not get the error. catchError is how exception-mapping interceptors work.',
+        note: 'The service throws after the handler started. The error skips the rest of the trip, including the interceptor\'s normal after step, and goes to the exception filter, which sends a 404. Because errors from anywhere end up there, a service can just throw. It never needs to touch res.status. An interceptor sees the error only if it listens for it, with catchError or the error callback of tap. finalize() also runs when something throws, but it does not get the error.',
       },
       {
         t: 2,
         title: 'Three guards on one route: one global, one on the controller, one on the route',
         steps: ['Global guard', 'Controller guard', 'Route guard'],
         decoys: ['Module guard', 'Param guard'],
-        note: 'On the way in, it is always global, then controller, then route. Same for interceptors. Pipes have a fourth level, on a single parameter, which runs last. There is no guard that applies to just one module. But a module can register a guard with APP_GUARD, and that guard is global: it runs on every route in the app, even ones that never mention it.',
+        note: 'On the way in, guards always run global first, then controller, then route. Interceptors follow the same order. Pipes have a fourth level, on a single parameter, which runs last. There is no guard for just one module. A module can register a guard with APP_GUARD, but that makes it global. It then runs on every route in the app, even routes that never mention it.',
       },
       {
         t: 2,
         title: 'The global guard passes and the route guard returns false',
         steps: ['Global guard', 'Route guard', 'Exception filter', 'Response sent'],
         decoys: ['Controller guard', 'Route handler', 'Interceptor (after)'],
-        note: 'Guards run outside in and the first false ends it. Passing the global guard only means the request got far enough for the route guard to say no. Only the two you registered run, and the 403 is built by the exception layer.',
+        note: 'Guards run from global to route, and the first false ends it. Passing the global guard only got the request as far as the route guard, which said no. There is no controller guard on this route, so none runs. Nest turns the false into a 403, and the exception filter sends it.',
       },
       {
         t: 2,
@@ -125,7 +125,7 @@ export const NEST_LINES: Line[] = [
           'Response sent',
         ],
         decoys: ['Exception filter'],
-        note: 'Coming back out the order reverses, so the most specific one finishes first and the global one wraps everything.',
+        note: 'On the way out, the order reverses. The route interceptor finishes first. The global one finishes last, because it wraps all the others.',
       },
       {
         t: 3,
@@ -146,7 +146,7 @@ export const NEST_LINES: Line[] = [
           'Response sent',
         ],
         decoys: ['Exception filter'],
-        note: 'This is the whole thing. In: global to specific. Out: specific to global.',
+        note: 'That is the whole thing. On the way in, each kind goes from global to specific. On the way out, the interceptors go from specific to global.',
       },
     ],
   },
@@ -2116,31 +2116,35 @@ findOne(@Param('id') id: number) {}`,
 /** Field guide for the NestJS division, including interview talking points. */
 export const NEST_GUIDE: Record<NestLineId, Guide> = {
   life: {
-    plain: 'A request does not go straight to your function. It walks through a line of checkpoints in a fixed order, and each one can stop it. Only the checkpoints you attached are there. Middleware sees the raw request first. Guards decide if it is allowed through at all. Interceptors wrap everything after them, so they can run code both before and after your handler. Pipes validate and convert the inputs. Then your handler runs, usually calling a service. On the way back out, the interceptors finish (that is where you reshape the response), and if anything threw along the way, an exception filter turns it into an HTTP response.',
+    plain: 'A request does not go straight to your handler. It passes through a line of checkpoints, always in the same order, and each one can stop it. Only the checkpoints you attached are there.\n\nMiddleware sees the raw request first, before Nest has picked a handler. Guards decide whether the request may continue. Interceptors wrap the handler, so they run code before it and again after it. Pipes check and convert the handler\'s inputs. Then your handler runs, usually calling a service.\n\nOn the way back out, the interceptors finish. That is where you can reshape the response. If anything threw along the way, an exception filter turns the error into the HTTP response instead.',
     words: [
       [
         'middleware',
-        'Runs first, before Nest knows which handler is involved. Plain req/res/next, same idea as Express.',
+        'Runs first, before Nest has picked a handler. It gets the plain req, res and next, same as Express middleware.',
       ],
       [
         'guard',
-        'A yes or no decision. Returns true to continue, false to reject with 403.',
+        'Answers one question: may this request continue? Returning true lets it through. Returning false stops it with a 403.',
       ],
       [
         'interceptor',
-        'Wraps the handler. Code before it runs, and code after it returns, in the same class.',
+        'Wraps the handler, so one class can run code before the handler and again after it returns.',
       ],
       [
         'pipe',
-        'Transforms and validates an input value right before the handler gets it.',
+        'Checks or converts one input, like the body or an :id, right before the handler gets it.',
+      ],
+      [
+        'route handler',
+        'The controller method that answers the route, like create() under @Post(). This is your code.',
       ],
       [
         'exception filter',
-        'Catches thrown errors and decides what HTTP response goes back.',
+        'Catches a thrown error and decides what HTTP response goes back. Nest has a built-in one, so you only write your own to change its behavior.',
       ],
       [
         'global vs controller vs route',
-        'Where you attached it. Globals run first on the way in, last on the way out.',
+        'Where you attached it: the whole app, one controller, or one route. Global runs first on the way in, and last on the way out.',
       ],
     ],
     code: {
@@ -2156,24 +2160,24 @@ export const NEST_GUIDE: Record<NestLineId, Guide> = {
 // if anything throws: an exception filter, @Catch(), builds the response`,
     },
     say: [
-      'Middleware, guards, interceptors, pipes, handler, service, interceptors again, response. If anything throws along the way, an exception filter builds the response instead.',
-      'Within each stage it goes global, then controller, then route. On the way out it reverses, so route interceptors finish first.',
-      'A guard rejecting means pipes and the handler never run at all, which is why auth belongs in a guard and not in the service.',
-      'Interceptors are the only layer that gets the handler\'s return value and knows which handler ran, so response shaping and caching live there.',
+      'Middleware, guards, interceptors, pipes, then the handler and its service. Then the interceptors again on the way out, and the response. If anything throws, an exception filter builds the response instead.',
+      'Within each kind, it goes global, then controller, then route. On the way out, interceptors reverse, so the route interceptor finishes first.',
+      'If a guard says no, the pipes and the handler never run. That is why auth belongs in a guard and not in the service.',
+      'Interceptors are the only layer that gets the handler\'s return value, and they also know which handler ran. That is why response shaping and caching live there.',
     ],
-    gotcha: 'Middleware runs before guards, so anything that needs to know which handler was matched cannot live in middleware. Use a guard or interceptor instead. And if middleware throws, only global exception filters can catch it, because no route has been selected yet.',
+    gotcha: 'Middleware runs before Nest picks a handler. So anything that needs the handler, like reading @Roles() off it, cannot live in middleware. Use a guard or an interceptor. Also, if middleware throws, only a global exception filter can catch it. Controller and route filters belong to a handler, and none has been picked yet.',
     rehearse: [
       {
         prompt: 'Walk me through what happens when a request hits a NestJS app.',
-        answer: 'Middleware, then guards, then interceptors, then pipes, then the route handler and whatever services it calls. On the way back out the interceptors finish, and if anything threw, an exception filter turns it into the response.',
+        answer: 'Middleware runs first, then guards, then interceptors, then pipes, then the route handler and whatever services it calls. On the way back out, the interceptors finish. If anything threw, an exception filter turns the error into the response.',
       },
       {
         prompt: 'Why does auth belong in a guard instead of the service?',
-        answer: 'A guard runs before pipes and the handler, so a rejected request never costs validation or business logic, and the rule lives in one place instead of being repeated in every service method.',
+        answer: 'A guard runs before the pipes and the handler. So a rejected request never costs a validation pass or any business logic. The rule also lives in one place, instead of being repeated in every service method.',
       },
       {
         prompt: 'What can an interceptor do that middleware cannot?',
-        answer: 'An interceptor knows which handler is running, through the execution context, and it gets the value the handler returned before it is sent. So it can reshape the response, cache it by handler, or read metadata like roles. Middleware runs before Nest has matched a handler. It can still time a whole request, by listening for the response to finish, but it never sees the handler or its return value.',
+        answer: 'An interceptor knows which handler is running, through the ExecutionContext. It also gets the value the handler returned, before Nest sends it. So it can reshape the response, cache it per handler, or read metadata like roles. Middleware runs before Nest picks a handler. It can time a whole request by waiting for the response to finish, but it never sees the handler or its return value.',
       },
     ],
   },
