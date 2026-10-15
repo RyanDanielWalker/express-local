@@ -67,7 +67,7 @@ Checked against the NestJS 12 documentation. Where a behavior depends on the ver
 ## How a ride works
 
 - **Three tiers per line.** Local, Express and Rush Hour ask up to 6, 8 and 10 questions. Rush Hour turns the helper panels off and adds a par time.
-- **Most runs end on a puzzle.** After the questions comes a "last stop": a sort (put each card in the right box) or a flow (put the steps of a process in order). Cards are named by what they do, never by their answer, and flows include decoy steps that do not happen in that scenario. Runs that end on a puzzle get a fourth heart. Every NestJS line has puzzles, and so do the TypeScript lines finished so far. React is still questions only.
+- **Most runs end on a puzzle.** After the questions comes a "last stop": a sort (put each card in the right box) or a flow (put the steps of a process in order). Cards are named by what they do, never by their answer, and flows include decoy steps that do not happen in that scenario. Runs that end on a puzzle get a fourth heart. Every NestJS and TypeScript line has puzzles. React is still questions only.
 - **Replays differ.** Questions not yet seen, or missed last time, come first, and the last-stop puzzle rotates from ride to ride. Every finished line has at least half again as many questions as a run at each tier, and two puzzles to rotate between on Local.
 - **A miss says it was a miss, nothing more.** The explanation comes after the answer is committed, and in puzzles at the end of the run. On Local, a second miss on the same step reveals it, so nobody gets stuck.
 - **You advance, not a timer.** Explanations stay on screen until you continue, and the clock holds while you read. Number keys pick an option or a box, and space continues.
@@ -148,7 +148,8 @@ The current focus is bringing TypeScript, then React, up to the same bar as Nest
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
-- [ ] **TypeScript, then React,** to the same bar (TypeScript: 2 of 6 lines so far)
+- [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler
+- [ ] **React** to the same bar
 - [ ] **Reorganize the page:** a Today band, collapsible divisions, and a play mode that takes over the screen
 - [ ] **Scenario mode:** read a real-world situation, pick the right tool
 

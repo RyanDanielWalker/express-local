@@ -2,7 +2,7 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 32 lines across 4 divisions, 94 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript, then React.** No new divisions until they clear the bar below.
+Status: 32 lines across 4 divisions, 94 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done, pending review), then React.** No new divisions until they clear the bar below.
 
 ## The bar
 
@@ -37,18 +37,17 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [ ] **A clarity pass, line by line.** The NestJS copy was written before the clarity standard in CLAUDE.md. Rewrite each line's explanations, field guide and notes to it, starting with whichever lines have been hardest to get through.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
 
-## Now: TypeScript
+## Done (pending review): TypeScript
 
-`npm run bar` lists exactly what each line is missing. On top of the gaps below, any vs unknown gives its answers away by length: the longest option is right on 9 of 10. Checked against TypeScript 6.0 and 7.0: `strict` is on by default since 6.0, and 7.0 is the same checker ported to Go, so the type rules carry over.
+All six lines clear the bar. Checked against TypeScript 6.0 and 7.0 (`strict` on by default since 6.0; 7.0 is the same checker ported to Go) and against `@types/react` 19.3. Every claim on every line was written as code and run through `tsc`, with a probe shown to fail first. Not yet listed in `FINISHED`: that waits for the independent review below.
 
-One line at a time, played before the next one starts. Each one gets content to the bar, writing to the clarity standard, and every claim checked with the compiler.
-
-- [x] **Narrow Gauge** clears the bar: 9 Local questions, two sorts (which check narrows which union, and the type at each spot in a function), a type predicate rehearsal, and the 5.5 inferred predicates on filter
-- [x] **Generic Line** clears the bar: everyday generics (Promise, Array, Set), inferred vs written type arguments, constraints, and a sort on which calls compile
-- [x] **Utility Yard** clears the bar: Partial, Pick, Omit, Record, Readonly, the Pick vs Omit typo trap, and the object-keys vs union-members sort
-- [ ] Fill tier 1 to 9 questions a line, so replays differ: about 18 across the other three lines
-- [ ] Rehearsal to three prompts a line
-- [ ] Two Local puzzles per line, so it is not six recognition quizzes in a row
+- [x] **Narrow Gauge:** narrowing checks, the else branch, the truthiness trap, type predicates (including 5.5 inferred ones on filter), and two sorts
+- [x] **Generic Line:** everyday generics (Promise, Array, Set), inferred vs written type arguments, constraints, and a sort on which calls compile
+- [x] **Utility Yard:** Partial, Pick, Omit, Record, Readonly, the Pick vs Omit typo trap, and the object-keys vs union-members sort
+- [x] **Unknown Territory:** any vs unknown, how any spreads, as and ! as claims not checks, satisfies (fixed: it does not keep literals, it keeps exact keys)
+- [x] **Shape Yard:** structural typing, the excess property check, declaration merging, extends vs &, branded types
+- [x] **Typed Components:** props, children, events, refs and hook type arguments on React 19 types. Found along the way: the global JSX namespace is gone, FormEvent is deprecated in favor of SubmitEvent, and ref is a normal prop
+- [ ] **Independent review.** A separate agent that did not write the content tries to break every claim: recompile every snippet, check library claims against current docs, flag opinion stated as fact and anything unclear. Every finding is verified before anything changes. Then add `ts` to `FINISHED`.
 
 ## Then: React
 
@@ -150,3 +149,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** Generic Line clears the bar, every claim checked with tsc
 - **2026-10-15** The bar checks for any length giveaway (longest, middle or shortest), not just the longest. Tool Shed and Test Track rebalanced
 - **2026-10-15** Utility Yard clears the bar. TypeScript at 3 of 6
+- **2026-10-15** Unknown Territory, Shape Yard and Typed Components clear the bar. TypeScript at 6 of 6, pending independent review
