@@ -6,7 +6,7 @@
 
 ## What it covers
 
-32 lines across four divisions. Each division unlocks in its own order, so NestJS can be started without finishing every sorting line.
+34 lines across four divisions. Each division unlocks in its own order, so NestJS can be started without finishing every sorting line.
 
 ### Algorithms
 
@@ -54,6 +54,8 @@ Every claim is run against React 19.3 in a test sandbox: real components, render
 | **K** | Key Change | Keys, lists, reconciliation |
 | **F** | Memo Yard | memo, useMemo, useCallback, profiling |
 | **N** | Hook Junction | Hook rules and the React 19 APIs |
+| **V** | Fare Machine | Forms, inputs and Actions |
+| **L** | Arrivals Board | Fetching data, Suspense and error boundaries |
 
 ### TypeScript
 
@@ -148,12 +150,12 @@ A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-NestJS, TypeScript and React are finished. Next are the gaps the React reviewers flagged, then the interface work. [ROADMAP.md](ROADMAP.md) has the full board.
+NestJS, TypeScript and React are finished, gaps included. Next is the interface work. [ROADMAP.md](ROADMAP.md) has the full board.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
 - [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and independently reviewed
-- [x] **React:** six lines clearing the bar, every claim run against React 19.3, and independently reviewed
+- [x] **React:** eight lines clearing the bar, every claim run against React 19.3, and independently reviewed
 - [ ] **Reorganize the page:** a Today band, collapsible divisions, and a play mode that takes over the screen
 - [ ] **Scenario mode:** read a real-world situation, pick the right tool
 
