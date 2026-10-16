@@ -23,7 +23,7 @@ export interface RideStats {
 interface Props {
   line: Line;
   tier: Tier;
-  /** Hearts for this run. Lines get 3, the cram drill gets 5. */
+  /** Hearts for this run. Lines get 3, or 4 when the run ends on a puzzle. The cram drill gets 5. */
   hearts?: number;
   firstTime: boolean;
   onArrive: (stats: RideStats) => void;
