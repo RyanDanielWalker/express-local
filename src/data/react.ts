@@ -272,6 +272,41 @@ export const REACT_LINES: Line[] = [
     ],
     hook: 'An effect syncs your component with an outside system. Dependencies decide when it re-runs, cleanup undoes it, and anything you can compute during render should not be an effect at all.',
     par: 100,
+    drill: 'Ask why the code should run. Because the component is on screen and has to stay in sync with something outside React? That is an effect. Because a user did something? That goes in the event handler. Because a value can be worked out from props and state? Compute it during render. Then ask what the effect reads: that is the dependency array.',
+    sorts: [
+      {
+        t: 1,
+        title: 'Where does each piece of code belong?',
+        buckets: ['Effect', 'Render', 'Event handler'],
+        items: [
+          { name: 'Connect to a chat room for the current roomId', bucket: 'Effect', why: 'The connection has to stay open while the component is on screen, and switch when roomId changes. That is syncing with an outside system.' },
+          { name: 'Start a timer that ticks every second', bucket: 'Effect', why: 'A timer lives outside React. Start it in an effect, and clear it in the cleanup.' },
+          { name: 'Keep document.title in sync with the unread count', bucket: 'Effect', why: 'document.title is a browser API React does not manage, so an effect keeps it matching the state.' },
+          { name: 'Work out fullName from first and last', bucket: 'Render', why: 'It can be computed from props and state, so compute it during render. An effect would cost an extra render and show a stale value in between.' },
+          { name: 'Filter the visible todos by the search text', bucket: 'Render', why: 'Same idea: the filtered list comes straight from props and state. Compute it when you need it, with useMemo if it is slow.' },
+          { name: 'Send analytics when the user clicks Buy', bucket: 'Event handler', why: 'It should happen because the user clicked, so it goes in the click handler. An effect would fire whenever the component rendered with that state.' },
+          { name: 'POST the form when the user submits it', bucket: 'Event handler', why: 'Submitting is something the user did. The submit handler is the one place that knows it happened.' },
+        ],
+        note: 'An effect is for staying in sync with something outside React while the component is on screen. A value you can work out from props and state belongs in render. Something that should happen because the user did something belongs in that event\'s handler.',
+      },
+    ],
+    flows: [
+      {
+        t: 1,
+        title: 'ChatRoom connects in `useEffect(() => { connect(roomId); return () => disconnect(roomId); }, [roomId])`. Then roomId changes from \'general\' to \'travel\'',
+        start: 2,
+        steps: [
+          'ChatRoom renders with \'general\'',
+          'Effect runs: connect to \'general\'',
+          'ChatRoom renders with \'travel\'',
+          'React commits the new render',
+          'Cleanup runs: disconnect from \'general\'',
+          'Effect runs: connect to \'travel\'',
+        ],
+        decoys: ['ChatRoom unmounts and mounts again', 'Cleanup runs: disconnect from \'travel\''],
+        note: 'React renders with the new roomId first. Only after that render is committed does it run the old cleanup, which still holds \'general\', and then the new effect with \'travel\'. A cleanup always sees the values from the run it is undoing. Nothing unmounts: a changed dependency re-runs the effect, it does not remount the component.',
+      },
+    ],
     questions: [
       {
         t: 1,
@@ -282,7 +317,7 @@ export const REACT_LINES: Line[] = [
           'Delays the effect until those values are defined',
         ],
         a: 'Re-runs the effect when one of those values changed',
-        why: 'React compares each dependency with Object.is. Any change re-runs the cleanup, then the effect.',
+        why: 'After each render, React compares every value in the array with its value last time, using Object.is. If any changed, it runs the cleanup from the last run, then the effect again. Nothing is cached, and the effect does not wait for values to be defined.',
       },
       {
         t: 1,
@@ -296,7 +331,7 @@ export const REACT_LINES: Line[] = [
           'Never run, since there is nothing to watch',
         ],
         a: 'Run after the first render, clean up on unmount',
-        why: 'Nothing reactive to watch, so it never re-runs. In StrictMode during development it still mounts twice on purpose.',
+        why: 'An empty array means the effect reads nothing that can change. So React runs it once after the first render, and cleans it up when the component leaves the screen. It does run. In StrictMode during development, React also mounts, cleans up and mounts once more, on purpose.',
       },
       {
         t: 1,
@@ -307,18 +342,18 @@ export const REACT_LINES: Line[] = [
           'The dependency array is missing a value it reads',
         ],
         a: 'StrictMode remounts once to expose missing cleanup',
-        why: 'It only happens in development. If running twice breaks something, the effect is missing cleanup, which is exactly what it is showing you.',
+        why: 'In development, StrictMode mounts each component, unmounts it, and mounts it again. So your effect runs, its cleanup runs, and the effect runs again. If that breaks something, the effect is missing a cleanup, which is exactly what StrictMode is showing you. Production runs it once. A missing dependency causes stale values later, not a second run on mount.',
       },
       {
         t: 2,
         q: 'When does an effect cleanup function run?',
         opts: [
-          'Before the next run of that effect, and on unmount',
+          'Before the next run, and on unmount',
           'Only on unmount, after the last render commits',
           'Right before the effect runs for the first time',
         ],
-        a: 'Before the next run of that effect, and on unmount',
-        why: 'Think of it as "undo the last run". Subscribe in the effect, unsubscribe in the cleanup, and re-runs stay balanced.',
+        a: 'Before the next run, and on unmount',
+        why: 'The cleanup undoes the last run. React calls it right before the effect runs again with new values, and once more when the component leaves the screen. So subscribe in the effect, unsubscribe in the cleanup, and the two stay balanced.',
       },
       {
         t: 2,
@@ -329,7 +364,7 @@ export const REACT_LINES: Line[] = [
           'Move the fetch into useLayoutEffect instead',
         ],
         a: 'Abort it in the cleanup, or ignore the late result',
-        why: 'Otherwise a late response can set state on a stale render, and racing responses can land out of order.',
+        why: 'If the user switches quickly, an older, slower response can land after the newer one and overwrite it. React does not cancel your fetch. In the cleanup, abort the request with an AbortController, or set an ignore flag so a late result is dropped. useLayoutEffect has the same problem.',
       },
       {
         t: 2,
@@ -339,12 +374,12 @@ useEffect(() => {
   setFullName(first + ' ' + last);
 }, [first, last]);`,
         opts: [
-          'It should not be an effect. Compute it during render',
+          'Compute it during render, not in an effect',
           'The dependency array is missing the state setter',
           'It needs useLayoutEffect to avoid a flash',
         ],
-        a: 'It should not be an effect. Compute it during render',
-        why: 'This is the "you might not need an effect" case: it renders twice and the state can go stale. `const fullName = first + " " + last` is the whole fix.',
+        a: 'Compute it during render, not in an effect',
+        why: 'This is an effect you do not need. It renders once with an empty fullName, then the effect sets it, and React renders again. For that first render, the screen shows a stale value. `const fullName = first + \' \' + last` during render is the whole fix. The setter does not need to be in the array, since React keeps it stable, and useLayoutEffect would only hide the extra render.',
       },
       {
         t: 2,
@@ -355,7 +390,7 @@ useEffect(() => {
           'Either one. They run at the same moment',
         ],
         a: 'The event handler, since a user did something',
-        why: 'If the code should run because something happened, it belongs in the handler. Effects run because the component rendered.',
+        why: 'If code should run because something happened, like a click, it belongs in that event\'s handler. Effects run because the component rendered. An effect watching a counter would fire one render late, and also in cases you did not mean.',
       },
       {
         t: 2,
@@ -364,12 +399,12 @@ useEffect(() => {
   const data = await fetchUser();
 }, []);`,
         opts: [
-          'The slot is for cleanup, and async returns a promise',
+          'Async returns a promise, not a cleanup',
           'React forbids any promise inside an effect body',
           'await belongs in handlers, never in effects',
         ],
-        a: 'The slot is for cleanup, and async returns a promise',
-        why: 'Define an async function inside the effect and call it, or use .then. Keep the cleanup slot free.',
+        a: 'Async returns a promise, not a cleanup',
+        why: 'The function you pass to useEffect may only return a cleanup function. An async function always returns a promise. TypeScript rejects it, React warns in development, and on unmount React tries to call the promise as a cleanup and crashes. Define an async function inside the effect and call it instead. Promises inside the effect are fine.',
       },
       {
         t: 3,
@@ -384,7 +419,7 @@ useEffect(() => {
           'count has to be a ref before it can be logged',
         ],
         a: 'The callback kept the count from the first render',
-        why: 'The classic stale closure. Use a functional update, put count in the deps, or keep the latest value in a ref.',
+        why: 'The interval\'s callback was created during the first render, so it holds that render\'s count forever. This is called a stale closure. Add count to the dependency array, so the interval restarts with the new value, or read the latest value from a ref. To update count, setCount(c => c + 1) avoids reading it at all.',
       },
       {
         t: 3,
@@ -395,7 +430,7 @@ useEffect(() => {
           'Whenever the effect touches the DOM at all',
         ],
         a: 'When you measure or fix the DOM before paint',
-        why: 'It runs synchronously after DOM mutations, so the user never sees the intermediate frame. It also blocks painting, so use it sparingly.',
+        why: 'useLayoutEffect runs after React updates the DOM but before the browser paints. So you can measure an element and adjust it without a visible flicker. It blocks painting while it runs, so a slow effect does not belong there. Most DOM work, like focusing an input, is fine in useEffect.',
       },
       {
         t: 3,
@@ -406,7 +441,83 @@ useEffect(() => {
           'Whatever makes the lint warning go away',
         ],
         a: 'Every reactive value it reads, props included',
-        why: 'If a dependency changes too often, fix the cause (move the function inside, wrap it, or use a ref). Do not silence the lint rule.',
+        why: 'Every reactive value the effect reads goes in: props, state, and anything computed from them during render. The lint rule checks this for you. If a dependency changes too often, fix the cause: move the function inside the effect, or keep the value in a ref. Silencing the warning hides a stale value bug.',
+      },
+      {
+        t: 1,
+        q: 'When does useEffect run?',
+        opts: [
+          'After React commits the render to the DOM',
+          'Before the component renders for the first time',
+          'During the render, while the JSX is built',
+        ],
+        a: 'After React commits the render to the DOM',
+        why: 'React first renders, then commits the changes to the DOM, and only then runs your effects. Usually that is after the browser paints, so effects do not hold up the screen. An effect never runs before or during a render.',
+      },
+      {
+        t: 1,
+        q: 'What happens with no dependency array at all?',
+        code: `useEffect(() => {
+  // ...
+});`,
+        opts: [
+          'It runs after every render',
+          'It runs only after the first render',
+          'It never runs until you add one',
+        ],
+        a: 'It runs after every render',
+        why: 'No array means React has nothing to compare, so it runs the effect after every render, cleaning up the last run first. An empty array is the one that runs once. There is no case where an effect never runs.',
+      },
+      {
+        t: 1,
+        q: 'What is useEffect for?',
+        opts: [
+          'Staying in sync with something outside React',
+          'Computing values from props and state',
+          'Responding when a user clicks a button',
+        ],
+        a: 'Staying in sync with something outside React',
+        why: 'Effects connect a component to systems React does not manage: a timer, a subscription, a browser API, a server. A value you can compute from props and state belongs in the render itself. A click belongs in the click handler.',
+      },
+      {
+        t: 1,
+        q: 'How do you stop a setInterval when the component leaves the screen?',
+        opts: [
+          'Return a cleanup that calls clearInterval',
+          'Call clearInterval at the top of the component',
+          'Nothing. React clears timers on unmount',
+        ],
+        a: 'Return a cleanup that calls clearInterval',
+        why: 'Return a function from the effect. React calls it when the component unmounts, and before any re-run. Calling clearInterval at the top of the component would run on every render, with no id to clear. React knows nothing about your timers, so it cannot clear them for you.',
+      },
+      {
+        t: 1,
+        q: 'What happens here?',
+        code: `const [user, setUser] = useState({ name: 'Ada' });
+useEffect(() => {
+  setUser({ name: 'Ada' });
+}, [user]);`,
+        opts: [
+          'It loops: every run makes a new user object',
+          'It runs once, since the name never actually changes',
+          'React merges the two updates into one',
+        ],
+        a: 'It loops: every run makes a new user object',
+        why: '`{ name: \'Ada\' }` is a new object every time, so Object.is sees a change. The new user re-runs the effect, which sets a new user again, forever. React stops it with a "Maximum update depth exceeded" error. React compares objects by identity, not by contents, so the matching name does not help.',
+      },
+      {
+        t: 1,
+        q: 'This effect fetches a user. What goes in the array?',
+        code: `useEffect(() => {
+  fetchUser(userId).then(setUser);
+}, [/* ??? */]);`,
+        opts: [
+          '[userId]',
+          '[] so it runs only once',
+          '[setUser, fetchUser]',
+        ],
+        a: '[userId]',
+        why: 'The effect reads userId, so it has to run again when userId changes. With [], it would keep showing the first user after the prop changes. setUser from useState is stable, and fetchUser is an import, so neither needs to be listed.',
       },
     ],
   },
@@ -997,24 +1108,24 @@ function SearchBox() {
     ],
   },
   effect: {
-    plain: 'useEffect is for syncing your component with something that lives outside React: a subscription, a timer, a browser API, a server. React runs it after the render is on screen, re-runs it when a dependency changes, and runs the cleanup before each re-run and on unmount. If you are using an effect to compute a value from props and state, or to respond to a click, you probably do not want an effect at all.',
+    plain: 'useEffect is for staying in sync with something outside React: a subscription, a timer, a browser API, a server.\n\nReact runs your effect after a render is committed. It runs it again whenever a value in the dependency array changes. Before each re-run, and when the component leaves the screen, it runs the cleanup function you returned.\n\nIf you are using an effect to compute a value from props and state, or to respond to a click, you probably do not want an effect at all. Compute the value during render, or put the code in the event handler.',
     words: [
       [
         'effect',
-        'Code that syncs the component with an outside system after render.',
+        'Code that keeps the component in sync with an outside system, run after render.',
       ],
       [
         'dependency array',
-        'The reactive values the effect reads. Change one and the effect re-runs.',
+        'The reactive values the effect reads. When one changes, the effect runs again.',
       ],
-      ['cleanup', 'The function you return. It undoes the last run.'],
+      ['cleanup', 'The function your effect returns. It undoes the last run.'],
       [
         'StrictMode',
-        'Development-only double mount, there to expose effects without cleanup.',
+        'A development-only check that mounts each component, unmounts it, and mounts it again, to expose effects with no cleanup.',
       ],
       [
         'stale closure',
-        'A callback still holding values from the render that created it.',
+        'A function still holding the values from the render that created it.',
       ],
     ],
     code: {
@@ -1033,17 +1144,21 @@ function SearchBox() {
       'Effects synchronize with the outside world. If something should happen because the user did something, it goes in the event handler instead.',
       'The cleanup runs before every re-run and on unmount, so subscribe and unsubscribe stay balanced.',
       'Double-running in StrictMode is a feature. If it breaks, my effect is missing cleanup.',
-      'Anything I can compute during render does not belong in state plus an effect. That pattern gives you an extra render and a chance to be out of sync.',
+      'Anything I can compute during render does not belong in state plus an effect. That pattern costs an extra render, and the screen is out of sync in between.',
     ],
     gotcha: 'Removing a dependency to stop an effect looping just hides a stale closure. Fix the cause: move the function inside the effect, use an updater function, or keep the changing value in a ref.',
     rehearse: [
       {
         prompt: 'What is useEffect for, and when do you not need one?',
-        answer: 'It syncs a component with something outside React: a subscription, a timer, an API. If I can compute the value during render, or the work should happen because a user did something, it belongs in render or in the handler instead.',
+        answer: 'It keeps a component in sync with something outside React: a subscription, a timer, an API. If I can compute the value during render, it belongs in render. If the work should happen because a user did something, it belongs in the event handler.',
       },
       {
         prompt: 'Explain the cleanup function.',
-        answer: 'It undoes the last run. It fires before the effect runs again and once on unmount, so subscriptions stay balanced. StrictMode double-mounting in development exists to expose a missing cleanup.',
+        answer: 'It undoes the last run. It fires before the effect runs again, and once on unmount, so subscriptions stay balanced. StrictMode mounts twice in development to expose a missing cleanup.',
+      },
+      {
+        prompt: 'Your effect fetches data. What can go wrong, and how do you handle it?',
+        answer: 'If the input changes quickly, two responses can come back out of order, so a slow old one overwrites the new one. I handle that in the cleanup: abort the request with an AbortController, or set an ignore flag so the late result is dropped. In a real app I would usually reach for a data library or my framework\'s data loading instead of writing this by hand.',
       },
     ],
   },
