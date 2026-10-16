@@ -1,9 +1,10 @@
 import type { Guide, Line, ReactLineId } from '../engine/types';
 
 /**
- * The React division: the front half of the job. Behavior checked against the
- * React docs, including the React 19 changes (ref as a prop, \`<Context>\` as a
- * provider, the \`use\` API, Actions) and the React Compiler.
+ * The React division: the front half of the job. Every claim is run against
+ * React 19.3 in a sandbox (see CLAUDE.md), including the React 19 changes (ref
+ * as a prop, `<Context>` as a provider, the `use` API, Actions), the 19.2
+ * additions (useEffectEvent, <Activity>) and the React Compiler.
  */
 export const REACT_LINES: Line[] = [
   {
@@ -337,11 +338,11 @@ export const REACT_LINES: Line[] = [
         t: 1,
         q: 'Your effect runs twice on mount in development. Why?',
         opts: [
-          'StrictMode remounts once to expose missing cleanup',
+          'StrictMode runs it again to expose missing cleanup',
           'StrictMode renders twice to compare the output',
           'The dependency array is missing a value it reads',
         ],
-        a: 'StrictMode remounts once to expose missing cleanup',
+        a: 'StrictMode runs it again to expose missing cleanup',
         why: 'In development, StrictMode runs each effect\'s setup, then its cleanup, then setup again. It keeps the component\'s state, so this is a simulated remount, not a real one. If that breaks something, the effect is missing a cleanup, which is exactly what StrictMode is showing you. Production runs it once. A missing dependency causes stale values later, not a second run on mount.',
       },
       {
@@ -353,7 +354,7 @@ export const REACT_LINES: Line[] = [
           'Right before the effect runs for the first time',
         ],
         a: 'Before the next run, and on unmount',
-        why: 'The cleanup undoes the last run. React calls it right before the effect runs again with new values, and once more when the component leaves the screen. So subscribe in the effect, unsubscribe in the cleanup, and the two stay balanced.',
+        why: 'The cleanup undoes the last run. React calls it right before the effect runs again with new values, and once more when the component leaves the screen. Since React 19.2, hiding the component inside an <Activity> runs the cleanup too. So subscribe in the effect, unsubscribe in the cleanup, and the two stay balanced.',
       },
       {
         t: 2,
@@ -419,7 +420,7 @@ useEffect(() => {
           'count has to be a ref before it can be logged',
         ],
         a: 'The callback kept the count from the first render',
-        why: 'The interval\'s callback was created during the first render, so it holds that render\'s count forever. This is called a stale closure. Add count to the dependency array, so the interval restarts with the new value, or read the latest value from a ref. To update count, setCount(c => c + 1) avoids reading it at all.',
+        why: 'The interval\'s callback was created during the first render, so it holds that render\'s count forever. This is called a stale closure. Add count to the dependency array, so the interval restarts with the new value, or read the latest value through useEffectEvent or a ref. To update count, setCount(c => c + 1) avoids reading it at all.',
       },
       {
         t: 3,
@@ -441,7 +442,7 @@ useEffect(() => {
           'Whatever makes the lint warning go away',
         ],
         a: 'Every reactive value it reads, props included',
-        why: 'Every reactive value the effect reads goes in: props, state, and anything computed from them during render. The lint rule checks this for you. If a dependency changes too often, fix the cause: move the function inside the effect, or keep the value in a ref. Silencing the warning hides a stale value bug.',
+        why: 'Every reactive value the effect reads goes in: props, state, and anything computed from them during render. The lint rule checks this for you. If a dependency changes too often, fix the cause: move the function inside the effect, or read the value through useEffectEvent or a ref. Silencing the warning hides a stale value bug.',
       },
       {
         t: 1,
@@ -1603,7 +1604,7 @@ setUser(user);`,
           'defaultValue makes the input read-only',
         ],
         a: 'value is controlled; defaultValue only sets the start',
-        why: 'value makes React the owner: the input always shows what you pass. defaultValue only sets the first value, and then the input keeps its own. Do not count on a later change to defaultValue reaching an input already on screen. To load a new starting value, give the input a new key.',
+        why: 'value makes React the owner: the input always shows what you pass. defaultValue only sets the first value, and then the input keeps its own. Do not count on a later change to defaultValue reaching an input already on screen. To load a new starting value, give the input a new key. A form reset does use the new one, though.',
       },
       {
         t: 1,
@@ -1694,7 +1695,7 @@ setUser(user);`,
           'They clear only after a page reload',
         ],
         a: 'React resets them to their defaults',
-        why: 'After a form action finishes without throwing, React resets the form\'s uncontrolled fields, the way a normal browser submit would. Controlled inputs keep whatever their state says. If the typed values should stay, make those inputs controlled.',
+        why: 'After a form action finishes without throwing, React resets the form\'s uncontrolled fields, the way a normal browser submit would. Controlled inputs keep whatever their state says. If the typed values should stay, make those inputs controlled. If signup throws, nothing resets, and the error goes to the nearest error boundary.',
       },
       {
         t: 2,
@@ -1790,7 +1791,7 @@ setUser(user);`,
       'Ask which boundary sits above the part that waits or throws.',
       'Watch for requests that wait on each other.',
     ],
-    hook: 'A Suspense boundary shows its fallback while something inside it is still loading. An error boundary shows its fallback when something inside it throws while rendering, or in an effect. Both only cover what is below them. Suspense never catches errors, and error boundaries miss errors from plain event handlers.',
+    hook: 'A Suspense boundary shows its fallback while something inside it is still loading. An error boundary shows its fallback when something inside it throws while rendering, in an effect, or in an Action like a form action. Both only cover what is below them. Suspense never catches errors, and error boundaries miss errors from plain event handlers.',
     par: 95,
     drill: 'Ask what the screen should show while waiting, and which Suspense boundary is closest above the part that waits. Ask what should show if it breaks, and which error boundary is above it. Then ask whether one request has to wait for another, or whether they can start together.',
     sorts: [
@@ -1806,7 +1807,7 @@ setUser(user);`,
           { name: 'A plain onClick handler\'s fetch fails', bucket: 'Neither', why: 'A plain event handler runs outside rendering, so no boundary sees its error. Catch it there and show it with state.' },
           { name: 'A setTimeout callback throws', bucket: 'Neither', why: 'Async callbacks run outside rendering, so no boundary catches them.' },
         ],
-        note: 'Suspense covers waiting: data or code that is not ready yet. Error boundaries cover crashes while rendering or in effects. Errors in plain event handlers and timers happen outside of that, so you catch those yourself.',
+        note: 'Suspense covers waiting: data or code that is not ready yet. Error boundaries cover crashes while rendering, in effects, or in a form action. Errors in plain event handlers and timers happen outside of that, so you catch those yourself.',
       },
     ],
     flows: [
@@ -1846,7 +1847,7 @@ setUser(user);`,
           'Only the errors that come from fetch',
         ],
         a: 'Errors thrown while rendering below it',
-        why: 'An error boundary catches errors thrown while React renders the components below it, or in their effects, and shows a fallback in place of that part of the tree. It does not see errors from event handlers, or from async code like setTimeout. Where an error came from, fetch or anything else, does not matter.',
+        why: 'An error boundary catches errors thrown while React renders the components below it, or in their effects, and shows a fallback in place of that part of the tree. It does not see errors from plain event handlers, or from timers like setTimeout. Where an error came from, fetch or anything else, does not matter.',
       },
       {
         t: 1,
@@ -2117,11 +2118,11 @@ useEffect(() => {
     },
     say: [
       'Effects synchronize with the outside world. If something should happen because the user did something, it goes in the event handler instead.',
-      'The cleanup runs before every re-run and on unmount, so subscribe and unsubscribe stay balanced.',
+      'The cleanup runs before every re-run, on unmount, and when an <Activity> hides the component, so subscribe and unsubscribe stay balanced.',
       'Double-running in StrictMode is a feature. If it breaks, my effect is missing cleanup.',
       'Anything I can compute during render does not belong in state plus an effect. That pattern costs an extra render, with an out-of-date value committed in between.',
     ],
-    gotcha: 'Removing a dependency to stop an effect looping trades the loop for a stale closure. Fix the cause: move the function inside the effect, use an updater function, or keep the changing value in a ref.',
+    gotcha: 'Removing a dependency to stop an effect looping trades the loop for a stale closure. Fix the cause: move the function inside the effect, use an updater function, or read the changing value through useEffectEvent or a ref.',
     rehearse: [
       {
         prompt: 'What is useEffect for, and when do you not need one?',
@@ -2129,7 +2130,7 @@ useEffect(() => {
       },
       {
         prompt: 'Explain the cleanup function.',
-        answer: 'It undoes the last run. It fires before the effect runs again, and once on unmount, so subscriptions stay balanced. In development, StrictMode runs setup, cleanup and setup again to expose a missing cleanup.',
+        answer: 'It undoes the last run. It fires before the effect runs again, and once on unmount, so subscriptions stay balanced. Since React 19.2, hiding a component with <Activity> runs it too. In development, StrictMode runs setup, cleanup and setup again to expose a missing cleanup.',
       },
       {
         prompt: 'Your effect fetches data. What can go wrong, and how do you handle it?',
@@ -2422,7 +2423,7 @@ How you fetch matters too. Fetching in useEffect works, but it leaves caching, r
     words: [
       ['Suspense', 'A boundary that shows its fallback while something inside it is still loading.'],
       ['suspend', 'What a component does when its data or code is not ready: React stops rendering it and shows the nearest fallback.'],
-      ['error boundary', 'A class component that catches errors thrown while rendering below it, or in effects, and shows a fallback instead.'],
+      ['error boundary', 'A class component that catches errors thrown while rendering below it, in effects, or in Actions like a form action, and shows a fallback instead.'],
       ['waterfall', 'Requests that run one after another because each waits for the last, so the waits add up.'],
       ['use()', 'React 19: reads a promise during render, and suspends until the promise settles.'],
       ['transition', 'An update marked with startTransition. React keeps the old screen visible while it gets the new one ready.'],
