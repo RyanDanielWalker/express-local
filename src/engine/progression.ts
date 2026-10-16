@@ -15,8 +15,8 @@ export const TIERS: Record<Tier, { name: string; mult: number; blurb: string }> 
 
 /**
  * Pegged to the content, not to a guess. Clearing one line at all three tiers
- * is about 830 XP, and there are 29 lines, so the map alone holds roughly
- * 24,000 before any reviews, drills or rehearsals. The old ladder topped out at
+ * is about 830 XP, and there are 34 lines, so the map alone holds roughly
+ * 28,000 before any reviews, drills or rehearsals. The old ladder topped out at
  * 5,500, which arrived after about seven lines.
  */
 export const RANKS: [number, string][] = [

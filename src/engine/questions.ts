@@ -4,7 +4,7 @@ import type { Division, Flow, Line, Question, QuestionStat, SaveData, Sort, Tier
 export const DIVISIONS: { id: Division; name: string; blurb: string }[] = [
   { id: 'algos', name: 'Algorithms', blurb: 'Be the algorithm. Click it out stop by stop.' },
   { id: 'nest', name: 'NestJS', blurb: 'The backend half of the job, drilled as questions.' },
-  { id: 'react', name: 'React', blurb: 'Rendering, effects and state, the parts that bite.' },
+  { id: 'react', name: 'React', blurb: 'Rendering, effects, forms and data, the parts that bite.' },
   { id: 'ts', name: 'TypeScript', blurb: 'Narrowing, generics and the types you write all day.' },
 ];
 
