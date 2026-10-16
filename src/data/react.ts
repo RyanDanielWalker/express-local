@@ -21,8 +21,43 @@ export const REACT_LINES: Line[] = [
       'A re-render means React calls your function again, not that the DOM changed.',
       'Wrong answers explain themselves.',
     ],
-    hook: 'A component re-renders when its own state changes, when its parent re-renders, or when a context it reads changes. React then diffs the output and only touches the DOM where it differs.',
+    hook: 'A component re-renders when its own state changes, when its parent re-renders, or when a context it reads changes. React then compares the output and only touches the DOM where it differs.',
     par: 95,
+    drill: 'Ask what changed. The component\'s own state? Its parent rendering again? A context it reads? Nothing else starts a render: not a ref, not a plain variable. Then ask what reaches the DOM. React only touches the parts of the output that differ.',
+    sorts: [
+      {
+        t: 1,
+        title: 'Counter is on screen. Which of these makes it render again?',
+        buckets: ['Re-renders', 'Stays put'],
+        items: [
+          { name: 'Counter calls setCount with a new number', bucket: 'Re-renders', why: 'Its own state changed, so React calls Counter again.' },
+          { name: 'Counter\'s parent renders again', bucket: 'Re-renders', why: 'Children render again with their parent by default, even with the same props. Only memo opts out.' },
+          { name: 'A context Counter reads with useContext gets a new value', bucket: 'Re-renders', why: 'Every component that reads a context renders again when its value changes, with or without memo.' },
+          { name: 'A handler in Counter sets inputRef.current = \'x\'', bucket: 'Stays put', why: 'A ref is a box React does not watch. Changing .current never starts a render.' },
+          { name: 'A handler in Counter changes a plain let variable', bucket: 'Stays put', why: 'React does not watch plain variables. And the next render would set it back to its starting value anyway.' },
+          { name: 'Counter is in memo, and its parent renders again with the same number props', bucket: 'Stays put', why: 'memo compares each prop with Object.is. The numbers are the same, so React skips Counter.' },
+          { name: 'A sibling of Counter updates its own state', bucket: 'Stays put', why: 'A render starts at the component whose state changed and goes down from there. A sibling is not below it.' },
+        ],
+        note: 'Three things make a component render again: its own state, its parent rendering, or a context it reads. Refs and plain variables are invisible to React. And memo can skip a parent\'s render when no prop has changed.',
+      },
+    ],
+    flows: [
+      {
+        t: 1,
+        title: 'Counter shows 0. You click its + button, which calls setCount(count + 1)',
+        steps: [
+          'The click handler runs',
+          'setCount queues an update',
+          'The handler finishes',
+          'React calls Counter again',
+          'React compares the new JSX with the old',
+          'React updates just the changed text',
+          'The browser paints',
+        ],
+        decoys: ['React renders the whole app from the root', 'React rebuilds all of Counter\'s DOM'],
+        note: 'Calling setCount does not render on the spot. It queues an update, and React renders once the handler is done. That second call to Counter is the render. React then compares what Counter returned with last time, and changes the DOM only where they differ, here a single piece of text. That DOM step is called the commit. The browser paints after it.',
+      },
+    ],
     questions: [
       {
         t: 1,
@@ -33,7 +68,7 @@ export const REACT_LINES: Line[] = [
           'Any state change anywhere in the component tree',
         ],
         a: 'Its own state, its parent rendering, or a context it reads',
-        why: 'Those are the three triggers. Props being "different" only matters when the component is wrapped in memo.',
+        why: 'Those are the three triggers: a new state value, the parent rendering again, or a context it reads changing. Props changing is not a trigger of its own. A component re-renders whenever its parent does, whatever the props, unless it is wrapped in memo. React never deep-compares props, and a state change only reaches the components below it.',
       },
       {
         t: 1,
@@ -44,7 +79,7 @@ export const REACT_LINES: Line[] = [
           'It skips, since nothing it renders has changed',
         ],
         a: 'It re-renders too, unless it is wrapped in memo',
-        why: 'React re-renders the whole subtree by default. Skipping is opt-in with memo, and the React Compiler can do it for you.',
+        why: 'By default, React re-renders everything below a component that rendered, same props or not. memo is how you opt out: it skips the child when every prop is equal to last time. The React Compiler can add that skipping for you. React does not compare props on its own, and it cannot know the output is the same without calling the function.',
       },
       {
         t: 1,
@@ -55,7 +90,7 @@ export const REACT_LINES: Line[] = [
           'Only in development, where the checks are stricter',
         ],
         a: 'No. React updates only where the output differs',
-        why: 'Re-render means React calls your function again. DOM work only happens where the output actually differs, which is why re-renders are usually cheap.',
+        why: 'A re-render means React calls your function again. React then compares the result with last time and changes the DOM only where they differ. If nothing differs, the DOM is left alone. That is why re-renders are usually cheap. Development mode does not change this.',
       },
       {
         t: 2,
@@ -69,7 +104,7 @@ export const REACT_LINES: Line[] = [
           'memo skips object props and checks primitives',
         ],
         a: 'The object is a new reference on every render',
-        why: 'memo compares props with Object.is. New object, new identity, no skip. Hoist it or wrap it in useMemo.',
+        why: 'memo compares each prop with Object.is, which checks for the same object, not the same contents. `{ margin: 8 }` written inline is a new object on every render, so the check fails every time. memo never deep-compares, and it treats object props like any other prop. Move the object outside the component, or wrap it in useMemo.',
       },
       {
         t: 2,
@@ -80,7 +115,7 @@ export const REACT_LINES: Line[] = [
           'React warns in development about a wasted update',
         ],
         a: 'React can bail out and skip rendering the children',
-        why: 'React compares with Object.is and bails out. It may still render that one component once more before deciding, which surprises people.',
+        why: 'React compares the new value with the old one using Object.is. They match, so it bails out: the children do not render, and no effects run. React may still call that one component once more before it decides, which surprises people. It does not warn about any of this.',
       },
       {
         t: 2,
@@ -91,7 +126,7 @@ export const REACT_LINES: Line[] = [
           'Nothing, until a prop changes further down',
         ],
         a: 'Every component that reads that context',
-        why: 'This is why a context holding one big object causes wide re-renders. Split contexts by how often each piece changes.',
+        why: 'Every component that reads that context with useContext re-renders, even inside memo. Components that do not read it are not affected by the change itself. That is why one context holding one big object causes wide re-renders. Split contexts by how often each piece changes.',
       },
       {
         t: 2,
@@ -102,7 +137,7 @@ export const REACT_LINES: Line[] = [
           'At the deepest leaf, then back up the tree',
         ],
         a: 'At the component that changed, then downward',
-        why: 'Updates flow down. That is why moving state lower in the tree shrinks what re-renders.',
+        why: 'A render starts at the component whose state changed, and goes down through what it renders. Components above it and beside it are not called. That is why moving state lower in the tree shrinks what re-renders.',
       },
       {
         t: 3,
@@ -113,7 +148,7 @@ export const REACT_LINES: Line[] = [
           'Lift the state into context so it is shared',
         ],
         a: 'Move the state into the component that needs it',
-        why: 'Memo is a patch over a structure problem. Moving state down (or passing children as a prop) usually removes the re-render entirely.',
+        why: 'memo is a patch over a structure problem. With the state at the top, every change re-renders the whole page below it. Move the state into the component that uses it, and the rest of the page stops re-rendering. Putting it in context would still re-render every component that reads it.',
       },
       {
         t: 3,
@@ -128,7 +163,7 @@ export const REACT_LINES: Line[] = [
           'Only memoized children are allowed to skip',
         ],
         a: 'The element came from a parent that did not render',
-        why: 'React sees the same element object and skips re-rendering it. A free optimization that costs no memo calls.',
+        why: 'The child element was created by Layout\'s parent, which did not render again. So when Layout re-renders, its children prop is the exact same element object as last time, and React skips it. React does not memoize children for you in general. This works without memo, purely because of where the element was created.',
       },
       {
         t: 3,
@@ -139,7 +174,84 @@ export const REACT_LINES: Line[] = [
           'Removes the need for keys in rendered lists',
         ],
         a: 'Memoizes for you when the rules are followed',
-        why: 'It shipped 1.0 in late 2025. It does what useMemo, useCallback and memo did by hand, as long as your components stay pure and follow the rules.',
+        why: 'React Compiler 1.0 shipped in October 2025. At build time, it adds the memoization you would otherwise write by hand with memo, useMemo and useCallback. It only does that for components that are pure and follow the Rules of React. It does not replace the virtual DOM, and keys still matter.',
+      },
+      {
+        t: 1,
+        q: 'In React, what does it mean when a component renders?',
+        opts: [
+          'React calls your component function',
+          'The browser paints pixels on screen',
+          'React writes new HTML into the page',
+        ],
+        a: 'React calls your component function',
+        why: 'Rendering is React calling your function to get the JSX it returns now. Writing changes into the DOM is a separate step, called the commit, and it only touches what differs. Painting pixels is the browser\'s job, after that.',
+      },
+      {
+        t: 1,
+        q: 'A parent\'s state changes. Its child takes no props at all. Does the child re-render?',
+        opts: [
+          'Yes, children re-render with their parent',
+          'No, it has no props that could change',
+          'Only if the child has state of its own',
+        ],
+        a: 'Yes, children re-render with their parent',
+        why: 'When a component renders, React renders everything it returns, by default. Having no props does not opt the child out. Wrapping it in memo would, because memo skips a component whose props are unchanged, and no props never change.',
+      },
+      {
+        t: 1,
+        q: 'A handler runs `count = count + 1` on a plain `let count = 0` declared inside the component. What does the screen show?',
+        opts: [
+          'Still 0. React never saw a change',
+          '1, as soon as the handler finishes',
+          '1, once the parent re-renders',
+        ],
+        a: 'Still 0. React never saw a change',
+        why: 'React only re-renders for state, props from a re-rendering parent, or context. A plain variable is none of those, so nothing renders. And if something else did cause a render, `let count = 0` would run again and start from 0. Use useState for a value the screen should show.',
+      },
+      {
+        t: 1,
+        q: 'A component re-renders. What happens to its useState values?',
+        opts: [
+          'They are kept from the last render',
+          'They reset to their initial values',
+          'They reset, unless it is wrapped in memo',
+        ],
+        a: 'They are kept from the last render',
+        why: 'React stores state outside your function, tied to that spot in the tree. A re-render reads the stored values back, so nothing resets. State only starts over when the component is removed and added again, for example when its key changes.',
+      },
+      {
+        t: 1,
+        q: 'A handler sets `inputRef.current = \'x\'`. Does the component re-render?',
+        opts: [
+          'No. Changing a ref never re-renders',
+          'Yes, the same way setting state does',
+          'Yes, once the handler has finished',
+        ],
+        a: 'No. Changing a ref never re-renders',
+        why: 'A ref is a box React keeps for you but does not watch. Writing to .current changes the value immediately, and nothing re-renders, now or later. That is what refs are for: values you need to keep, but that the screen does not show.',
+      },
+      {
+        t: 1,
+        q: 'What does wrapping a component in memo do?',
+        opts: [
+          'Skips its re-render when no prop has changed',
+          'Caches the DOM it produced between pages',
+          'Stops it re-rendering when its state changes',
+        ],
+        a: 'Skips its re-render when no prop has changed',
+        why: 'memo compares each prop with the last render\'s, using Object.is. If none changed, React skips calling the component when its parent renders. Its own state changes and the contexts it reads still re-render it. memo caches nothing about the DOM.',
+      },
+      {
+        t: 2,
+        q: 'Under StrictMode, in development, React calls your component function twice per render. Why?',
+        opts: [
+          'To catch rendering code that is not pure',
+          'To compare the two outputs and pick one',
+          'To warm up a cache for the next render',
+        ],
+        a: 'To catch rendering code that is not pure',
+        why: 'A pure component returns the same output for the same inputs, so calling it twice changes nothing. If something does change, like a counter outside the component, the bug shows up in development. React keeps one result and throws the other away. Production calls each component once.',
       },
     ],
   },
@@ -823,7 +935,7 @@ setUser(user);`,
 /** Field guide for the React division, including interview talking points. */
 export const REACT_GUIDE: Record<ReactLineId, Guide> = {
   render: {
-    plain: "A re-render just means React calls your component function again to see what it returns now. It does that when the component's own state changes, when its parent re-renders, or when a context it reads changes. React then compares the new output to the old one and only touches the real DOM where they differ. So a re-render is usually cheap, and the expensive part is doing it to a huge tree over and over.",
+    plain: "A re-render means React calls your component function again to see what it returns now. Three things cause one: the component's own state changing, its parent rendering again, or a context it reads changing.\n\nAfter a render, React compares the new output with the old one. It changes the real DOM only where they differ. That last step is called the commit.\n\nSo a single re-render is usually cheap. What gets expensive is re-rendering a big tree over and over, and the fix is usually structure before memo.",
     words: [
       [
         're-render',
@@ -835,13 +947,13 @@ export const REACT_GUIDE: Record<ReactLineId, Guide> = {
       ],
       [
         'reconciliation',
-        'Comparing the new element tree with the old one to work out what changed.',
+        'React comparing the new output with the old one to work out what changed.',
       ],
       [
         'referential equality',
-        'Two values being the same object in memory. React compares props this way.',
+        'Two values being the very same object, not just objects that look alike. memo compares props this way, with Object.is.',
       ],
-      ['React.memo', 'Opt out of re-rendering when props are shallow-equal.'],
+      ['React.memo', 'Wraps a component so it skips re-rendering when every prop is equal to last time, compared with Object.is.'],
     ],
     code: {
       label: 'the fix that beats memo',
@@ -863,20 +975,24 @@ function SearchBox() {
 }`,
     },
     say: [
-      'Three things trigger a re-render: own state, a parent re-rendering, or a context the component reads.',
-      'A re-render is not a repaint. React diffs the output and only commits what actually changed.',
-      'Before reaching for memo I look at structure: move state down, or pass children as a prop so a subtree keeps its identity.',
-      'With the React Compiler most of that memoization happens automatically, as long as the components follow the Rules of React.',
+      'Three things trigger a re-render: the component\'s own state, its parent re-rendering, or a context it reads.',
+      'A re-render is not a repaint. React compares the output and only commits what actually changed.',
+      'Before reaching for memo, I look at structure. I move state down, or pass children as a prop so a subtree keeps its identity.',
+      'With the React Compiler, most of that memoization happens automatically, as long as the components follow the Rules of React.',
     ],
-    gotcha: 'Wrapping a child in memo does nothing if you pass it a fresh object, array or arrow function on every render. The shallow compare fails every time and you have paid for the comparison for nothing.',
+    gotcha: 'Wrapping a child in memo does nothing if you pass it a fresh object, array or arrow function on every render. Each of those is a new object, so memo\'s comparison fails every time, and you pay for the comparison for nothing.',
     rehearse: [
       {
         prompt: 'What causes a component to re-render?',
-        answer: 'Its own state changed, its parent re-rendered, or a context it reads changed. A re-render means React called the function again, not that the browser repainted.',
+        answer: 'Its own state changed, its parent re-rendered, or a context it reads changed. A re-render means React called the function again. It does not mean the browser repainted.',
       },
       {
         prompt: 'Typing in a form feels slow. How do you approach it?',
-        answer: 'Profile first with the DevTools Profiler. It is usually state sitting too high in the tree, so I move it down or pass children as a prop. Memo comes after structure, and the compiler covers most of it now.',
+        answer: 'I profile first with the React DevTools Profiler. Usually the state sits too high in the tree, so every keystroke re-renders the whole page. I move it down, or pass children as a prop. memo comes after structure, and the React Compiler covers most of it now.',
+      },
+      {
+        prompt: 'What is the difference between a render and a commit?',
+        answer: 'Rendering is React calling my components to work out what the UI should look like now. The commit is when React applies the differences to the real DOM. A component can render without anything being committed, if its output did not change. That is why a re-render on its own is usually cheap.',
       },
     ],
   },
