@@ -31,7 +31,7 @@ export const REACT_LINES: Line[] = [
         buckets: ['Re-renders', 'Stays put'],
         items: [
           { name: 'Counter calls setCount with a new number', bucket: 'Re-renders', why: 'Its own state changed, so React calls Counter again.' },
-          { name: 'Counter\'s parent renders again', bucket: 'Re-renders', why: 'Children render again with their parent by default, even with the same props. Only memo opts out.' },
+          { name: 'Counter\'s parent renders again', bucket: 'Re-renders', why: 'Children render again with their parent by default, even with the same props. memo opts out. So does a child passed in as children from higher up.' },
           { name: 'A context Counter reads with useContext gets a new value', bucket: 'Re-renders', why: 'Every component that reads a context renders again when its value changes, with or without memo.' },
           { name: 'A handler in Counter sets inputRef.current = \'x\'', bucket: 'Stays put', why: 'A ref is a box React does not watch. Changing .current never starts a render.' },
           { name: 'A handler in Counter changes a plain let variable', bucket: 'Stays put', why: 'React does not watch plain variables. And the next render would set it back to its starting value anyway.' },
@@ -79,7 +79,7 @@ export const REACT_LINES: Line[] = [
           'It skips, since nothing it renders has changed',
         ],
         a: 'It re-renders too, unless it is wrapped in memo',
-        why: 'By default, React re-renders everything below a component that rendered, same props or not. memo is how you opt out: it skips the child when every prop is equal to last time. The React Compiler can add that skipping for you. React does not compare props on its own, and it cannot know the output is the same without calling the function.',
+        why: 'By default, React re-renders everything below a component that rendered, same props or not. memo is how you opt out: it skips the child when every prop is equal to last time. The React Compiler can add that skipping for you. React does not compare props one by one on its own. The one exception is a child it gets back as the exact same element object, like one passed in as children.',
       },
       {
         t: 1,
@@ -174,7 +174,7 @@ export const REACT_LINES: Line[] = [
           'Removes the need for keys in rendered lists',
         ],
         a: 'Memoizes for you when the rules are followed',
-        why: 'React Compiler 1.0 shipped in October 2025. At build time, it adds the memoization you would otherwise write by hand with memo, useMemo and useCallback. It only does that for components that are pure and follow the Rules of React. It does not replace the virtual DOM, and keys still matter.',
+        why: 'React Compiler 1.0 shipped in October 2025. At build time, it adds the memoization you would otherwise write by hand with memo, useMemo and useCallback. When it spots code breaking the Rules of React, it skips that component. It cannot spot every break, so following the rules is still your job. It does not replace the virtual DOM, and keys still matter.',
       },
       {
         t: 1,
@@ -251,7 +251,7 @@ export const REACT_LINES: Line[] = [
           'To warm up a cache for the next render',
         ],
         a: 'To catch rendering code that is not pure',
-        why: 'A pure component returns the same output for the same inputs, so calling it twice changes nothing. If something does change, like a counter outside the component, the bug shows up in development. React keeps one result and throws the other away. Production calls each component once.',
+        why: 'A pure component returns the same output for the same inputs, so calling it twice changes nothing. If something does change, like a counter outside the component, the bug shows up in development. React does not compare the two results. It just uses one. Production calls each component once.',
       },
     ],
   },
@@ -280,9 +280,9 @@ export const REACT_LINES: Line[] = [
         buckets: ['Effect', 'Render', 'Event handler'],
         items: [
           { name: 'Connect to a chat room for the current roomId', bucket: 'Effect', why: 'The connection has to stay open while the component is on screen, and switch when roomId changes. That is syncing with an outside system.' },
-          { name: 'Start a timer that ticks every second', bucket: 'Effect', why: 'A timer lives outside React. Start it in an effect, and clear it in the cleanup.' },
+          { name: 'Run a clock that ticks every second while it is on screen', bucket: 'Effect', why: 'A timer lives outside React. Start it in an effect, and clear it in the cleanup.' },
           { name: 'Keep document.title in sync with the unread count', bucket: 'Effect', why: 'document.title is a browser API React does not manage, so an effect keeps it matching the state.' },
-          { name: 'Work out fullName from first and last', bucket: 'Render', why: 'It can be computed from props and state, so compute it during render. An effect would cost an extra render and show a stale value in between.' },
+          { name: 'Work out fullName from first and last', bucket: 'Render', why: 'It can be computed from props and state, so compute it during render. An effect would cost an extra render, with the old value committed in between.' },
           { name: 'Filter the visible todos by the search text', bucket: 'Render', why: 'Same idea: the filtered list comes straight from props and state. Compute it when you need it, with useMemo if it is slow.' },
           { name: 'Send analytics when the user clicks Buy', bucket: 'Event handler', why: 'It should happen because the user clicked, so it goes in the click handler. An effect would fire whenever the component rendered with that state.' },
           { name: 'POST the form when the user submits it', bucket: 'Event handler', why: 'Submitting is something the user did. The submit handler is the one place that knows it happened.' },
@@ -331,7 +331,7 @@ export const REACT_LINES: Line[] = [
           'Never run, since there is nothing to watch',
         ],
         a: 'Run after the first render, clean up on unmount',
-        why: 'An empty array means the effect reads nothing that can change. So React runs it once after the first render, and cleans it up when the component leaves the screen. It does run. In StrictMode during development, React also mounts, cleans up and mounts once more, on purpose.',
+        why: 'An empty array means the effect reads nothing that can change. So React runs it once after the first render, and cleans it up when the component leaves the screen. It does run. In StrictMode during development, React also runs setup, cleanup and setup once more, on purpose. And since React 19.2, when an <Activity> hides the component, the cleanup runs, and showing it again runs the effect again.',
       },
       {
         t: 1,
@@ -342,7 +342,7 @@ export const REACT_LINES: Line[] = [
           'The dependency array is missing a value it reads',
         ],
         a: 'StrictMode remounts once to expose missing cleanup',
-        why: 'In development, StrictMode mounts each component, unmounts it, and mounts it again. So your effect runs, its cleanup runs, and the effect runs again. If that breaks something, the effect is missing a cleanup, which is exactly what StrictMode is showing you. Production runs it once. A missing dependency causes stale values later, not a second run on mount.',
+        why: 'In development, StrictMode runs each effect\'s setup, then its cleanup, then setup again. It keeps the component\'s state, so this is a simulated remount, not a real one. If that breaks something, the effect is missing a cleanup, which is exactly what StrictMode is showing you. Production runs it once. A missing dependency causes stale values later, not a second run on mount.',
       },
       {
         t: 2,
@@ -357,10 +357,10 @@ export const REACT_LINES: Line[] = [
       },
       {
         t: 2,
-        q: 'You fetch in an effect and the user navigates away before it resolves. What is the fix?',
+        q: 'Your effect fetches the user for userId. userId changes before the first response arrives. What is the fix?',
         opts: [
           'Abort it in the cleanup, or ignore the late result',
-          'Nothing. React cancels pending work on unmount',
+          'Nothing. React cancels the old fetch for you',
           'Move the fetch into useLayoutEffect instead',
         ],
         a: 'Abort it in the cleanup, or ignore the late result',
@@ -379,7 +379,7 @@ useEffect(() => {
           'It needs useLayoutEffect to avoid a flash',
         ],
         a: 'Compute it during render, not in an effect',
-        why: 'This is an effect you do not need. It renders once with an empty fullName, then the effect sets it, and React renders again. For that first render, the screen shows a stale value. `const fullName = first + \' \' + last` during render is the whole fix. The setter does not need to be in the array, since React keeps it stable, and useLayoutEffect would only hide the extra render.',
+        why: 'This is an effect you do not need. It renders and commits once with the old fullName, then the effect sets it, and React renders again. On first load, the user can see the old value flash. `const fullName = first + \' \' + last` during render is the whole fix. The setter does not need to be in the array, since React keeps it stable, and useLayoutEffect would only hide the extra render.',
       },
       {
         t: 2,
@@ -390,7 +390,7 @@ useEffect(() => {
           'Either one. They run at the same moment',
         ],
         a: 'The event handler, since a user did something',
-        why: 'If code should run because something happened, like a click, it belongs in that event\'s handler. Effects run because the component rendered. An effect watching a counter would fire one render late, and also in cases you did not mean.',
+        why: 'If code should run because something happened, like a click, it belongs in that event\'s handler. Effects run because the component rendered. An effect watching a counter runs after the render, not at the click, and also runs in cases you did not mean.',
       },
       {
         t: 2,
@@ -466,7 +466,7 @@ useEffect(() => {
           'It never runs until you add one',
         ],
         a: 'It runs after every render',
-        why: 'No array means React has nothing to compare, so it runs the effect after every render, cleaning up the last run first. An empty array is the one that runs once. There is no case where an effect never runs.',
+        why: 'No array means React has nothing to compare, so it runs the effect after every render, cleaning up the last run first. An empty array is the one that runs once. Leaving the array out never stops an effect from running.',
       },
       {
         t: 1,
@@ -503,12 +503,14 @@ useEffect(() => {
           'React merges the two updates into one',
         ],
         a: 'It loops: every run makes a new user object',
-        why: '`{ name: \'Ada\' }` is a new object every time, so Object.is sees a change. The new user re-runs the effect, which sets a new user again, forever. React stops it with a "Maximum update depth exceeded" error. React compares objects by identity, not by contents, so the matching name does not help.',
+        why: '`{ name: \'Ada\' }` is a new object every time, so Object.is sees a change. The new user re-runs the effect, which sets a new user again, forever. React does not stop it. In development it logs a "Maximum update depth exceeded" warning, but the loop keeps running. In production it just burns CPU quietly. React compares objects by identity, not by contents, so the matching name does not help.',
       },
       {
         t: 1,
         q: 'This effect fetches a user. What goes in the array?',
-        code: `useEffect(() => {
+        code: `import { fetchUser } from './api';
+
+useEffect(() => {
   fetchUser(userId).then(setUser);
 }, [/* ??? */]);`,
         opts: [
@@ -536,7 +538,7 @@ useEffect(() => {
       'Remember that state does not change in the middle of a function.',
       'Watch for the updater function form.',
     ],
-    hook: 'The state you read is the value from that render. Updates are queued, batched and applied before the next render, so use the updater form when the next value depends on the last.',
+    hook: 'The state you read is the value from that render. Setters only queue updates. React works through the queue during the next render, so use the updater form when the next value depends on the last.',
     par: 95,
     drill: 'Ask which render\'s value you are reading. Inside a handler, state is fixed: it is the value from the render that created the handler. Setters only queue updates, so ask whether the next value depends on the last one. If it does, use the updater form. Then ask whether it needs to be state at all, or can be computed.',
     sorts: [
@@ -545,7 +547,7 @@ useEffect(() => {
         title: 'Where should each value live?',
         buckets: ['State', 'Ref', 'Computed in render'],
         items: [
-          { name: 'The text a user is typing into a search box', bucket: 'State', why: 'The input shows it, so the screen has to update every time it changes.' },
+          { name: 'The search text that filters a list as you type', bucket: 'State', why: 'The list on screen changes with every keystroke, so each change has to start a render.' },
           { name: 'Whether a dropdown menu is open', bucket: 'State', why: 'Opening and closing changes what is on screen, so it has to start a render.' },
           { name: 'The id from setInterval, kept so you can clear it later', bucket: 'Ref', why: 'You need to keep it between renders, but the screen never shows it. A ref holds it without causing a render.' },
           { name: 'The DOM input you want to focus', bucket: 'Ref', why: 'Pass a ref to the input, and React puts the DOM node in .current for you.' },
@@ -565,11 +567,11 @@ useEffect(() => {
           'setCount(count + 1) queues "set it to 1"',
           'setCount(c => c + 1) queues "add one"',
           'The handler finishes',
-          'React works through the queue: 1, then 2',
-          'Counter renders once, showing 2',
+          'React renders Counter once',
+          'useState works through the queue: 1, then 2, so it shows 2',
         ],
         decoys: ['count changes to 1 inside the handler', 'React renders after the first setCount'],
-        note: 'Inside the handler, count stays 0, because it belongs to this render. Each setter call only adds to a queue. When the handler is done, React works through the queue in order: "set it to 1" gives 1, then "add one" gives 2. Then it renders once, with 2.',
+        note: 'Inside the handler, count stays 0, because it belongs to this render. Each setter call only adds to a queue. When the handler is done, React renders Counter once. During that render, useState works through the queue in order: "set it to 1" gives 1, then "add one" gives 2.',
       },
     ],
     questions: [
@@ -645,7 +647,7 @@ setUser(user);`,
           'It throws in development under StrictMode',
         ],
         a: 'Same reference, so React sees no change',
-        why: 'user.name = \'Ryan\' changes the object, but setUser gets the same object back. React compares with Object.is, sees the same object, and skips the render. Make a new object instead: setUser({ ...user, name: \'Ryan\' }). React never deep-compares, and nothing throws.',
+        why: 'user.name = \'Ryan\' changes the object, but setUser gets the same object back. React compares with Object.is, sees the same object, and bails out, so the screen keeps the old name. The new name only shows up later, when something else re-renders. Make a new object instead: setUser({ ...user, name: \'Ryan\' }). React never deep-compares, and nothing throws.',
       },
       {
         t: 2,
@@ -684,12 +686,12 @@ setUser(user);`,
         t: 3,
         q: 'When is useReducer the better call?',
         opts: [
-          'When several values change by the same rules',
+          'When many handlers update the same state',
           'Whenever you have more than two useState calls',
           'When the state has to be shared across the tree',
         ],
-        a: 'When several values change by the same rules',
-        why: 'When several pieces of state change together, by the same rules, a reducer puts those rules in one pure function. That also makes them easy to test. The number of useState calls is not the trigger, and a reducer does not share state by itself. That is context\'s job.',
+        a: 'When many handlers update the same state',
+        why: 'When many event handlers update the same state, a reducer moves every way it can change into one pure function. That also makes them easy to test. The number of useState calls is not the trigger, and a reducer does not share state by itself. That is context\'s job.',
       },
       {
         t: 3,
@@ -726,7 +728,7 @@ setUser(user);`,
           'setTodos(todos.push(item))',
         ],
         a: 'setTodos([...todos, item])',
-        why: '[...todos, item] is a new array with the item on the end, so React sees a change and renders. push changes the old array and hands back the same one, so React skips the render. And push returns the new length, so setTodos(todos.push(item)) would replace your list with a number.',
+        why: '[...todos, item] is a new array with the item on the end, so React sees a change and renders. push changes the old array in place, and setTodos(todos) passes that same array back, so React skips the render. And push returns the new length, so setTodos(todos.push(item)) would replace your list with a number.',
       },
       {
         t: 1,
@@ -770,7 +772,7 @@ setUser(user);`,
           'Running effects one after another in order',
         ],
         a: 'Applying several updates in a single re-render',
-        why: 'When one event calls several setters, React waits until the event is done, applies them all, and renders once. That saves work, and the screen never shows a half-updated state. It has nothing to do with storage or effects.',
+        why: 'When one event calls several setters, React waits until the event is done, then renders once, working through all of them. That saves work, and the screen never shows a half-updated state. It has nothing to do with storage or effects.',
       },
     ],
   },
@@ -799,13 +801,13 @@ setUser(user);`,
         buckets: ['Good key', 'Risky key'],
         items: [
           { name: 'todo.id from the database', bucket: 'Good key', why: 'It belongs to the item and never changes, so it follows the todo wherever it moves.' },
-          { name: 'user.email, unique for each user', bucket: 'Good key', why: 'Anything unique and stable among the siblings works. It does not have to be called id.' },
+          { name: 'todo.slug, unique and never edited', bucket: 'Good key', why: 'Anything unique among the siblings that never changes works. It does not have to be called id.' },
           { name: 'The index, in a fixed list that never changes', bucket: 'Good key', why: 'If nothing is ever reordered, added or removed, each index always points at the same item. The index is fine there.' },
           { name: 'The index, in a list you can reorder', bucket: 'Risky key', why: 'Move an item and its index changes, so React matches it to whatever used to be at that position. State and DOM end up on the wrong row.' },
           { name: 'Math.random() called during render', bucket: 'Risky key', why: 'A new key every render means React never finds a match. It throws away every row and mounts it again, losing state and focus.' },
-          { name: 'Date.now() called during render', bucket: 'Risky key', why: 'Same problem as Math.random(): it changes between renders. And items made in the same millisecond share it.' },
+          { name: 'Date.now() called during render', bucket: 'Risky key', why: 'Same problem as Math.random(): it changes between renders. And every row rendered in the same millisecond gets the same key, which is usually all of them.' },
         ],
-        note: 'A good key is unique among its siblings and stays with its item from render to render. Data ids are the usual choice. The index only works when the list never changes order or length. Anything made up during render changes every time, which defeats the point.',
+        note: 'A good key is unique among its siblings and stays with its item from render to render. Data ids are the usual choice. The index only works when no item can move to a different index. Anything made up during render changes every time, which defeats the point.',
       },
     ],
     flows: [
@@ -815,13 +817,13 @@ setUser(user);`,
         steps: [
           'The new list is B, C',
           'B gets key 0 and C gets key 1',
-          'React matches key 0 to the old first row',
-          'That row keeps its DOM, your typed text included',
-          'It now shows B\'s label next to A\'s text',
-          'React removes the row with key 2',
+          'React matches keys 0 and 1 to the old first two rows',
+          'Key 2 has no match, so React removes that row',
+          'Row 0 keeps its DOM, your typed text included',
+          'Row 0 now shows B\'s label next to A\'s text',
         ],
-        decoys: ['React removes the row that showed A', 'B\'s row keeps its own empty input'],
-        note: 'React matches rows by key. With index keys, deleting A shifts B to key 0 and C to key 1. So React thinks row 0 just got new props: it keeps that row\'s DOM and state, typed text included, and shows B\'s label on it. Key 2 has no match any more, so that row is removed. With key={item.id}, React would remove A\'s row and leave B and C alone.',
+        decoys: ['React removes the row that showed A', 'B shows up with an empty input'],
+        note: 'React matches rows by key. With index keys, deleting A shifts B to key 0 and C to key 1. Key 2 has no match any more, so React removes that row first. Row 0 is kept, with its DOM and state, typed text included, and now shows B\'s label. With key={item.id}, React would remove A\'s row and leave B and C alone.',
       },
     ],
     questions: [
@@ -900,7 +902,7 @@ setUser(user);`,
           'It is the fastest possible key',
         ],
         a: 'Every render remounts the whole list',
-        why: 'A new key every render means no row ever matches its old self. React throws every row away and mounts it again, every render. You lose state, focus and scroll position, and do the most DOM work possible. It is never fine, even for a list that does not change.',
+        why: 'A new key every render means no row ever matches its old self. React throws every row away and mounts it again, every render. You lose state, typed input and focus, and do the most DOM work possible. It is never fine, even for a list that does not change.',
       },
       {
         t: 3,
@@ -968,12 +970,12 @@ setUser(user);`,
         t: 1,
         q: 'When is the array index an acceptable key?',
         opts: [
-          'The list never reorders, inserts or deletes',
+          'No item ever moves to a different index',
           'The list has fewer than ten items in it',
           'The items are plain strings, not objects',
         ],
-        a: 'The list never reorders, inserts or deletes',
-        why: 'The index is only a problem when an item can end up at a different index. If the list never changes order or length, each index always means the same item. Size has nothing to do with it, and neither does the type of the items.',
+        a: 'No item ever moves to a different index',
+        why: 'The index is only a problem when an item can end up at a different index. That rules out reordering, and inserting or deleting anywhere but the end. A static list, or one that only adds or removes at the end, is safe. Size has nothing to do with it, and neither does the type of the items.',
       },
       {
         t: 1,
@@ -1025,7 +1027,7 @@ setUser(user);`,
       'Watch for memo that is quietly defeated.',
       'Structure beats memoization.',
     ],
-    hook: 'memo skips a re-render when props are shallow-equal. useMemo caches a value, useCallback caches a function reference. All three only matter when something downstream compares references.',
+    hook: 'memo skips a re-render when props are shallow-equal. useMemo caches a value, useCallback caches a function reference. useMemo can also skip an expensive calculation. Otherwise they only pay off when something compares what you hand it.',
     par: 90,
     drill: 'Ask what is being compared, and by whom. memo compares a component\'s props. A dependency array compares its values. Then ask whether what you pass in is the same object as last time. A new object, array or arrow function fails that comparison every time. And before any of it, ask whether you measured.',
     sorts: [
@@ -1041,7 +1043,7 @@ setUser(user);`,
           { name: 'Pass the same onSelect handler to 1,000 rows on every render', bucket: 'useCallback', why: 'useCallback keeps the function identical between renders, so rows that compare props can skip.' },
           { name: 'Keep a function stable so an effect that lists it does not re-run', bucket: 'useCallback', why: 'The effect compares its dependencies too. A stable function means no change, so the effect stays put.' },
         ],
-        note: 'memo wraps a component. useMemo keeps a value, and useCallback keeps a function. The last two only pay off when something compares what you hand it: a component wrapped in memo, or an effect\'s dependency array.',
+        note: 'memo wraps a component. useMemo keeps a value, and useCallback keeps a function. useMemo also pays off by skipping an expensive calculation. Otherwise, the last two only help when something compares what you hand it: a component wrapped in memo, or a dependency array.',
       },
     ],
     flows: [
@@ -1065,11 +1067,11 @@ setUser(user);`,
         q: 'What does React.memo do?',
         opts: [
           'Skips a re-render when props are shallow-equal',
-          'Caches the rendered output for later reuse',
+          'Stops re-renders caused by its own state',
           'Memoizes the state that the component is holding',
         ],
         a: 'Skips a re-render when props are shallow-equal',
-        why: 'Shallow-equal means React compares each prop with Object.is, one level deep. If every prop is the same as last time, React skips calling the component. A new object or function prop fails that check. memo caches no output, and it has nothing to do with state.',
+        why: 'Shallow-equal means React compares each prop with Object.is, one level deep. If every prop is the same as last time, React skips calling the component. A new object or function prop fails that check. It does not block re-renders from the component\'s own state, or from a context it reads.',
       },
       {
         t: 1,
@@ -1111,12 +1113,12 @@ setUser(user);`,
         t: 2,
         q: 'When is memo not worth adding?',
         opts: [
-          'On cheap components, where comparing costs more',
+          'On cheap components, where skipping saves little',
           'Never. Wrap everything you can and move on, it is free',
           'Only in development, where renders are slower',
         ],
-        a: 'On cheap components, where comparing costs more',
-        why: 'memo is not free. It adds code, a comparison on every parent render, and a way to hold onto stale props. On a cheap component that comparison saves almost nothing. Profile first, then add memo where the Profiler shows real cost. Development mode has nothing to do with it.',
+        a: 'On cheap components, where skipping saves little',
+        why: 'memo adds code and a props comparison on every parent render. On a cheap component, skipping saves almost nothing. If a prop is new every render, memo never skips at all. Profile first, then add memo where the Profiler shows real cost. Development mode has nothing to do with it.',
       },
       {
         t: 2,
@@ -1155,12 +1157,12 @@ setUser(user);`,
         t: 3,
         q: 'Your team turns on the React Compiler. What changes about memoization?',
         opts: [
-          'Most hand-written memo goes away',
+          'Most new code needs no manual memo',
           'Keys become optional in rendered lists',
           'Third-party components get memo applied',
         ],
-        a: 'Most hand-written memo goes away',
-        why: 'The compiler adds memoization to your code at build time, so most manual memo, useMemo and useCallback becomes unnecessary. Where code mutates props or state, or breaks the Rules of React, it leaves that component alone. Keys still matter, and it only compiles your code, not third-party packages.',
+        a: 'Most new code needs no manual memo',
+        why: 'The compiler adds memoization to your code at build time, so new code rarely needs manual memo, useMemo or useCallback. Existing memo can stay, since removing it can change what the compiler outputs. When it spots code that breaks the Rules of React, it skips that component, but it cannot catch every case. Keys still matter, and it only compiles your code, not third-party packages.',
       },
       {
         t: 1,
@@ -1272,7 +1274,7 @@ setUser(user);`,
           { name: 'useState at the top of a component', bucket: 'Allowed', why: 'Top level, every render, same order. That is exactly what the rule asks for.' },
           { name: 'useEffect inside a custom hook named useTimer', bucket: 'Allowed', why: 'Custom hooks may call hooks, as long as they do it at their own top level.' },
           { name: 'use(ThemeContext) inside an if block', bucket: 'Allowed', why: 'use is the exception. React built it to be read conditionally, so it can sit inside an if.' },
-          { name: 'useState inside an if block', bucket: 'Breaks the rules', why: 'When the condition changes, the number of hook calls changes, and React matches hooks by order. It throws as soon as the count differs.' },
+          { name: 'useState inside an if block', bucket: 'Breaks the rules', why: 'When the condition changes, the number of hook calls changes, and React matches hooks by order. If the component has other hooks, React throws as soon as the count differs.' },
           { name: 'useEffect called after an early return', bucket: 'Breaks the rules', why: 'On renders that return early, the effect is never called. That changes the order, the same as a condition would.' },
           { name: 'useState inside a click handler', bucket: 'Breaks the rules', why: 'Hooks only run during render. Called from a handler, React throws "Invalid hook call".' },
           { name: 'useMemo inside a .map over items', bucket: 'Breaks the rules', why: 'The number of calls follows the number of items, so it changes whenever the list does.' },
@@ -1302,11 +1304,11 @@ setUser(user);`,
         q: 'What is the rule of hooks?',
         opts: [
           'Top level only, never in a condition or loop',
-          'Any order, as long as it stays consistent',
+          'Anywhere, as long as the name starts with use',
           'Only inside useEffect or inside an event handler',
         ],
         a: 'Top level only, never in a condition or loop',
-        why: 'Call hooks at the top level of a component or a custom hook, on every render, in the same order. Never inside a condition, a loop, a nested function or after an early return. A consistent order is not enough on its own, and hooks cannot be called from effects or event handlers at all.',
+        why: 'Call hooks at the top level of a component or a custom hook, on every render, in the same order. Never inside a condition, a loop, a nested function or after an early return. React only needs the same calls in the same order each render. The rule says top level because a condition or loop can change that order, and the linter cannot prove it will not. Hooks cannot be called from effects or event handlers at all.',
       },
       {
         t: 1,
@@ -1328,7 +1330,7 @@ setUser(user);`,
           'A context provider with hooks inside',
         ],
         a: 'A use-prefixed function that calls hooks',
-        why: 'A custom hook is a plain function whose name starts with use, and that calls other hooks. It renders nothing, so it is not a component. The use prefix is how the linter knows to check the rules of hooks inside it.',
+        why: 'A custom hook is a plain function whose name starts with use, and that calls other hooks. It renders nothing, so it is not a component. The use prefix tells the linter that hooks are allowed inside, and then it checks them.',
       },
       {
         t: 2,
@@ -1354,7 +1356,7 @@ setUser(user);`,
       },
       {
         t: 2,
-        q: 'In React 19, how do you pass a ref into a function component?',
+        q: 'What is new in React 19 for passing a ref into a function component?',
         opts: [
           'As a normal prop',
           'Wrap it in forwardRef, as before',
@@ -1405,7 +1407,7 @@ setUser(user);`,
           'Debouncing a rapidly changing state',
         ],
         a: 'Showing the expected result while it runs',
-        why: 'useOptimistic shows a guess right away, like a sent message, while the action runs. When the action ends, React drops the guess and shows the real state again. If the action saved the message, the real state now has it. If it failed, the message simply disappears.',
+        why: 'useOptimistic shows a guess right away, like a sent message, while the action runs. When the action ends, React drops the guess and shows the real state again. If the action saved the message, the real state now has it. If the action catches its error and leaves the real state alone, the guess just disappears. If the action throws, the error also goes to the nearest error boundary.',
       },
       {
         t: 3,
@@ -1436,6 +1438,7 @@ setUser(user);`,
   if (isLoggedIn) {
     const [name, setName] = useState('');
   }
+  const [count, setCount] = useState(0);
   // ...
 }`,
         opts: [
@@ -1488,7 +1491,7 @@ setUser(user);`,
           'withOnlineStatus',
         ],
         a: 'useOnlineStatus',
-        why: 'A custom hook starts with use, followed by a capital letter. getOnlineStatus reads like a plain helper, so the linter would not check hook rules inside it. withOnlineStatus is the old naming for a higher-order component, which wraps components instead of calling hooks.',
+        why: 'A custom hook starts with use, followed by a capital letter. Call a hook inside getOnlineStatus, and the linter reports an error, because only components and use-prefixed functions may call hooks. withOnlineStatus is the old naming for a higher-order component, which wraps components instead of calling hooks.',
       },
     ],
   },
@@ -1534,6 +1537,15 @@ function Page() {
 function SearchBox() {
   const [text, setText] = useState('');
   return <input value={text} onChange={e => setText(e.target.value)} />;
+}
+
+function Page() {
+  return (
+    <>
+      <SearchBox />
+      <ExpensiveTree />
+    </>
+  );
 }`,
     },
     say: [
@@ -1554,7 +1566,7 @@ function SearchBox() {
       },
       {
         prompt: 'What is the difference between a render and a commit?',
-        answer: 'Rendering is React calling my components to work out what the UI should look like now. The commit is when React applies the differences to the real DOM. A component can render without anything being committed, if its output did not change. That is why a re-render on its own is usually cheap.',
+        answer: 'Rendering is React calling my components to work out what the UI should look like now. The commit is when React applies the differences to the real DOM. A component can re-render, and the commit then finds nothing to change in the DOM. That is why a re-render on its own is usually cheap.',
       },
     ],
   },
@@ -1572,7 +1584,7 @@ function SearchBox() {
       ['cleanup', 'The function your effect returns. It undoes the last run.'],
       [
         'StrictMode',
-        'A development-only check that mounts each component, unmounts it, and mounts it again, to expose effects with no cleanup.',
+        'A development-only check that runs each effect\'s setup, cleanup and setup again, keeping state, to expose effects with no cleanup.',
       ],
       [
         'stale closure',
@@ -1581,7 +1593,9 @@ function SearchBox() {
     ],
     code: {
       label: 'subscribe and clean up',
-      snippet: `useEffect(() => {
+      snippet: `// onMessage must stay the same function between renders, or this
+// reconnects every render. useEffectEvent (stable since React 19.2) helps.
+useEffect(() => {
   const socket = connect(roomId);
   socket.on('message', onMessage);
 
@@ -1595,9 +1609,9 @@ function SearchBox() {
       'Effects synchronize with the outside world. If something should happen because the user did something, it goes in the event handler instead.',
       'The cleanup runs before every re-run and on unmount, so subscribe and unsubscribe stay balanced.',
       'Double-running in StrictMode is a feature. If it breaks, my effect is missing cleanup.',
-      'Anything I can compute during render does not belong in state plus an effect. That pattern costs an extra render, and the screen is out of sync in between.',
+      'Anything I can compute during render does not belong in state plus an effect. That pattern costs an extra render, with an out-of-date value committed in between.',
     ],
-    gotcha: 'Removing a dependency to stop an effect looping just hides a stale closure. Fix the cause: move the function inside the effect, use an updater function, or keep the changing value in a ref.',
+    gotcha: 'Removing a dependency to stop an effect looping trades the loop for a stale closure. Fix the cause: move the function inside the effect, use an updater function, or keep the changing value in a ref.',
     rehearse: [
       {
         prompt: 'What is useEffect for, and when do you not need one?',
@@ -1605,7 +1619,7 @@ function SearchBox() {
       },
       {
         prompt: 'Explain the cleanup function.',
-        answer: 'It undoes the last run. It fires before the effect runs again, and once on unmount, so subscriptions stay balanced. StrictMode mounts twice in development to expose a missing cleanup.',
+        answer: 'It undoes the last run. It fires before the effect runs again, and once on unmount, so subscriptions stay balanced. In development, StrictMode runs setup, cleanup and setup again to expose a missing cleanup.',
       },
       {
         prompt: 'Your effect fetches data. What can go wrong, and how do you handle it?',
@@ -1614,7 +1628,7 @@ function SearchBox() {
     ],
   },
   state: {
-    plain: 'Each render gets its own fixed copy of state. Calling the setter does not change the variable you are holding. It queues an update.\n\nReact batches everything queued in the same event, applies it in order, and renders again with the new values. That is why reading state right after setting it gives you the old value, and why two plain setCount(count + 1) calls only add one.',
+    plain: 'Each render gets its own fixed value of state. Calling the setter does not change the variable you are holding. It queues an update.\n\nReact batches everything queued in the same event. During the next render, it works through the queue in order, and the new values show up. That is why reading state right after setting it gives you the old value, and why two plain setCount(count + 1) calls only add one.',
     words: [
       [
         'snapshot',
@@ -1670,7 +1684,7 @@ setUser({ ...user, name: 'Ryan' });`,
     ],
   },
   lists: {
-    plain: 'When React re-renders a list, it has to match the new items to the old ones. By default it matches by position, which breaks the moment items move or get deleted.\n\nA key gives each item an identity that survives reordering. So React keeps the right DOM node, the right state and the right focus with the right item.\n\nThat is also why changing a key on purpose is the clean way to reset a component: a new key means a new thing, mounted fresh.',
+    plain: 'When React re-renders a list, it has to match the new items to the old ones. By default it matches by position, which breaks the moment an item moves to a different index, like on a reorder or a delete.\n\nA key gives each item an identity that survives reordering. So React keeps the right DOM node, the right state and the right focus with the right item.\n\nThat is also why changing a key on purpose is the clean way to reset a component: a new key means a new thing, mounted fresh.',
     words: [
       ['key', 'A stable identity for an item, unique among its siblings.'],
       [
@@ -1699,15 +1713,15 @@ items.map(item => <Row key={item.id} item={item} />)
     },
     say: [
       'Keys are identity, not order. React uses them to match items between renders.',
-      'Index keys are fine for a list that never reorders. For anything else, they are a bug waiting to happen.',
+      'Index keys are fine when no item ever moves to a different index, like a static list or one that only grows at the end. Otherwise state lands on the wrong row.',
       'Keys only need to be unique among siblings.',
       'Changing a key is the documented way to reset a component, because React remounts it.',
     ],
-    gotcha: 'key={Math.random()} silences the warning, but it remounts the whole list on every render. You lose state, focus and scroll position, and do the most DOM work possible.',
+    gotcha: 'key={Math.random()} silences the warning, but it remounts the whole list on every render. You lose state, typed input and focus, and do the most DOM work possible.',
     rehearse: [
       {
         prompt: 'Why do keys matter in a list?',
-        answer: 'They tell React which item is which between renders, so state, focus and DOM nodes stay with the right item. Index keys break as soon as the list reorders or something is removed.',
+        answer: 'They tell React which item is which between renders, so state, focus and DOM nodes stay with the right item. Index keys break as soon as an item can move to a different index, like on a reorder, or an insert or delete before the end.',
       },
       {
         prompt: 'How do you reset a child component on purpose?',
@@ -1720,7 +1734,7 @@ items.map(item => <Row key={item.id} item={item} />)
     ],
   },
   perf: {
-    plain: "React gives you three memo tools. memo skips a component's re-render when its props are unchanged. useMemo keeps a computed value. useCallback keeps a function the same between renders.\n\nThey all exist for one reason: something is comparing what you hand it, and a new object fails that comparison. They cost code and comparison time, so the order is: measure, fix the structure, then memoize what is left.\n\nThe React Compiler now does most of this for you.",
+    plain: "React gives you three memo tools. memo skips a component's re-render when its props are unchanged. useMemo keeps a computed value. useCallback keeps a function the same between renders.\n\nuseMemo and useCallback pay off in two cases. One is skipping an expensive calculation. The other is handing the same object to something that compares it, like a memo child or a dependency array, where a new object would fail the comparison. They cost code and comparison time, so the order is: measure, fix the structure, then memoize what is left.\n\nThe React Compiler now does most of this for you.",
     words: [
       ['shallow equal', 'Comparing each prop with Object.is, one level deep, without looking inside objects.'],
       [
@@ -1742,8 +1756,9 @@ items.map(item => <Row key={item.id} item={item} />)
       snippet: `const Row = React.memo(function Row({ item, onSelect }) { ... });
 
 function List({ items }) {
-  // stable identity, so Row can skip
-  const onSelect = useCallback((id) => select(id), []);
+  const [selected, setSelected] = useState(null);
+  // setSelected never changes, so [] is safe, and Row can skip
+  const onSelect = useCallback((id) => setSelected(id), []);
   return items.map(item => (
     <Row key={item.id} item={item} onSelect={onSelect} />
   ));
@@ -1755,7 +1770,7 @@ function List({ items }) {
       'For long lists, the real fix is virtualization. The cost is the number of DOM nodes, not the render function.',
       'With the React Compiler, most manual memoization goes away, which puts the emphasis back on writing components that follow the rules.',
     ],
-    gotcha: 'Memoizing everything is its own performance problem. It means more code, more comparisons, and more ways to hold onto a stale value. Structure first, memo second.',
+    gotcha: 'Memoizing everything rarely helps. It makes code harder to read, and one prop that is new every render defeats it. A wrong dependency array can also hand you a stale value. Structure first, memo second.',
     rehearse: [
       {
         prompt: 'When do you reach for memo, useMemo or useCallback?',
@@ -1767,7 +1782,7 @@ function List({ items }) {
       },
       {
         prompt: 'What does the React Compiler change for you?',
-        answer: 'It adds the memoization I used to write by hand. At build time, it works out what each part of a component depends on, and skips work when those inputs have not changed, the way memo, useMemo and useCallback would. It only does that for code that follows the Rules of React, like pure components that do not mutate props or state. So the job shifts from sprinkling memo to writing components that follow the rules.',
+        answer: 'It adds the memoization I used to write by hand. At build time, it works out what each part of a component depends on, and skips work when those inputs have not changed, the way memo, useMemo and useCallback would. When it spots code that breaks the Rules of React, it leaves that component alone, and it cannot spot everything. So the job shifts from sprinkling memo to writing components that follow the rules.',
       },
     ],
   },
