@@ -1775,6 +1775,235 @@ setUser(user);`,
       },
     ],
   },
+  {
+    id: 'data',
+    division: 'react',
+    kind: 'quiz',
+    bullet: 'L',
+    color: '--slate',
+    short: 'Data',
+    name: 'Arrivals Board',
+    topic: 'Fetching data, Suspense and error boundaries',
+    pitch: 'Every screen waits on data, and something can always go wrong. Interviewers want to hear how you show loading, how you contain errors, and how you avoid fetching one thing after another.',
+    rules: [
+      'Pick what React shows while waiting, or after a crash.',
+      'Ask which boundary sits above the part that waits or throws.',
+      'Watch for requests that wait on each other.',
+    ],
+    hook: 'A Suspense boundary shows its fallback while something inside it is still loading. An error boundary shows its fallback when something inside it throws while rendering, or in an effect. Both only cover what is below them. Suspense never catches errors, and error boundaries miss errors from plain event handlers.',
+    par: 95,
+    drill: 'Ask what the screen should show while waiting, and which Suspense boundary is closest above the part that waits. Ask what should show if it breaks, and which error boundary is above it. Then ask whether one request has to wait for another, or whether they can start together.',
+    sorts: [
+      {
+        t: 1,
+        title: 'Which tool covers each job?',
+        buckets: ['Suspense', 'Error boundary', 'Neither'],
+        items: [
+          { name: 'Show a spinner while the profile\'s data loads', bucket: 'Suspense', why: 'Something below is waiting, so the nearest Suspense boundary shows its fallback.' },
+          { name: 'Show a skeleton while a lazy-loaded chart\'s code downloads', bucket: 'Suspense', why: 'React.lazy suspends while the code loads, so a Suspense fallback covers it too.' },
+          { name: 'Show a friendly message when a widget crashes while rendering', bucket: 'Error boundary', why: 'A crash during rendering travels up to the nearest error boundary, which shows its fallback.' },
+          { name: 'Keep one broken widget from blanking the whole page', bucket: 'Error boundary', why: 'Wrap each widget in its own boundary, and a crash only replaces that widget.' },
+          { name: 'A plain onClick handler\'s fetch fails', bucket: 'Neither', why: 'A plain event handler runs outside rendering, so no boundary sees its error. Catch it there and show it with state.' },
+          { name: 'A setTimeout callback throws', bucket: 'Neither', why: 'Async callbacks run outside rendering, so no boundary catches them.' },
+        ],
+        note: 'Suspense covers waiting: data or code that is not ready yet. Error boundaries cover crashes while rendering or in effects. Errors in plain event handlers and timers happen outside of that, so you catch those yourself.',
+      },
+    ],
+    flows: [
+      {
+        t: 1,
+        title: '`<Suspense fallback={<Spinner />}>` wraps Profile, which calls `use(userPromise)`. The promise is still pending',
+        steps: [
+          'React renders Profile',
+          'use() finds userPromise still pending',
+          'Profile suspends',
+          'React shows the nearest fallback, Spinner',
+          'userPromise resolves',
+          'React renders Profile again, now with the user',
+        ],
+        decoys: ['Profile renders once with user as undefined', 'React waits on a blank screen'],
+        note: 'use() does not hand back undefined while it waits. It suspends: React stops rendering Profile and shows the nearest Suspense fallback instead. When the promise resolves, React renders Profile again, and this time use() returns the user. The page outside the boundary stays visible the whole time.',
+      },
+    ],
+    questions: [
+      {
+        t: 1,
+        q: 'What does a Suspense boundary show while a component inside it is still loading?',
+        opts: [
+          'Its fallback, like a spinner',
+          'Nothing, so the page stays blank',
+          'The component, with empty data',
+        ],
+        a: 'Its fallback, like a spinner',
+        why: 'When a component inside suspends, React shows the boundary\'s fallback prop in its place until the data is ready, then swaps in the real content. The component never renders with missing data. The rest of the page, outside the boundary, stays visible.',
+      },
+      {
+        t: 1,
+        q: 'What does an error boundary catch?',
+        opts: [
+          'Errors thrown while rendering below it',
+          'Every error in the app, async ones too',
+          'Only the errors that come from fetch',
+        ],
+        a: 'Errors thrown while rendering below it',
+        why: 'An error boundary catches errors thrown while React renders the components below it, or in their effects, and shows a fallback in place of that part of the tree. It does not see errors from event handlers, or from async code like setTimeout. Where an error came from, fetch or anything else, does not matter.',
+      },
+      {
+        t: 1,
+        q: 'Can you write an error boundary as a function component?',
+        opts: [
+          'No. It has to be a class, or come from a library',
+          'Yes, with a built-in useErrorBoundary hook',
+          'Yes, with try/catch around the returned JSX',
+        ],
+        a: 'No. It has to be a class, or come from a library',
+        why: 'React only supports error boundaries as class components, using getDerivedStateFromError or componentDidCatch. Libraries like react-error-boundary wrap that class for you. React has no built-in hook for it. And try/catch around JSX catches nothing, because the children render later, not inside your function.',
+      },
+      {
+        t: 1,
+        q: 'A button\'s onClick throws. Does the error boundary above it catch the error?',
+        opts: [
+          'No. Handle it in the handler',
+          'Yes, like any other error',
+          'Only if it wraps the button directly',
+        ],
+        a: 'No. Handle it in the handler',
+        why: 'Error boundaries catch errors thrown while React renders, or in effects. A plain click handler runs outside of that, so its error goes uncaught. Catch it in the handler, and if the screen should show it, put it in state. Where the boundary sits does not change that.',
+      },
+      {
+        t: 1,
+        q: 'A component fetches in useEffect. Which three states should it handle?',
+        opts: [
+          'Loading, error, and the data',
+          'Mount, update, and then unmount',
+          'Pending, cached, and stale',
+        ],
+        a: 'Loading, error, and the data',
+        why: 'Until the response arrives, show something for loading. If the request fails, show an error, not a blank screen. Then show the data. Mount and unmount are the component\'s lifecycle, and cached or stale is something a data library tracks.',
+      },
+      {
+        t: 1,
+        q: 'Profile fetches the user, and only renders Posts once the user arrives. Then Posts starts fetching posts. Both only need the user id. What is that called?',
+        opts: [
+          'A request waterfall',
+          'A race condition',
+          'A memory leak',
+        ],
+        a: 'A request waterfall',
+        why: 'Each request waits for the one before it to finish, like water stepping down a waterfall, so the waits add up. A race condition is a different problem: requests finishing in the wrong order. Nothing here leaks memory.',
+      },
+      {
+        t: 1,
+        q: 'How do you fix that waterfall?',
+        opts: [
+          'Start both requests together',
+          'Wrap Profile and Posts in memo',
+          'Show a longer loading spinner',
+        ],
+        a: 'Start both requests together',
+        why: 'Start the posts request at the same time as the user request, for example both in the parent, or with Promise.all, and pass the results down. Now the wait is the slowest request, not the sum. memo changes nothing about when a fetch starts, and a spinner only hides the wait.',
+      },
+      {
+        t: 1,
+        q: 'Why reach for a library like TanStack Query instead of fetching in useEffect?',
+        opts: [
+          'It handles caching, retries and races',
+          'React forbids fetch inside an effect',
+          'It makes each request travel faster',
+        ],
+        a: 'It handles caching, retries and races',
+        why: 'Fetching in an effect means writing caching, deduping, retries, loading flags and race handling yourself. A data library does all of that, and shares results between components that ask for the same data. React allows fetch in effects, and no library makes the network faster.',
+      },
+      {
+        t: 1,
+        q: 'Where must an error boundary sit to catch a child\'s error?',
+        opts: [
+          'Above the child, in the tree',
+          'Below the child, inside its JSX',
+          'Anywhere in the same file',
+        ],
+        a: 'Above the child, in the tree',
+        why: 'An error travels up the tree from where it was thrown, and the nearest error boundary above it catches it. A boundary rendered inside the child, or beside it, is not on that path. Files have nothing to do with it. The tree does.',
+      },
+      {
+        t: 2,
+        q: 'A component calls `use(fetchUser(id))`, creating the promise during render. What happens?',
+        opts: [
+          'It keeps suspending, on every retry',
+          'It suspends once, then renders the user',
+          'React caches the promise for you by id',
+        ],
+        a: 'It keeps suspending, on every retry',
+        why: 'use(promise) suspends until that promise settles. But when React retries, the component runs again and calls fetchUser again, which makes a brand new pending promise, so it suspends again, over and over. Create the promise outside render: in a cache, a parent, a loader or a server component. React does not cache it for you.',
+      },
+      {
+        t: 2,
+        q: 'The sidebar and the feed each sit in their own Suspense boundary. The feed is slow. What shows?',
+        opts: [
+          'The sidebar, plus the feed\'s fallback',
+          'One fallback until both have loaded',
+          'Nothing until the feed has loaded',
+        ],
+        a: 'The sidebar, plus the feed\'s fallback',
+        why: 'Each boundary only waits for what is inside it. The sidebar\'s boundary has nothing pending, so the sidebar shows. The feed\'s boundary shows its own fallback until the feed is ready. Put both in one boundary if they should appear together.',
+      },
+      {
+        t: 2,
+        q: 'Switching tabs replaces the old tab with the Suspense fallback. How do you keep the old tab on screen while the new one loads?',
+        opts: [
+          'Wrap the tab switch in startTransition',
+          'Wrap the new tab in a second Suspense',
+          'Put the old tab inside the fallback',
+        ],
+        a: 'Wrap the tab switch in startTransition',
+        why: 'A plain update that suspends hides the content and shows the fallback. Marked as a transition, the same update lets React keep the old tab visible until the new one is ready. useTransition\'s isPending can dim the old tab meanwhile. A new Suspense boundary inside the tab would still show its own fallback.',
+      },
+      {
+        t: 2,
+        q: 'An error boundary is showing its fallback. How do you let the user try again?',
+        opts: [
+          'Reset it, often by changing its key',
+          'Re-render the parent component',
+          'Wait, since boundaries retry on a timer',
+        ],
+        a: 'Reset it, often by changing its key',
+        why: 'A boundary stays in its error state until something resets it. Changing its key mounts a fresh boundary, which renders the children again. react-error-boundary gives you a resetErrorBoundary function for the same job. Re-rendering the parent does not clear the error, and boundaries never retry on their own.',
+      },
+      {
+        t: 3,
+        q: '`const deferredQuery = useDeferredValue(query)`. The user types fast. What does the results list render with?',
+        opts: [
+          'The old query, until React has time for the new one',
+          'Always the newest query, on every keystroke',
+          'Nothing, until the user stops typing',
+        ],
+        a: 'The old query, until React has time for the new one',
+        why: 'useDeferredValue hands back the previous value first, so the input updates right away. Then React re-renders the list with the new value in the background, and drops that work if another keystroke arrives. It is not a debounce with a fixed delay, and the list keeps showing results the whole time.',
+      },
+      {
+        t: 3,
+        q: 'A tab is already showing content. A normal setState makes it suspend. What happens to the content?',
+        opts: [
+          'It hides, and the fallback shows',
+          'It stays, until the new data is ready',
+          'It shows with old data mixed in',
+        ],
+        a: 'It hides, and the fallback shows',
+        why: 'Without a transition, React cannot keep the old content on screen, so it hides it and shows the nearest Suspense fallback. React keeps the hidden content\'s state, but the user sees a spinner. Wrapping the update in startTransition is what keeps the old content visible.',
+      },
+      {
+        t: 3,
+        q: 'Why do the React docs steer most apps away from fetching in useEffect?',
+        opts: [
+          'Waterfalls, no cache, and races to handle',
+          'Effects cannot run async code at all',
+          'fetch is blocked during rendering',
+        ],
+        a: 'Waterfalls, no cache, and races to handle',
+        why: 'Fetching in effects tends to create waterfalls, because a child\'s fetch waits for its parent to render. Nothing is cached, so the same data is fetched again. And you have to handle races yourself. Effects can run async code, and fetch is never blocked. The docs point to your framework\'s data loading, or a library like TanStack Query.',
+      },
+    ],
+  },
 ];
 
 /** Field guide for the React division, including interview talking points. */
@@ -2181,6 +2410,70 @@ function SignupForm() {
       {
         prompt: 'Where does form validation belong?',
         answer: 'On the server, always, because anyone can send a request without using my form. On top of that, the browser can check things early, with attributes like required and type="email", or with messages as the user types. That makes the form friendlier, but it is not security.',
+      },
+    ],
+  },
+  data: {
+    plain: `Data takes time to arrive, and sometimes it does not arrive at all. React gives you a boundary for each case.
+
+A Suspense boundary shows a fallback, like a spinner, while a component inside it waits for data or code. An error boundary shows a fallback when a component inside it throws while rendering, or in an effect. Each only covers what is below it, so where you put them decides how much of the page waits or breaks together.
+
+How you fetch matters too. Fetching in useEffect works, but it leaves caching, races and waterfalls to you. A data library or your framework's data loading handles those, and starting requests together keeps one from waiting on another.`,
+    words: [
+      ['Suspense', 'A boundary that shows its fallback while something inside it is still loading.'],
+      ['suspend', 'What a component does when its data or code is not ready: React stops rendering it and shows the nearest fallback.'],
+      ['error boundary', 'A class component that catches errors thrown while rendering below it, or in effects, and shows a fallback instead.'],
+      ['waterfall', 'Requests that run one after another because each waits for the last, so the waits add up.'],
+      ['use()', 'React 19: reads a promise during render, and suspends until the promise settles.'],
+      ['transition', 'An update marked with startTransition. React keeps the old screen visible while it gets the new one ready.'],
+    ],
+    code: {
+      label: 'one boundary for waiting, one for breaking',
+      snippet: `class ErrorBoundary extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) return <p>Something went wrong.</p>;
+    return this.props.children;
+  }
+}
+
+function ProfilePage({ userPromise }) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<Spinner />}>
+        <Profile userPromise={userPromise} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+function Profile({ userPromise }) {
+  const user = use(userPromise); // suspends until it resolves
+  return <h1>{user.name}</h1>;
+}`,
+    },
+    say: [
+      'Suspense covers waiting, and error boundaries cover crashing. Where I put each one decides how much of the page waits or breaks together.',
+      'Error boundaries catch errors during rendering and in effects. Plain event handlers and timers need their own try/catch.',
+      'I start independent requests together instead of nesting them, so the slowest one sets the wait, not the sum.',
+      'In a real app I fetch through a data library or the framework, which handles caching, deduping and races for me.',
+    ],
+    gotcha: 'An error boundary does not catch an error thrown in a plain onClick or a setTimeout. Those run outside rendering. Catch the error where it happens, and put it in state if the screen should show it.',
+    rehearse: [
+      {
+        prompt: 'How do you handle loading and errors in a React app?',
+        answer: 'I wrap parts of the page in Suspense boundaries, with a fallback for while they load, and in error boundaries, with a fallback if they crash while rendering. Each boundary only covers what is below it, so I place them around parts that should wait or fail together. Errors from plain event handlers I catch myself and show through state.',
+      },
+      {
+        prompt: 'What is a request waterfall, and how do you avoid it?',
+        answer: 'It is when one request only starts after another finishes, usually because a child fetches after its parent has rendered with its own data. The waits add up. I start independent requests together, higher up or with Promise.all, or let the framework or a data library load them in parallel.',
+      },
+      {
+        prompt: 'What can an error boundary not catch?',
+        answer: 'Errors in plain event handlers, errors in async code like setTimeout or a promise callback, and errors thrown by the boundary itself, which go to the next boundary up. It catches errors thrown while React renders the components below it, or in their effects. A throw inside an Action, like a form action, also reaches it.',
       },
     ],
   },
