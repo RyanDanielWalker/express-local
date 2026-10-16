@@ -1533,6 +1533,248 @@ setUser(user);`,
       },
     ],
   },
+  {
+    id: 'forms',
+    division: 'react',
+    kind: 'quiz',
+    bullet: 'V',
+    color: '--orange',
+    short: 'Forms',
+    name: 'Fare Machine',
+    topic: 'Forms, inputs and Actions',
+    pitch: 'Every app has a form, and interviewers know it. The questions are always the same: controlled or uncontrolled, where validation lives, and, since React 19, what Actions do for you.',
+    rules: [
+      'Pick what the form actually does.',
+      'Ask who owns the value: React state, or the DOM.',
+      'React 19 Actions change how a submit works.',
+    ],
+    hook: 'A controlled input gets value from state and changes it in onChange. An uncontrolled input keeps its own value, read on submit. In React 19, <form action={fn}> calls fn with the form\'s FormData, tracks pending, and resets the uncontrolled fields when it finishes without throwing.',
+    par: 95,
+    drill: 'Ask who owns the value. If the screen needs it on every keystroke, it lives in state, and the input is controlled. If you only need it on submit, let the input keep it and read FormData then. Then ask how the submit runs: onSubmit with preventDefault, or a React 19 action that handles pending and the reset for you.',
+    sorts: [
+      {
+        t: 1,
+        title: 'Who should own each input\'s value?',
+        buckets: ['Controlled', 'Uncontrolled'],
+        items: [
+          { name: 'A search box that filters a list on every keystroke', bucket: 'Controlled', why: 'The list changes as you type, so the value has to be in state, where rendering can see it.' },
+          { name: 'A message box with a live character count under it', bucket: 'Controlled', why: 'The count changes on every keystroke, so the text lives in state.' },
+          { name: 'A Next button that stays disabled until the email looks valid', bucket: 'Controlled', why: 'The button depends on the value as it changes, so React needs that value in state.' },
+          { name: 'A contact form read once with FormData on submit', bucket: 'Uncontrolled', why: 'Nothing on screen depends on the fields until submit, so the inputs can keep their own values.' },
+          { name: 'A file picker for an avatar upload', bucket: 'Uncontrolled', why: 'A file input\'s value can only be set by the user, so React always leaves it uncontrolled. Read the file from the input or from FormData.' },
+          { name: 'A newsletter field whose defaultValue is the saved email', bucket: 'Uncontrolled', why: 'defaultValue only sets the starting value. After that, the input owns it.' },
+        ],
+        note: 'Ask whether anything on screen has to change while the user types. If it does, the value lives in state, and the input is controlled. If you only need the value when the form submits, let the input keep it, and read it then.',
+      },
+    ],
+    flows: [
+      {
+        t: 1,
+        title: 'A user submits `<form action={signup}>`. Inside it, SubmitButton reads useFormStatus()',
+        steps: [
+          'The user clicks Submit',
+          'React calls signup with the form\'s FormData',
+          'useFormStatus reports pending: true',
+          'signup finishes without throwing',
+          'pending goes back to false, and the fields reset',
+        ],
+        decoys: ['The browser reloads the page', 'React calls signup with the submit event'],
+        note: 'With a function in action, React handles the submit itself, so the page never reloads. It calls signup with a FormData of the fields, during the click itself, and the render that shows pending: true comes right after. While signup runs, every useFormStatus inside the form reports pending: true, which is how the button can say Saving.... When signup finishes, pending goes back to false, and React resets the uncontrolled fields.',
+      },
+    ],
+    questions: [
+      {
+        t: 1,
+        q: 'An input has `value={name}` but no onChange. What happens when the user types?',
+        opts: [
+          'Nothing changes, and React warns',
+          'It works like a normal input',
+          'React adds an onChange for you',
+        ],
+        a: 'Nothing changes, and React warns',
+        why: 'value tells React to control the input, so React keeps putting name back. With no onChange, nothing ever updates name, so typing does nothing. React warns in development and suggests onChange, defaultValue or readOnly. It does not add a handler for you.',
+      },
+      {
+        t: 1,
+        q: 'What is the difference between value and defaultValue?',
+        opts: [
+          'value is controlled; defaultValue only sets the start',
+          'They are the same; defaultValue is just older',
+          'defaultValue makes the input read-only',
+        ],
+        a: 'value is controlled; defaultValue only sets the start',
+        why: 'value makes React the owner: the input always shows what you pass. defaultValue only sets the first value, and then the input keeps its own. Do not count on a later change to defaultValue reaching an input already on screen. To load a new starting value, give the input a new key.',
+      },
+      {
+        t: 1,
+        q: 'In an onSubmit handler, why call `e.preventDefault()`?',
+        opts: [
+          'To stop the browser reloading the page',
+          'To stop React re-rendering the form',
+          'To clear every input after submitting',
+        ],
+        a: 'To stop the browser reloading the page',
+        why: 'A form\'s default submit sends a request and loads a new page, which throws away your app\'s state. preventDefault stops that, so your handler can send the data itself. It has nothing to do with rendering, and it clears nothing. With a React 19 action prop, React prevents the reload for you.',
+      },
+      {
+        t: 1,
+        q: 'Which prop controls a checkbox?',
+        opts: [
+          'checked, with onChange',
+          'value, with onChange',
+          'selected, with onClick',
+        ],
+        a: 'checked, with onChange',
+        why: 'A checkbox\'s on or off state is checked. A controlled checkbox gets checked={agree} and updates it in onChange from e.target.checked. value is the text the checkbox sends with the form, not whether it is ticked. selected marks an option in plain HTML. In React, you set value or defaultValue on the select instead.',
+      },
+      {
+        t: 1,
+        q: 'An `<input type="number">` changes. What type is `e.target.value`?',
+        opts: [
+          'A string, like "42"',
+          'A number, like 42',
+          'A number, or NaN if empty',
+        ],
+        a: 'A string, like "42"',
+        why: 'Every input\'s value is a string, even a number input, and an empty one gives "". Convert it yourself with Number(e.target.value), or read e.target.valueAsNumber, which is NaN when the field is empty.',
+      },
+      {
+        t: 1,
+        q: 'One handler updates several fields. What tells it which field changed?',
+        code: `function handleChange(e) {
+  setForm({ ...form, [e.target.name]: e.target.value });
+}`,
+        opts: [
+          'e.target.name',
+          'The label text',
+          'The input order',
+        ],
+        a: 'e.target.name',
+        why: 'Give each input a name, like name="email". The event\'s target is the input that changed, so e.target.name says which key to update. Neither the label nor the order of the inputs is on the event.',
+      },
+      {
+        t: 1,
+        q: 'In React 19, what does `<form action={saveUser}>` pass to saveUser?',
+        opts: [
+          'A FormData with the fields',
+          'The submit event, like onSubmit',
+          'An object of your React state',
+        ],
+        a: 'A FormData with the fields',
+        why: 'React calls the action with a FormData built from the form\'s fields, keyed by each input\'s name. Read a value with formData.get(\'email\'). There is no event to call preventDefault on, because React handles the submit for you. It knows nothing about your state.',
+      },
+      {
+        t: 1,
+        q: 'When is an uncontrolled input a good fit?',
+        opts: [
+          'You only need the value on submit',
+          'The value changes what is on screen',
+          'You validate it on every keystroke',
+        ],
+        a: 'You only need the value on submit',
+        why: 'If nothing on screen depends on the value until submit, let the input keep it, and read it with FormData then. That is less code, and no re-render per keystroke. If the screen reacts to each keystroke, like a live filter or a character count, the value belongs in state.',
+      },
+      {
+        t: 1,
+        q: 'For a text input, when does React\'s onChange fire?',
+        opts: [
+          'On every edit, as the user types',
+          'When the field loses focus',
+          'When the user presses Enter',
+        ],
+        a: 'On every edit, as the user types',
+        why: 'React\'s onChange fires on every edit, the way the browser\'s input event does. The browser\'s own change event usually waits until the field loses focus, which trips up people coming from plain JavaScript. Pressing Enter does not fire onChange. Inside a form, it usually submits the form.',
+      },
+      {
+        t: 2,
+        q: 'A form uses `action={signup}`, with uncontrolled inputs. signup finishes without throwing. What happens to the inputs?',
+        opts: [
+          'React resets them to their defaults',
+          'They keep what the user typed',
+          'They clear only after a page reload',
+        ],
+        a: 'React resets them to their defaults',
+        why: 'After a form action finishes without throwing, React resets the form\'s uncontrolled fields, the way a normal browser submit would. Controlled inputs keep whatever their state says. If the typed values should stay, make those inputs controlled.',
+      },
+      {
+        t: 2,
+        q: 'SubmitButton reads `useFormStatus().pending`. Where must it be rendered?',
+        opts: [
+          'Inside the <form>, as a child component',
+          'In the same component that renders the <form>',
+          'Anywhere, since pending is global',
+        ],
+        a: 'Inside the <form>, as a child component',
+        why: 'useFormStatus reads the status of the form it is rendered inside, a bit like reading context from a parent. Called in the component that renders the form, it is outside that form, so pending is always false. Each form has its own status. Nothing about it is global.',
+      },
+      {
+        t: 2,
+        q: '`const [state, formAction, isPending] = useActionState(save, null)`. Where does formAction go?',
+        opts: [
+          'On the form: action={formAction}',
+          'On the button: onClick={formAction}',
+          'Into a useEffect that calls it',
+        ],
+        a: 'On the form: action={formAction}',
+        why: 'formAction is a wrapped version of save. Pass it to the form\'s action prop. When the form submits, React calls save with the previous state and the FormData, and stores what it returns in state. Calling it from onClick or an effect skips the form submit, so there is no FormData and no reset.',
+      },
+      {
+        t: 2,
+        q: 'Where must a signup form be validated?',
+        opts: [
+          'On the server, even if the browser checks too',
+          'Only in the browser, with required and pattern',
+          'Only in onChange, on every keystroke',
+        ],
+        a: 'On the server, even if the browser checks too',
+        why: 'Anyone can skip your form and send a request straight to your API, so the server has to check everything. Checks in the browser, like required, or messages as the user types, make the form faster and friendlier. On their own, they protect nothing.',
+      },
+      {
+        t: 3,
+        q: 'Code submits a form for the user. How do `form.submit()` and `form.requestSubmit()` differ?',
+        opts: [
+          'submit() skips validation and onSubmit',
+          'requestSubmit() skips only the validation',
+          'They are two names for the same call',
+        ],
+        a: 'submit() skips validation and onSubmit',
+        why: 'form.submit() sends the form directly: no validation and no submit event, so onSubmit and React actions never run. form.requestSubmit() acts like a click on a submit button. The browser checks required and other rules, then fires the submit event your code listens for.',
+      },
+      {
+        t: 3,
+        q: 'useActionState\'s isPending turns true when the form submits. When does it go back to false?',
+        opts: [
+          'When the action\'s promise settles',
+          'As soon as the action has been called',
+          'After the next render, whatever happens',
+        ],
+        a: 'When the action\'s promise settles',
+        why: 'React treats the whole async action as one transition. isPending stays true across every await inside it, and goes back to false when the promise resolves or rejects. That is what lets a button say Saving... for exactly as long as the save takes.',
+      },
+      {
+        t: 3,
+        q: 'Libraries like React Hook Form lean on uncontrolled inputs. What does that buy them?',
+        opts: [
+          'Fewer re-renders while the user types',
+          'Inputs that work without any JavaScript',
+          'Validation that also runs on the server',
+        ],
+        a: 'Fewer re-renders while the user types',
+        why: 'With uncontrolled inputs, typing does not set state, so the form does not re-render on every keystroke. The library reads the values through refs when it needs them. That matters on big forms. It still needs JavaScript, and server validation is still your job.',
+      },
+      {
+        t: 3,
+        q: 'A useActionState action returns \'Email taken\' instead of throwing. What happens to the email the user typed, in an uncontrolled input?',
+        opts: [
+          'It is cleared, since the action didn\'t throw',
+          'It stays, since the action returned an error',
+          'It stays until the user submits again',
+        ],
+        a: 'It is cleared, since the action didn\'t throw',
+        why: 'React resets the uncontrolled fields after the action finishes without throwing. Returning an error message still counts as finishing, so the email field is emptied, and the user has to type it again. To keep it, make that input controlled, or return the email with the error and pass it back as defaultValue. The reset then fills the field from that defaultValue.',
+      },
+    ],
+  },
 ];
 
 /** Field guide for the React division, including interview talking points. */
@@ -1881,6 +2123,64 @@ function Input({ ref, ...props }) { return <input ref={ref} {...props} />; }
       {
         prompt: 'When would you write a custom hook?',
         answer: 'When two components need the same stateful logic, like tracking the window width or debouncing a value. I move those hook calls into a function named useSomething and call it from both. Each component still gets its own state, because a custom hook shares the logic, not the data. If they need the same data, that is lifting state up, context, or a store.',
+      },
+    ],
+  },
+  forms: {
+    plain: `Every input has to keep its value somewhere. A controlled input keeps it in React state: value={email}, updated in onChange on every keystroke. An uncontrolled input keeps it in the DOM, and you read it when you need it, usually on submit.
+
+React 19 adds Actions. Pass a function to <form action={...}>, and React calls it with the form's FormData when the form submits. It prevents the page reload, tracks pending while the function runs, and resets the uncontrolled fields when it finishes without throwing. useActionState keeps what the action returns, and useFormStatus lets a button inside the form see that it is pending.
+
+Whatever the browser checks, the server checks again. Browser validation makes a form friendlier. It does not make it safe.`,
+    words: [
+      ['controlled input', 'An input whose value comes from React state and changes through onChange.'],
+      ['uncontrolled input', 'An input that keeps its own value in the DOM. You set a start with defaultValue and read it later.'],
+      ['FormData', 'A browser object holding a form\'s fields by name. formData.get(\'email\') reads one.'],
+      ['form action', 'React 19: a function passed to <form action>. React calls it with FormData when the form submits.'],
+      ['useActionState', 'Wraps an action and gives back its latest result, the wrapped action, and isPending.'],
+      ['useFormStatus', 'From react-dom, called inside a form. Tells a child, like a submit button, whether the form is pending.'],
+    ],
+    code: {
+      label: 'a React 19 form with an action',
+      snippet: `function SubmitButton() {
+  const { pending } = useFormStatus();
+  return <button disabled={pending}>{pending ? 'Saving...' : 'Save'}</button>;
+}
+
+function SignupForm() {
+  const [error, formAction] = useActionState(async (prev, formData) => {
+    const res = await signup(formData.get('email'));
+    return res.ok ? null : res.message;
+  }, null);
+
+  return (
+    <form action={formAction}>
+      <input name="email" type="email" required />
+      <SubmitButton />
+      {error && <p role="alert">{error}</p>}
+    </form>
+  );
+}`,
+    },
+    say: [
+      'A controlled input gets its value from state and updates it in onChange. An uncontrolled one keeps its own value, and I read it on submit.',
+      'I control an input when something on screen depends on it while the user types. Otherwise I let the DOM keep it.',
+      'In React 19 I pass a function to the form\'s action. React calls it with FormData, tracks pending, and resets the uncontrolled fields when it finishes without throwing.',
+      'Browser validation is for a friendlier form. The server validates everything again.',
+    ],
+    gotcha: 'value without onChange makes a read-only input. React keeps putting the old value back, so typing does nothing, and it warns in development. Use defaultValue if you only want a starting value.',
+    rehearse: [
+      {
+        prompt: 'Controlled or uncontrolled: how do you choose?',
+        answer: 'If something on screen has to react while the user types, like a live filter, a character count or a disabled button, I keep the value in state and control the input. If I only need the values when the form submits, I let the inputs keep them and read FormData then. That is less code, and no re-render per keystroke.',
+      },
+      {
+        prompt: 'How do forms work in React 19 with Actions?',
+        answer: 'I pass a function to the form\'s action prop. When the form submits, React calls it with a FormData of the fields, so I do not need onSubmit or preventDefault. While it runs, useFormStatus tells a button inside the form that it is pending, and useActionState keeps the result, like an error message. When it finishes without throwing, React resets the uncontrolled fields.',
+      },
+      {
+        prompt: 'Where does form validation belong?',
+        answer: 'On the server, always, because anyone can send a request without using my form. On top of that, the browser can check things early, with attributes like required and type="email", or with messages as the user types. That makes the form friendlier, but it is not security.',
       },
     ],
   },
