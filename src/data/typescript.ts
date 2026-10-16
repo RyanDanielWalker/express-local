@@ -2,8 +2,8 @@ import type { Guide, Line, TsLineId } from '../engine/types';
 
 /**
  * The TypeScript division: the half of the job that shows up in every code
- * review. Behavior follows TypeScript 5 with `strict` on, which is what both
- * the NestJS and the Vite React templates ship with.
+ * review. Every claim is proven with the compiler, with `strict` on, under
+ * TypeScript 5.9, 6.0 and 7.0 (see CLAUDE.md).
  */
 export const TS_LINES: Line[] = [
   {
@@ -513,7 +513,7 @@ export const TS_GUIDE: Record<TsLineId, Guide> = {
     ],
     gotcha: 'The built-in Omit does not check that the key exists. Misspell it, or rename the field later, and Omit quietly removes nothing. Pick does check, so a typo there is a compile error. So when hiding something sensitive, list the fields you mean to keep with Pick, rather than the ones to hide with Omit.',
     rehearse: [
-      { prompt: 'How do you keep a DTO and an entity from drifting apart?', answer: 'I build one from the other instead of writing both by hand. In plain TypeScript, Pick is the one that turns a renamed field into a compile error, because it checks its keys. The built-in Omit does not. NestJS has class versions, PickType and OmitType, from @nestjs/mapped-types, or from @nestjs/swagger or @nestjs/graphql if your project uses those. PickType and OmitType both check their keys, and DTOs have to be classes for validation anyway. With Pick or the NestJS versions, a rename breaks the build instead of slipping past a reviewer.' },
+      { prompt: 'How do you keep a DTO and an entity from drifting apart?', answer: 'I build one from the other instead of writing both by hand. In plain TypeScript, Pick is the one that turns a renamed field into a compile error, because it checks its keys. The built-in Omit does not. NestJS has class versions, PickType and OmitType, from @nestjs/mapped-types, or from @nestjs/swagger or @nestjs/graphql if your project uses those. PickType and OmitType both check their keys, and DTOs have to be classes for ValidationPipe anyway. With Pick or the NestJS versions, a rename breaks the build instead of slipping past a reviewer.' },
       { prompt: 'Which utility types do you actually reach for, and for what?', answer: 'Partial for a PATCH body. Pick and Omit to build a public shape from an entity. Record for a lookup object. And Awaited of ReturnType to name what an async function resolves to. The point is one source of truth, so a change breaks the build instead of drifting.' },
       { prompt: 'Pick or Omit: how do you choose?', answer: 'Usually whichever lists fewer keys, with one catch. Pick checks that every key exists, so a typo or a renamed field is a compile error. The built-in Omit accepts any key, so a typo quietly removes nothing. For sensitive fields like passwordHash, I would rather list what I send with Pick than list what I hide with Omit.' },
     ],
