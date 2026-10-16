@@ -56,13 +56,13 @@ The point of every line is that the idea clicks and can then be explained out lo
 5. **Explain both sides.** A `why` says why the right answer is right and why the tempting wrong one is wrong.
 6. **Clear, not long.** Cut any word that is not helping. No metaphors that need decoding.
 
-NestJS and TypeScript are written to it. React and the algorithm lines are not yet, and get brought up to it when their turn comes (see ROADMAP.md).
+NestJS, TypeScript and React are written to it. The algorithm lines are not yet, and get brought up to it when their turn comes (see ROADMAP.md).
 
 ### The rest
 
 - Every question needs its answer among its options, at least two options, and a `why` that teaches rather than restates.
 - Tier 1 questions are the ones a junior should get. Tier 3 is the deep cut.
-- Keep claims checkable: stack answers follow current behavior, and version-specific behavior says which version. The docs are where to start, not proof: compile TypeScript claims and run NestJS claims (sections below).
+- Keep claims checkable: stack answers follow current behavior, and version-specific behavior says which version. The docs are where to start, not proof: compile TypeScript claims, and run NestJS and React claims (sections below).
 - Options must not give the answer away by length. `data.test.ts` fails a question whose answer is 1.35x its distractors. The bar fails a line where the answer sits in the same length position (longest, middle or shortest) more than half the time: fixing "always the longest" by padding the wrong answers just moves the giveaway to the middle. Write every option as a parallel claim, vary which one is longest, and put the nuance in `why`.
 - Non-algorithm lines need at least three `rehearse` prompts in their guide, written as a full spoken answer.
 - The bar: `src/data/bar.ts` audits each line against the checks in ROADMAP.md. Run `npm run bar` to see where every division stands before proposing content work. Add a division to `FINISHED` only once it could carry an interview on its own topic; from then on the tests fail if any of its lines slips below the bar.
@@ -93,3 +93,15 @@ The docs are not enough either. The independent review found claims the docs sup
 5. Say which adapter a claim assumes. Express is the default, so call out anything Fastify does differently.
 6. Re-run whatever a rewrite touches. The clarity pass added new "why the wrong option is wrong" sentences, and reviewers found some of them false.
 7. When a pass is done, an independent agent that did not write it reviews the changed fields against running code. Verify each finding before changing anything.
+
+### Checking React claims against running code
+
+Same idea as NestJS. The React review found claims the docs seemed to support but React 19.3 did not, like an effect loop being stopped (it only warns in development) and StrictMode doing a real remount (it keeps state). For every React line:
+
+1. Keep a throwaway project outside the repo with the current react and react-dom, jsdom and tsx.
+2. Render real components with `createRoot` inside `act()`. Count renders, log effect setups and cleanups, and watch the DOM with a MutationObserver when a claim is about what React touches.
+3. Run each probe with `NODE_ENV=development`, and with `NODE_ENV=production` for anything StrictMode, warnings or timing could change.
+4. Prove every wrong option is wrong, and add one check that should fail.
+5. Flow puzzles accept one exact order, so check the order against the log, and make sure no step could honestly go in two places.
+6. Type claims still go through `tsc`, as in the TypeScript section.
+7. When a pass is done, an independent agent reviews it against running code, then a fresh one re-checks whatever the fixes changed.

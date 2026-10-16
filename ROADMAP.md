@@ -2,7 +2,7 @@
 
 Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
 
-Status: 32 lines across 4 divisions, 95 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done), then React.** NestJS and TypeScript are finished, with no loose threads left. No new divisions until all three clear the bar below.
+Status: 32 lines across 4 divisions, 97 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done), then React (done).** All three clear the bar and have been independently reviewed. The React gaps are the last open item before anything new.
 
 ## The bar
 
@@ -52,16 +52,21 @@ All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Ever
 - [x] **Independent review.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in CLAUDE.md: prove the wrong options, not just the right one.
 - [x] **Gaps the reviewers flagged.** 8 new questions: assertion functions and `x == null` on Narrow Gauge, generic type aliases and defaults on Generic Line, Omit on a union on Utility Yard, `.catch()` callbacks on Unknown Territory, and context and `ComponentProps<'button'>` on Typed Components. Each was proved with `tsc`, then checked by an independent reviewer.
 
-## Next: React
+## Done: React
 
-NestJS and TypeScript have no open items: both clear the bar, both were independently reviewed against running code or the compiler, and the gaps the reviewers found are closed.
+All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Every claim was run in a React 19.3 sandbox: real components rendered with `react-dom` in jsdom, with renders counted, effects logged and DOM changes watched, in development and production builds.
 
-Three React lines also give their answers away by length (performance: 8 of 9).
+- [x] **Fill tier 1.** 37 new Local questions, so every line has 9, plus a few deeper ones.
+- [x] **Two Local puzzles a line.** A sort and a flow on each: what makes Counter render again, effect versus render versus handler, where a value should live, good and risky keys, which memo tool fits, which hook calls break the rules. The flows walk through a click, a changing roomId, a mixed setState queue, deleting from an index-keyed list, an inline arrow defeating memo, and a conditional hook.
+- [x] **Rehearsal to three prompts a line**, and a drill for every side panel.
+- [x] **No more length giveaways.** Memo Yard had the answer as the longest option on 8 of 9 questions. Every line now spreads it across longest, middle and shortest.
+- [x] **The clarity standard**, on every explanation, field guide and note.
+- [x] **Independent review.** Three reviewers ran all 325 items against React 19.3 and flagged 55. The worst: an effect loop React was said to stop (it only warns, and the loop runs on), StrictMode described as a real remount, state updates said to apply before the next render instead of during it, and a conditional-hook question whose code never actually threw. All fixed, then a fresh reviewer re-checked the 75 changed fields and flagged 14 more, also fixed.
+- [ ] **Gaps.** Likely new lines or questions: forms and controlled inputs with Actions, data fetching with Suspense and error boundaries, and the React 19.2 additions the reviewers ran into, `useEffectEvent` and `<Activity>`.
 
-- [ ] Fill tier 1 to 9 questions a line: about 37 across the six lines
-- [ ] Rehearsal to three prompts a line
-- [ ] A sort line: hooks by what they are for, and which ones are allowed where
-- [ ] Likely missing lines: forms and controlled inputs, data fetching and error boundaries
+## Next: the React gaps
+
+NestJS, TypeScript and React all clear the bar, and all three were independently reviewed against the compiler or running code. The last open item for the stack divisions is the React gaps above, done the same way the NestJS and TypeScript gaps were.
 
 ## Parked until those are done
 
@@ -160,3 +165,6 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** NestJS clarity pass: all nine lines rewritten to the clarity standard, then reviewed against running code
 - **2026-10-15** NestJS gaps closed: 13 questions on dynamic modules, lifecycle hooks, custom decorators, GraphQL guards, token storage and e2e pipes
 - **2026-10-15** TypeScript gaps closed: 8 questions, each proved with tsc. NestJS and TypeScript have no open items
+- **2026-10-16** Flow puzzles say where a missed step goes and what you tried instead
+- **2026-10-16** React clears the bar on all six lines: 37 new Local questions, 12 puzzles, the clarity standard, every claim run against React 19.3
+- **2026-10-16** Independent review of React: 55 items fixed, re-checked, and React added to `FINISHED`
