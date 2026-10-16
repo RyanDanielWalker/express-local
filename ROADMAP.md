@@ -86,9 +86,9 @@ Orthogonal to the content work, and the thing to do when you want a break from w
 - [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
 - [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
 - [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
-- [ ] **Fresh screenshots** for the README, once the interface work above is done. The current ones predate the TypeScript puzzles and the clarity rewrite.
+- [ ] **Fresh screenshots** for the README, once the interface work above is done. The current ones predate the TypeScript and React puzzles and the clarity rewrite.
 - [ ] **Upgrade the repo to TypeScript 6.** The app is built with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The content's probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
-- [ ] **Split the bundle by division.** Every question ships in one chunk, now 638 kB (200 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
+- [ ] **Split the bundle by division.** Every question ships in one chunk, now 723 kB (225 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
 
 ## Engine ideas
 
@@ -169,3 +169,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-16** React clears the bar on all six lines: 37 new Local questions, 12 puzzles, the clarity standard, every claim run against React 19.3
 - **2026-10-16** Independent review of React: 55 items fixed, re-checked, and React added to `FINISHED`
 - **2026-10-16** React gaps closed: Fare Machine (forms and Actions), Arrivals Board (Suspense and error boundaries), and `useEffectEvent` and `<Activity>` on Side Track. React has no open items
+- **2026-10-16** Consistency pass across all 34 lines: older React answers updated for `<Activity>`, Actions and `useEffectEvent`, two React questions that repeated others replaced, stale comments and docs fixed, and the new lines played end to end in a browser

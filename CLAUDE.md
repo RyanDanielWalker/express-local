@@ -36,7 +36,7 @@ Subway-themed drill for algorithms, NestJS, React and TypeScript. React 19 + Typ
 
 ## Adding a line
 
-1. Add the id to `LineId` in `engine/types.ts`.
+1. Add the id to its division's id type in `engine/types.ts` (`NestLineId`, `ReactLineId`, `TsLineId` or `AlgoLineId`).
 2. Add the line and its guide entry to its division's data file in `src/data/`.
 3. Quiz and flow lines stop there. A `kind: 'game'` line also needs pure logic plus tests in `src/algorithms/` and a component registered in `GAMES`.
 4. Consider badges in `engine/progression.ts` if the line joins a group.
