@@ -521,6 +521,44 @@ useEffect(() => {
         a: '[userId]',
         why: 'The effect reads userId, so it has to run again when userId changes. With [], it would keep showing the first user after the prop changes. setUser from useState is stable, and fetchUser is an import, so neither needs to be listed.',
       },
+      {
+        t: 2,
+        q: 'What is useEffectEvent for?',
+        opts: [
+          'Reading fresh values in an effect, without re-running it',
+          'Running an effect once, the same as an empty array',
+          'Turning an event handler into an effect',
+        ],
+        a: 'Reading fresh values in an effect, without re-running it',
+        why: 'Some code in an effect needs the newest props or state, but should not be a reason to re-run the effect, like the theme for a toast. Wrap that code in useEffectEvent and call it from the effect. It always sees the latest values, and it never goes in the dependency array. It is not a way to run an effect once, and it does not replace event handlers, which still go on JSX.',
+      },
+      {
+        t: 3,
+        q: 'ChatRoom reconnects whenever theme changes, though it only uses theme to color a toast. What fixes that?',
+        code: `useEffect(() => {
+  const conn = connect(roomId);
+  conn.on('connected', () => showToast('Connected!', theme));
+  return () => conn.disconnect();
+}, [roomId, theme]);`,
+        opts: [
+          'Move the toast into a useEffectEvent',
+          'Drop theme from the array, silence the lint',
+          'Wrap the connect call in useMemo',
+        ],
+        a: 'Move the toast into a useEffectEvent',
+        why: 'useEffectEvent, stable since React 19.2, wraps code that should read the latest values without making the effect re-run. Write const onConnected = useEffectEvent(() => showToast(\'Connected!\', theme)), call it inside the effect, and leave it out of the array. A theme change no longer reconnects, and the toast still uses the current theme. Dropping theme from the array would freeze it at whatever it was when the effect last ran. useMemo does not control when an effect runs.',
+      },
+      {
+        t: 3,
+        q: 'A visible tab is switched to `<Activity mode="hidden">`. What happens to it?',
+        opts: [
+          'It keeps its state, and its effects are cleaned up',
+          'It unmounts, and its state is thrown away',
+          'It stays mounted, with its effects still running',
+        ],
+        a: 'It keeps its state, and its effects are cleaned up',
+        why: 'Activity, added in React 19.2, hides its children without unmounting them. React keeps their state and DOM, hides the DOM with display: none, and runs their effects\' cleanups, so timers and subscriptions stop. While hidden, it can still re-render in the background, at low priority. When the mode goes back to visible, the effects run again, with the state still there. Rendering {show && <Tab />} instead would unmount the tab and lose its state.',
+      },
     ],
   },
   {
@@ -1594,7 +1632,8 @@ function Page() {
     code: {
       label: 'subscribe and clean up',
       snippet: `// onMessage must stay the same function between renders, or this
-// reconnects every render. useEffectEvent (stable since React 19.2) helps.
+// reconnects every render. Or wrap it in useEffectEvent (stable since
+// React 19.2) and take it out of the array.
 useEffect(() => {
   const socket = connect(roomId);
   socket.on('message', onMessage);
