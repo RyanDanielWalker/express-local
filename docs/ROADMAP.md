@@ -1,8 +1,73 @@
 # Roadmap
 
-Where this is going, what's parked, and what we learned building it. Not a contract. Delete anything that stops sounding like a good idea.
+What's next, in order, then what's done, what's parked, and what we learned building it. `/next` works from the top of **Next, in order**. Not a contract: delete anything that stops sounding like a good idea, and record why in an ADR if it was a real decision.
 
-Status: 34 lines across 4 divisions, 97 tests, no backend. Four divisions is enough. The work now is making the three stack divisions good enough to carry an interview, in this order: **NestJS (done), then TypeScript (done), then React (done).** All three clear the bar, have been independently reviewed, and have their gaps closed.
+Status: 34 lines across 4 divisions, 98 tests, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
+
+## Next, in order
+
+Depth first ([ADR 0002](adr/0002-depth-first.md)): finish one thing completely, with no loose threads, before starting the next. An inventory stop closes each block of work.
+
+### 1. Near-duplicate questions
+
+A cross-line review found pairs of questions that test the same fact with the same answer. A pair inside one line is the worse kind, because one run can show both, so the second is free. For each pair, keep the question in the line that owns the topic and give the other a new angle: a different fact the line should teach, written to the clarity standard, proven like any new question, with option lengths rebalanced. Same-line pairs first.
+
+Same line:
+
+- [ ] **Memo Yard:** "A table renders 10,000 rows and scrolling stutters. What actually fixes it?" (t3) vs "What does virtualization do for a long list?" (t1). Nearly the same answer text.
+- [ ] **Memo Yard:** "How do you find out what is actually slow?" (t3) vs "What should you do before adding memo anywhere?" (t1). Both answer "measure with the Profiler first".
+- [ ] **Repaint Line:** "A parent re-renders. Its child gets exactly the same props..." (t1) vs "A parent's state changes. Its child takes no props at all..." (t1).
+- [ ] **Generic Line:** "Why use a generic instead of any?" (t1) vs "Which signature keeps the type of what you pass in?" (t1).
+- [ ] **Dispatch Desk:** "Send your own JSON shape whenever a NotFoundException is thrown." (t1) vs "Turn every thrown error into your standard error JSON shape, and log it." (t1).
+- [ ] **Test Track:** "Unit testing OrdersService, which injects PaymentsService. What goes in providers?" (t1) vs "OrdersService calls PaymentsService, which calls Stripe... What do you fake?" (t1).
+- [ ] **Platform Signs (weaker):** the two route-order questions, "GET /users/me. Which handler runs?" (t1) and "A catch-all route is declared first..." (t3). Also the two status-code questions: "How do you make a handler send 204...?" (t1) and "What status does this return on success?" (t2). Keep both of a pair only if they really test different things.
+
+Across lines (each line should own its topic):
+
+- [ ] "What does wrapping a component in memo do?" (Repaint Line, t1) vs "What does React.memo do?" (Memo Yard, t1). They share a distractor too.
+- [ ] "What does the React Compiler do?" (Repaint Line, t3) vs "Your team turns on the React Compiler..." (Memo Yard, t3).
+- [ ] The memoized child with `style={{ margin: 8 }}` (Repaint Line, t2) vs the memoized child with an inline arrow (Memo Yard, t2, "Why does this memoized child still re-render...").
+- [ ] "What is wrong with this?" (Side Track, t2: a full name computed in an effect) vs "You store filteredItems in state and update it in an effect..." (Snapshot Line, t3). Both answer "compute it during render".
+- [ ] "Two components both call useCounter()..." (Hook Junction, t2) vs "useWindowWidth()... How many listeners?" (Hook Junction, t1).
+- [ ] "What is new in React 19 for passing a ref into a function component?" (Hook Junction, t2) vs "React 19. How does a function component accept a ref?" (Typed Components, t2).
+- [ ] "`(pet as Cat).meow()`... What does the `as` do when the code runs?" (Narrow Gauge, t1) vs "What does `as User` actually do?" (Unknown Territory, t1).
+- [ ] "Why put this `never` line in the default of a switch?" (Narrow Gauge, t2) vs "What is `never` good for?" (Unknown Territory, t2).
+- [ ] "How do you type a React component that takes a list of anything?" (Generic Line, t3) vs "What does making this component generic give you?" (Typed Components, t3).
+- [ ] "Data should only exist once status is done..." (Shape Yard, t3) vs "A prop should be required only when another prop is set. How?" (Typed Components, t3).
+- [ ] "When do you use 401 versus 403?" (Fault Line, t2) vs "What is the difference between authentication and authorization?" (Turnstile, t1).
+- [ ] "A global auth guard is on, but /health has to stay public." (Dispatch Desk, t2) vs "A global auth guard is on. How does /health stay reachable?" (Turnstile, t1).
+- [ ] "Why register a global guard with APP_GUARD instead of app.useGlobalGuards()?" (Tool Shed, t2) vs "Your global exception filter injects a LoggerService..." (Fault Line, t2). Same `APP_*` provider idea; keep only if the angles differ.
+
+Smaller cleanups from the same review:
+
+- [ ] "forwardRef" means React's ref forwarding on Hook Junction and Typed Components, but Nest's circular-dependency helper on Wiring Yard. Say "Nest's `forwardRef` (from `@nestjs/common`, unrelated to React's)" once on Wiring Yard. Its rehearse answer also recommends `forwardRef` twice.
+- [ ] Main Line's flow note calls a middleware rate limiter "fine for a rate limit", while Dispatch Desk teaches `ThrottlerGuard`. Add a clause on when a guard is the better home (routes that opt out with `@SkipThrottle()`), proven in `probes/nest`.
+- [ ] The `@nestjs/throttler` claims on Dispatch Desk (`ThrottlerGuard`, `@SkipThrottle()`, in a sort card and a question's `why`) were checked against the docs but never run: the package was not in the sandbox. It is pinned in `probes/nest` now. Prove them, and fix anything the run contradicts.
+
+### 2. Inventory stop
+
+- [ ] A fact-check pass by a separate agent that did not write the changes (the `fact-checker` agent), over every question touched in step 1. Verify each finding by re-running its probe before fixing, then a fresh agent re-checks the fixes.
+- [ ] Sanity pass: `npm test`, `npm run bar`, `npm run build`, the probes pass (see [DEVELOPMENT.md](DEVELOPMENT.md#inventory-stops), step 2), play each changed line end to end in a browser, and every doc still true.
+
+### 3. Interface
+
+Orthogonal to the content work. In this order:
+
+- [ ] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page.
+- [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar.
+- [ ] **Badges become a count that opens a panel.**
+- [ ] **Tabs on the intro screen.** Ride / Field guide / Say it out loud.
+- [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
+- [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
+- [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
+- [ ] **Fresh screenshots** for the README, once the interface work above is done. The current ones predate the TypeScript and React puzzles and the clarity rewrite.
+- [ ] **Upgrade the repo to TypeScript 6.** The app is built with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The content's probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
+- [ ] **Split the bundle by division.** Every question ships in one chunk, now over 700 kB (about 225 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
+
+### 4. Inventory stop
+
+- [ ] Sanity pass after the interface work: everything in step 2's sanity pass, plus the app on a phone-width screen in light and dark, and keyboard-only play.
+- [ ] Decide what's next from **Parked for now** and **Later**, and record the decision in an ADR.
 
 ## The bar
 
@@ -34,7 +99,7 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [x] **A testing line.** Test Track. `Test.createTestingModule`, `overrideProvider`, what to mock and what not to, testing a guard without standing up HTTP. More likely to come up in an interview than half of what the division already covers.
 - [x] **An auth line.** Turnstile. Guards plus strategies, JWT, where the user object comes from, why auth is a guard and not middleware.
 - [x] **More flows.** The validation pipeline on the DTO line, DI resolution order on Wiring Yard, an exception's trip to the client on Fault Line, and an interceptor wrapping a handler on Tool Shed.
-- [x] **A clarity pass, line by line.** All nine lines rewritten to the clarity standard in CLAUDE.md: one idea per sentence, terms defined where they appear, and explanations that say why the tempting wrong answer is wrong. Three reviewers then ran all 201 changed fields against Nest 12.1.3 and flagged 19, all fixed.
+- [x] **A clarity pass, line by line.** All nine lines rewritten to the clarity standard in [CLAUDE.md](../CLAUDE.md): one idea per sentence, terms defined where they appear, and explanations that say why the tempting wrong answer is wrong. Three reviewers then ran all 201 changed fields against Nest 12.1.3 and flagged 19, all fixed.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
 - [x] **Independent review.** Three reviewers that had not seen the content ran its claims as real code against Nest 12.1.3. They found wrong answers or explanations on most lines, and many more misleading ones. The worst: a missing `@Injectable()` listed as a cause of "can't resolve dependencies" (it boots, with an undefined dependency), `overrideGuard` advised for a global `APP_GUARD` it cannot reach, `transform: true` said to convert DTO fields, and a catch-all filter example that dropped every error message. Each finding was checked against the Nest source or a probe, fixed line by line, then a second set of reviewers re-checked all 122 changed fields and flagged 16 more, also fixed.
 - [x] **Gaps the reviewers flagged.** 13 new questions: dynamic modules (`forRoot`, `forFeature`, `forRootAsync`) and lifecycle and shutdown hooks on Wiring Yard, an `APP_FILTER` filter with dependencies on Fault Line, custom decorators (`Reflector.createDecorator`, `applyDecorators`, `createParamDecorator`) on Tool Shed, GraphQL guards and token storage on Turnstile, and global pipes in e2e tests on Test Track. Each was run against Nest 12.1.3, then checked by an independent reviewer.
@@ -49,7 +114,7 @@ All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Ever
 - [x] **Unknown Territory:** any vs unknown, how any spreads, as and ! as claims not checks, satisfies (fixed: it does not keep literals, it keeps exact keys)
 - [x] **Shape Yard:** structural typing, the excess property check, declaration merging, extends vs &, branded types
 - [x] **Typed Components:** props, children, events, refs and hook type arguments on React 19 types. Found along the way: the global JSX namespace is gone, FormEvent is deprecated in favor of SubmitEvent, and ref is a normal prop
-- [x] **Independent review.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in CLAUDE.md: prove the wrong options, not just the right one.
+- [x] **Independent review.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in [CLAUDE.md](../CLAUDE.md): prove the wrong options, not just the right one.
 - [x] **Gaps the reviewers flagged.** 8 new questions: assertion functions and `x == null` on Narrow Gauge, generic type aliases and defaults on Generic Line, Omit on a union on Utility Yard, `.catch()` callbacks on Unknown Territory, and context and `ComponentProps<'button'>` on Typed Components. Each was proved with `tsc`, then checked by an independent reviewer.
 
 ## Done: React
@@ -64,10 +129,6 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - [x] **Independent review.** Three reviewers ran all 325 items against React 19.3 and flagged 55. The worst: an effect loop React was said to stop (it only warns, and the loop runs on), StrictMode described as a real remount, state updates said to apply before the next render instead of during it, and a conditional-hook question whose code never actually threw. All fixed, then a fresh reviewer re-checked the 75 changed fields and flagged 14 more, also fixed.
 - [x] **Gaps the reviewers flagged.** Two new lines: Fare Machine, on controlled and uncontrolled inputs and React 19 form Actions, and Arrivals Board, on Suspense, `use()`, error boundaries and request waterfalls. Side Track gained three questions on the React 19.2 additions, `useEffectEvent` and `<Activity>`. Three fresh reviewers ran the new content against React 19.3 and flagged 14 items. The biggest: error boundaries were said to catch only rendering errors, but they also catch errors in effects and in Actions, like a form action. All fixed, then a fresh reviewer re-checked the changed fields and flagged 5 wording points, also fixed.
 
-## Next: the interface
-
-NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have no open items. The interface work below is next, with the algorithm question pools still parked.
-
 ## Parked for now
 
 - **Algorithms question pools.** Eleven lines, no question pools, so they contribute almost nothing to cram and their readiness has no recall component. Worth fixing, explicitly not now.
@@ -75,22 +136,7 @@ NestJS, TypeScript and React all clear the bar, were independently reviewed agai
 - **Engineer's Cab.** After Rush Hour, write the algorithm yourself against in-browser tests.
 - **Scenario mode.** Read a real situation, pick the right tool. Still the best idea in this file, and it needs the content above to draw from.
 
-## Interface
-
-Orthogonal to the content work, and the thing to do when you want a break from writing questions.
-
-- [ ] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page.
-- [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar.
-- [ ] **Badges become a count that opens a panel.**
-- [ ] **Tabs on the intro screen.** Ride / Field guide / Say it out loud.
-- [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
-- [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
-- [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
-- [ ] **Fresh screenshots** for the README, once the interface work above is done. The current ones predate the TypeScript and React puzzles and the clarity rewrite.
-- [ ] **Upgrade the repo to TypeScript 6.** The app is built with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The content's probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
-- [ ] **Split the bundle by division.** Every question ships in one chunk, now 723 kB (225 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
-
-## Engine ideas
+## Later: engine ideas
 
 - [ ] **Interview mode.** Five random rehearsal prompts across divisions, timed, no retries. The closest thing to the real event.
 - [ ] **Study plan.** Give it a date, get a daily plan that walks readiness up to where it needs to be by then.
@@ -170,3 +216,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-16** Independent review of React: 55 items fixed, re-checked, and React added to `FINISHED`
 - **2026-10-16** React gaps closed: Fare Machine (forms and Actions), Arrivals Board (Suspense and error boundaries), and `useEffectEvent` and `<Activity>` on Side Track. React has no open items
 - **2026-10-16** Consistency pass across all 34 lines: older React answers updated for `<Activity>`, Actions and `useEffectEvent`, two React questions that repeated others replaced, stale comments and docs fixed, and the new lines played end to end in a browser
+- **2026-10-17** Moved to a terminal workflow: `CLAUDE.md` rewritten for Claude Code, `docs/` (this roadmap, architecture, development, decision records), the `/next` command, a `fact-checker` agent, the fact-check sandboxes committed under `probes/`, and a test that keeps question ids unique within a line

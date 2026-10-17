@@ -5,7 +5,7 @@ import { auditLine, barReport, clears, FINISHED, lengthPosition } from './bar';
 import { GUIDE, LINES } from './index';
 
 /**
- * The bar from ROADMAP.md, as a ratchet. Finished divisions are enforced;
+ * The bar from docs/ROADMAP.md, as a ratchet. Finished divisions are enforced;
  * everything else is reported when you ask (BAR=1, or `npm run bar`).
  */
 describe('the bar', () => {

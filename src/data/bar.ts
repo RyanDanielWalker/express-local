@@ -58,7 +58,7 @@ export const VARIETY = 1.5;
 export const PUZZLES_AT_LOCAL = 2;
 
 /**
- * One line against the bar in ROADMAP.md. Check 6 there (content tests) is
+ * One line against the bar in docs/ROADMAP.md. Check 6 there (content tests) is
  * mostly enforced for every line by data.test.ts; the one part that has to be
  * judged per line, answers giving themselves away by length, lives here.
  */
