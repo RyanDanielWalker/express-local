@@ -1,0 +1,15 @@
+{
+  "name": "express-local-probes-ts",
+  "private": true,
+  "type": "module",
+  "description": "Proves TypeScript content claims with tsc under every version the content covers. Not part of the app.",
+  "scripts": {
+    "check": "node check.mjs"
+  },
+  "dependencies": {
+    "@types/react": "19.3.0",
+    "typescript": "5.9.3",
+    "typescript-6": "npm:typescript@6.0.3",
+    "typescript-7": "npm:typescript@7.0.2"
+  }
+}

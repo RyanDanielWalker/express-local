@@ -1,0 +1,11 @@
+import './harness.ts';
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
+const host = document.createElement('div'); document.body.appendChild(host); const root = createRoot(host);
+let called = 0; const seen: string[] = [];
+document.addEventListener('submit', e => seen.push('doc submit defaultPrevented=' + e.defaultPrevented), true);
+window.addEventListener('error', (e: any) => seen.push('window error ' + e.message));
+await act(async () => root.render(<form action={async (fd: FormData) => { called++; seen.push('action ' + fd.get('email')); }}><input name="email" defaultValue="x" /><button>go</button></form>));
+const origErr = console.error; console.error = (...a: any[]) => seen.push('console.error ' + String(a[0]).slice(0, 100));
+await act(async () => { (host.querySelector('button') as any).click(); await new Promise(r => setTimeout(r, 30)); });
+console.error = origErr; console.log(called, seen, host.querySelector('form')!.getAttribute('action')?.slice(0, 60));
