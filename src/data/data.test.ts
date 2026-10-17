@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GUIDE, LINES } from './index';
-import { DIVISIONS } from '../engine/questions';
+import { DIVISIONS, qid } from '../engine/questions';
 
 /** Content is data, and data goes stale quietly. These catch the typos. */
 describe('line data', () => {
@@ -29,6 +29,16 @@ describe('line data', () => {
       // a tier 1 run has to have something to ask
       if (line.kind === 'quiz') expect(line.questions!.some(q => q.t === 1), line.id).toBe(true);
       if (line.kind === 'flow') expect(line.flows!.some(f => f.t === 1), line.id).toBe(true);
+    }
+  });
+
+  // History is keyed by qid(), a hash of the question text and code. Two
+  // questions with the same text and code in one line would share a history.
+  it('gives every question in a line its own id', () => {
+    for (const line of LINES) {
+      const ids = (line.questions ?? []).map(q => qid(line.id, q));
+      const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+      expect(dupes, line.id).toEqual([]);
     }
   });
 
@@ -126,6 +136,12 @@ describe('line data', () => {
       ...(l.flows ?? []).flatMap(f => [f.title, f.note, ...f.steps, ...(f.decoys ?? [])]),
       ...(l.sorts ?? []).flatMap(s => [s.title, s.note, ...s.buckets, ...s.items.flatMap(i => [i.name, i.why])]),
     ]);
+    const guides = Object.values(GUIDE).flatMap(g => [
+      g.plain, g.gotcha ?? '', g.lore ?? '', g.code.label, g.code.snippet, g.code.note ?? '',
+      ...g.words.flat(), ...(g.say ?? []), ...(g.when ?? []), ...(g.famous ?? []),
+      ...(g.rehearse ?? []).flatMap(r => [r.prompt, r.answer]),
+    ]);
+    copy.push(...guides);
     expect(copy.filter(t => t.includes('—'))).toEqual([]);
   });
 });
