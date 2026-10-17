@@ -4,3 +4,6 @@ dist/
 .vercel/
 *.log
 .env
+probes/*/_review/
+*.tsbuildinfo
+.claude/settings.local.json
