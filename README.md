@@ -95,7 +95,7 @@ Every claim is proven with the compiler, with `strict` on, under TypeScript 5.9,
 
 ## Design decisions
 
-A few choices that shape how the app teaches. [ROADMAP.md](ROADMAP.md) has the full list of principles and how each was arrived at.
+A few choices that shape how the app teaches. [docs/ROADMAP.md](docs/ROADMAP.md) has the full list of principles and how each was arrived at.
 
 - **Readiness over XP.** A total that only goes up measures time spent, and it topped out after a fraction of the content. Readiness is a state that can drop, which is what makes it useful the week before an interview.
 - **Never answer the question for the player.** Naming the correct step after a wrong click turned the most useful moment in a puzzle into reading, and made a wrong click the cheapest hint in the app.
@@ -123,11 +123,13 @@ src/
   components/   screens: header, map, intro, play, results, rehearsal, cram band, badges
   hooks/        useKeys, useTimers
   lib/          small helpers
+probes/         sandboxes that prove the content against real React, NestJS and TypeScript
+docs/           roadmap, architecture, development guide, and decision records
 ```
 
 ## Running locally
 
-Requires Node.js 20.19+ or 22.12+.
+Requires Node.js 22.12+.
 
 ```bash
 npm install
@@ -142,22 +144,24 @@ npm run build      # typecheck and production build into dist/
 1. Add the id to the division's id type in `src/engine/types.ts`.
 2. Add the line and its field guide entry to the division's data file in `src/data/` (`lines.ts` and `guide.ts`, `nest.ts`, `react.ts` or `typescript.ts`).
 3. Give it at least 9 / 12 / 15 questions available on Local / Express / Rush Hour, two Local puzzles (flows or sorts), and three rehearsal prompts.
-4. Write to the clarity standard in [CLAUDE.md](CLAUDE.md). For a TypeScript line, check every claim with the compiler. For a NestJS or React line, run every claim against real code.
+4. Write to the clarity standard in [CLAUDE.md](CLAUDE.md), and prove every claim with the sandboxes in `probes/`: the compiler for TypeScript, running code for NestJS and React.
 5. Run `npm test` and `npm run bar`. A line in a finished division has to clear the bar before the tests pass.
 6. A `kind: 'game'` line also needs pure logic with tests in `src/algorithms/` and a component registered in `src/games/index.ts`.
 
 A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) covers the content shapes and how to add a question, puzzle, line or division. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) covers setup and how content gets checked.
+
 ## Roadmap
 
-NestJS, TypeScript and React are finished, gaps included. Next is the interface work. [ROADMAP.md](ROADMAP.md) has the full board.
+NestJS, TypeScript and React are finished, gaps included. Next is a cleanup of questions that repeat each other across lines, then the interface work. [docs/ROADMAP.md](docs/ROADMAP.md) has the full board.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
 - [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and independently reviewed
 - [x] **React:** eight lines clearing the bar, every claim run against React 19.3, and independently reviewed
 - [ ] **Reorganize the page:** a Today band, collapsible divisions, and a play mode that takes over the screen
-- [ ] **Scenario mode:** read a real-world situation, pick the right tool
+- [ ] **No repeats:** rework questions that test the same fact as another question
 
 ## Credits
 

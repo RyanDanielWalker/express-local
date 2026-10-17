@@ -3,7 +3,7 @@ import type { Guide, Line, TsLineId } from '../engine/types';
 /**
  * The TypeScript division: the half of the job that shows up in every code
  * review. Every claim is proven with the compiler, with `strict` on, under
- * TypeScript 5.9, 6.0 and 7.0 (see CLAUDE.md).
+ * TypeScript 5.9, 6.0 and 7.0 (see probes/ts).
  */
 export const TS_LINES: Line[] = [
   {

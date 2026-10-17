@@ -1,49 +1,62 @@
 # Express & Local
 
-Subway-themed drill for algorithms, NestJS, React and TypeScript. React 19 + TypeScript + Vite, no backend, progress in localStorage.
+A subway-themed practice app for technical interviews. Ryan, a junior web developer, built it to drill computer science and his stack until he can explain it out loud: NestJS, TypeScript and React, plus algorithms. He is the player, the owner, and the only user.
 
-`ROADMAP.md` is the working board: what's next, parked ideas, the principles this project keeps relearning, and a shipped log. Read it before proposing work, and add to it when an idea comes up that isn't getting built today.
+Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line clears the quality bar, every claim was proven against real code and independently reviewed. Algorithms are parked. Not deployed; it runs locally.
 
-## Commands
+## Where things are
 
-- `npm run dev`: dev server
-- `npm test`: Vitest (run before every commit)
+- `docs/ROADMAP.md`: what's next, in order, and what's done. `/next` works from its top. Read it before proposing work.
+- `docs/ARCHITECTURE.md`: how the app and its content are structured, and how to add a question, puzzle, line or division.
+- `docs/DEVELOPMENT.md`: setup, scripts, the working agreement, and the full procedure for checking content.
+- `docs/adr/`: why things are the way they are. Append-only.
+- `probes/`: sandboxes that prove content against real React, NestJS and TypeScript. Not part of the app.
+- `.claude/skills/next/`: the `/next` command. `.claude/agents/fact-checker.md`: the independent content reviewer.
+
+## How we work
+
+- **Ryan owns it, Claude is the senior engineer.** Claude writes the code and content; Ryan makes the calls, reviews every commit, and pushes. Explaining the work in plain English is part of the deliverable.
+- **Commit, never push.** Small Conventional Commits on local `main` as the work goes (`feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`). Subject says what, body says why. Content commits end with what they were checked against. Never push, never rewrite a pushed commit.
+- **Stop for real decisions** with two or three options and a recommendation. Make routine choices and mention them.
+- **Keep the docs true** in the same commit. A significant decision gets an ADR.
+- **No loose threads.** A roadmap item is done when everything it touched is done, proven and documented. Anything found and not fixed goes on the roadmap.
+- **The repo carries the context, not the chat.** Sessions get cleared between tasks. Anything a future session needs (a decision, a trap, a half-finished thread) goes in the docs or the roadmap before the session ends.
+
+## Stack and commands
+
+React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5. No backend; progress lives in `localStorage`. Node 22.12+ for the app (Vitest needs it), 22.22.2+ or 24.15+ for the React probes. `.nvmrc` says 22.
+
+- `npm run dev`: dev server at http://localhost:5173
+- `npm test`: every test (run before every commit)
 - `npm run typecheck`: `tsc --noEmit`
-- `npm run build`: typecheck + production build
+- `npm run build`: typecheck and production build
+- `npm run preview`: serve the production build
 - `npm run bar`: where every line stands against the quality bar
 
-## Architecture
+## Code rules
 
-- `src/algorithms/`: **pure** game logic as small state machines (`init`, `want/should`, `step` returning `{ ok, state }`). No React, no DOM. Every file gets tests in `algorithms.test.ts`.
-- `src/engine/`: save data (`save.ts`, with `migrate()` for old saves), progression and scoring (`progression.ts`, where `finishTrip()` is pure and returns a new save). Tests in `engine.test.ts`.
-- `src/data/`: one file per division (`lines.ts` + `guide.ts` for algorithms, `nest.ts`, `react.ts`, `typescript.ts`), merged by `index.ts` into `LINES` and `GUIDE`. Saves refer to lines by id (including the Daily Ride pick), so a line can be added anywhere in its division; unlock order is the order within the division. Copy supports `` `code` `` and `**bold**`, rendered by `<Rich />`; longer copy like a field guide's `plain` intro goes through `<Prose />`, which also turns a blank line into a new paragraph. `data.test.ts` validates the content.
-- Lines declare a `division` (unlock order is per division) and a `kind`:
-  - `game`: a hand-built component in `src/games/`, registered in `games/index.ts`
-  - `quiz`: multiple choice drawn from `questions`, then one puzzle from its `flows` or `sorts` as the last stop. `QuizRun` plays the questions through `QuizGame`, then the puzzle through `FlowGame` or `SortGame`
-  - `flow`: put `steps` in order, played by `FlowGame`
-- `src/engine/questions.ts`: `DIVISIONS`, tier-aware `pickQuestions` (unseen and shaky questions first) and `pickPuzzle` (rotates by ride count), the cram pool, and per-question history (`qid`, `recordAnswers`, `shakyQuestions`). Pure, tested.
-- `src/games/`: one component per line, registered in `games/index.ts`. Games receive a `GameApi` (`say`, `correct`, `wrong`, `record`, `hold`, `resume`, `finish`, `tier`, `assist`, `over`) and render a `.board` and a `.side`. The play screen owns hearts, XP, and the clock.
-- `src/components/`: screens and shared UI. `App.tsx` is a small screen state machine: intro → play → quiz → result (or derailed), plus a cram run that scores through `finishCram`, a shaky drill built from `shakyQuestions`, and an out-loud rehearsal (`Rehearse.tsx` → `finishRehearsal`). None of those three touch line progress.
-- Styles: one stylesheet, `src/styles/app.css`, built on CSS custom properties with light and dark themes. Line colors are `--red`, `--blue`, etc., exposed to a line's subtree as `--c`.
-
-## Conventions
-
-- Keep game rules out of components. If it decides what's correct, it lives in `src/algorithms/` and has a test.
+- Game rules and scoring are pure functions with tests, in `src/algorithms/` or `src/engine/`. Components ask and render; they never decide what's correct.
+- Don't break saves. A new save field needs a default in `emptySave()` and handling in `migrate()`.
+- Use `useTimers()` (cleaned up on unmount) and `useKeys()` for keyboard shortcuts.
 - Tiers: 1 Local, 2 Express, 3 Rush Hour. `api.assist` is false on Rush Hour; hide helper panels when it is.
-- Copy voice: direct, a little funny, plain English. **No em dashes** anywhere in user-facing copy.
-- Don't break saves. New save fields need a default in `emptySave()` and handling in `migrate()`.
-- Use the timers from `useTimers()` (auto-cleaned on unmount), and `useKeys()` for keyboard shortcuts.
-
-## Adding a line
-
-1. Add the id to its division's id type in `engine/types.ts` (`NestLineId`, `ReactLineId`, `TsLineId` or `AlgoLineId`).
-2. Add the line and its guide entry to its division's data file in `src/data/`.
-3. Quiz and flow lines stop there. A `kind: 'game'` line also needs pure logic plus tests in `src/algorithms/` and a component registered in `GAMES`.
-4. Consider badges in `engine/progression.ts` if the line joins a group.
-
-A new division also needs an entry in `DIVISIONS` (`engine/questions.ts`).
+- After tests pass, break the code once on purpose and confirm a test catches it.
 
 ## Content rules
+
+Ryan is still learning this material, so he can't catch a wrong claim in review. The content has to be right before it's committed.
+
+### Prove every claim
+
+The docs are where a claim starts, not the proof. Reviews kept finding claims the docs seemed to support that the real code did not. So for every new or changed question, option, explanation, puzzle and field guide example:
+
+1. Read the official docs for the version the app covers (react.dev, docs.nestjs.com, typescriptlang.org).
+2. Prove it in `probes/`: TypeScript under 5.9, 6.0 and 7.0 with `strict`; React 19.3 rendered in jsdom (production too when StrictMode, warnings or timing matter); NestJS 12.1.3 on the Express adapter with supertest.
+3. Prove the wrong options wrong. A distractor a knowledgeable person could defend is a bug.
+4. Include one check that should fail, and confirm it does.
+5. Re-prove after any edit, including rebalancing option lengths.
+6. Before an inventory stop, the `fact-checker` agent reviews what changed. Verify each finding by re-running its probe before fixing, then a fresh fact-checker re-checks the fixes.
+
+Full procedure: `docs/DEVELOPMENT.md`, "Checking content".
 
 ### Clarity comes first
 
@@ -56,52 +69,35 @@ The point of every line is that the idea clicks and can then be explained out lo
 5. **Explain both sides.** A `why` says why the right answer is right and why the tempting wrong one is wrong.
 6. **Clear, not long.** Cut any word that is not helping. No metaphors that need decoding.
 
-NestJS, TypeScript and React are written to it. The algorithm lines are not yet, and get brought up to it when their turn comes (see ROADMAP.md).
+NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 
 ### The rest
 
-- Every question needs its answer among its options, at least two options, and a `why` that teaches rather than restates.
-- Tier 1 questions are the ones a junior should get. Tier 3 is the deep cut.
-- Keep claims checkable: stack answers follow current behavior, and version-specific behavior says which version. The docs are where to start, not proof: compile TypeScript claims, and run NestJS and React claims (sections below).
-- Options must not give the answer away by length. `data.test.ts` fails a question whose answer is 1.35x its distractors. The bar fails a line where the answer sits in the same length position (longest, middle or shortest) more than half the time: fixing "always the longest" by padding the wrong answers just moves the giveaway to the middle. Write every option as a parallel claim, vary which one is longest, and put the nuance in `why`.
-- Non-algorithm lines need at least three `rehearse` prompts in their guide, written as a full spoken answer.
-- The bar: `src/data/bar.ts` audits each line against the checks in ROADMAP.md. Run `npm run bar` to see where every division stands before proposing content work. Add a division to `FINISHED` only once it could carry an interview on its own topic; from then on the tests fail if any of its lines slips below the bar.
-- Replays have to differ. The bar wants every tier's pool at least 1.5x a run (9 / 12 / 15 questions for a quiz line) and two puzzles on Local. `pickQuestions` puts unseen and shaky questions first, and `pickPuzzle` rotates by ride count.
-- Side panels: during play, quiz and flow lines show `drill` (how to reason it out). `hook` is close to an answer key and belongs on the intro screen, but `QuizGame` falls back to it when a line has no `drill`, so give every line one.
-- Flow puzzles: use `start` to open a puzzle mid-flight and `decoys` for steps that do not happen in that run, so the player has to decide what gets skipped. Tier 1 flows must not all open the same way, or the first clicks are muscle memory.
-- Sort puzzles: a card's name may not contain the first word of its own box (a test enforces it). Card names render as plain text, so no backticks in them; titles, `why`s and notes are formatted.
+- Every question has its answer among its options (three parallel claims), and a `why` that teaches rather than restates.
+- Tier 1 is what a junior should get. Tier 3 is the deep cut.
+- Version-specific behavior says which version ("since React 19.2", "on the default Express adapter", "with `strict` on").
+- No answer gives itself away by length. `data.test.ts` fails an answer 1.35x its distractors; the bar fails a line where the answer holds the same length position (longest, middle or shortest) on more than half its questions. Rewrite options as parallel claims; don't pad the wrong ones.
+- The bar (`src/data/bar.ts`): 9 / 12 / 15 questions available on Local / Express / Rush Hour, two Local puzzles, three rehearsal prompts, talking points and a gotcha. Divisions in `FINISHED` fail the tests if a line slips.
+- No two questions anywhere test the same fact with the same answer. Search before adding.
+- `drill` is shown during play and must never contain the answer. `hook` is close to an answer key and only shows on the intro screen.
+- Flows: check the order against a real run. Decoys must truly not happen in that scenario. Tier 1 flows must not all open the same way.
+- Sort card names can't contain the first word of their own box, and can't contain backticks.
 
-### Checking TypeScript claims with the compiler
+## Known traps
 
-Rereading is not enough: it missed real errors that `tsc` caught. For every TypeScript line:
+- **Escaped quotes.** The data files are single-quoted strings. An apostrophe needs `\'`. A script that writes `\\'` breaks the file; this has happened several times.
+- **An answer lives in two places**, `opts` and `a`. Change both.
+- **Rewording a question resets its history.** A question's id is its line id plus a hash of its `q` and `code`, so moving it to another line resets it too.
+- **Rebalancing option lengths can make a wrong option true.** Re-prove after every rewording.
+- **jsdom details:** submit forms with `button.click()`; use jsdom's own `FormData` (the probes harness does). A Suspense boundary hides old content with `display: none` but leaves it in the DOM, so `textContent` still includes it.
+- **React facts that look wrong in the docs:** an effect loop only warns, it isn't stopped. StrictMode runs setup, cleanup, setup but keeps state (not a real remount). Error boundaries catch errors in rendering, effects and Actions like a form action, but not in plain event handlers or timers.
+- **NestJS facts that look wrong in the docs:** `@HttpCode()` still applies alongside `@Res()`. A missing `@Injectable()` can boot with an undefined dependency instead of failing.
+- **Don't run `tsc -b`.** It leaves a `tsconfig.tsbuildinfo` in the repo. Use the npm scripts.
+- **Don't kill processes by a pattern** (`pkill -f "vite preview"`) in a shell whose own command line matches it. Kill by PID or port.
+- **The bundle is over 700 kB.** Vite's size warning on build is expected for now; splitting it is on the roadmap.
 
-1. Write each claim (every question, explanation, puzzle card and field guide example) as code in a scratch probe, with an `Expect<A, B>` type assertion or a `// @ts-expect-error` where something should fail.
-2. Prove every **wrong** option is wrong too, not just that the right one is right. A wrong option a knowledgeable person could defend is a bug. The first independent review found two of these that a right-answers-only probe passed.
-3. Add one deliberately wrong assertion first and confirm the probe fails, so a pass means something.
-4. Run it with `strict` on, under every TypeScript version the content claims to cover (currently 5.9, 6.0 and 7.0), then fix the content wherever the compiler disagrees. Version-dependent behavior says which version (for example, inferred type predicates since 5.5), and anything that depends on `strict` or another setting says so.
-5. Any later edit to an option, including rebalancing lengths, gets re-proved. Rebalancing once turned a wrong option into a true one.
-6. When a division is done, an independent agent that did not write it reviews it, trying to break every claim. Verify each finding before changing anything.
+## Voice
 
-### Checking NestJS claims against running code
-
-The docs are not enough either. The independent review found claims the docs supported but Nest 12.1.3 did not, like `@HttpCode()` still applying alongside `@Res()`. For every NestJS line:
-
-1. Keep a throwaway project on the current Nest version, outside the repo, with `@nestjs/testing` and supertest.
-2. Write each claim as a small module, built with `Test.createTestingModule` and hit with supertest. Print what actually happens: the status, the body, which hooks and filters ran.
-3. Prove every wrong option is wrong too, the same as for TypeScript.
-4. Add one check that should fail, and confirm it does.
-5. Say which adapter a claim assumes. Express is the default, so call out anything Fastify does differently.
-6. Re-run whatever a rewrite touches. The clarity pass added new "why the wrong option is wrong" sentences, and reviewers found some of them false.
-7. When a pass is done, an independent agent that did not write it reviews the changed fields against running code. Verify each finding before changing anything.
-
-### Checking React claims against running code
-
-Same idea as NestJS. The React review found claims the docs seemed to support but React 19.3 did not, like an effect loop being stopped (it only warns in development) and StrictMode doing a real remount (it keeps state). For every React line:
-
-1. Keep a throwaway project outside the repo with the current react and react-dom, jsdom and tsx.
-2. Render real components with `createRoot` inside `act()`. Count renders, log effect setups and cleanups, and watch the DOM with a MutationObserver when a claim is about what React touches.
-3. Run each probe with `NODE_ENV=development`, and with `NODE_ENV=production` for anything StrictMode, warnings or timing could change.
-4. Prove every wrong option is wrong, and add one check that should fail.
-5. Flow puzzles accept one exact order, so check the order against the log, and make sure no step could honestly go in two places.
-6. Type claims still go through `tsc`, as in the TypeScript section.
-7. When a pass is done, an independent agent reviews it against running code, then a fresh one re-checks whatever the fixes changed.
+- **In the app:** direct, a little funny, plain English, and clear before clever. The subway theme goes in names and headings, never in the teaching. **No em dashes** anywhere (a test enforces it in player-facing copy, and the rule holds for docs and commit messages too).
+- **README:** professional, third person, no "I" or "we".
+- **To Ryan:** plain English, short, no jargon without a definition. He would rather read one clear sentence than three clever ones.

@@ -2,7 +2,7 @@ import type { Guide, Line, ReactLineId } from '../engine/types';
 
 /**
  * The React division: the front half of the job. Every claim is run against
- * React 19.3 in a sandbox (see CLAUDE.md), including the React 19 changes (ref
+ * React 19.3 in a sandbox (see probes/react), including the React 19 changes (ref
  * as a prop, `<Context>` as a provider, the `use` API, Actions), the 19.2
  * additions (useEffectEvent, <Activity>) and the React Compiler.
  */

@@ -2,7 +2,7 @@ import type { Guide, Line, NestLineId } from '../engine/types';
 
 /**
  * The NestJS division: the backend half of the job, drilled as questions.
- * Every claim is run against NestJS 12.1.3 on the Express adapter (see CLAUDE.md).
+ * Every claim is run against NestJS 12.1.3 on the Express adapter (see probes/nest).
  */
 export const NEST_LINES: Line[] = [
   {
