@@ -11,7 +11,7 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 - `docs/DEVELOPMENT.md`: setup, scripts, the working agreement, and the full procedure for checking content.
 - `docs/adr/`: why things are the way they are. Append-only.
 - `probes/`: sandboxes that prove content against real React, NestJS and TypeScript. Not part of the app.
-- `.claude/skills/next/`: the `/next` command. `.claude/agents/fact-checker.md`: the independent content reviewer.
+- `.claude/skills/next/`: the `/next` command. `.claude/skills/audit/`: the `/audit` command, an outsider's review at the end of each phase (`/audit quiz` to rehearse the interview questions). `.claude/agents/fact-checker.md`: the independent content reviewer.
 
 ## How we work
 
