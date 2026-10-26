@@ -1,6 +1,6 @@
 # 0003. React, TypeScript and Vite, with no backend
 
-Status: Accepted. Decided earlier (2026-09-21), recorded 2026-10-17.
+Status: Accepted. Decided earlier (2026-09-21), recorded 2026-10-17. The backend question is answered by [0010](0010-a-portfolio-piece-with-a-1-0.md): 2.0, not 1.0.
 
 The original discussion was not written down. The context and options below are reconstructed from the code, the README and the roadmap.
 

@@ -154,14 +154,15 @@ A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-NestJS, TypeScript and React are finished, gaps included. Next is a cleanup of questions that repeat each other across lines, then the interface work. [docs/ROADMAP.md](docs/ROADMAP.md) has the full board.
+NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md): a live deploy behind CI, no repeated questions, a reorganized page, and a case study. A NestJS and Postgres backend is 2.0.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
 - [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and independently reviewed
 - [x] **React:** eight lines clearing the bar, every claim run against React 19.3, and independently reviewed
-- [ ] **Reorganize the page:** a Today band, collapsible divisions, and a play mode that takes over the screen
+- [ ] **Foundation:** formatting and lint, CI on every push, a live deploy, and an end-to-end test
 - [ ] **No repeats:** rework questions that test the same fact as another question
+- [ ] **Reorganize the page:** a Today band, a play mode that takes over the screen, and real URLs
 
 ## Credits
 

@@ -1,6 +1,20 @@
 # Roadmap
 
-What's next, in order, then what's done, what's parked, and what we learned building it. `/next` works from the top of **Next, in order**. Not a contract: delete anything that stops sounding like a good idea, and record why in an ADR if it was a real decision.
+What 1.0 means, what's next in order, then what's done, what's parked, and what we learned building it. `/next` works from the top of **Next, in order**. Not a contract: delete anything that stops sounding like a good idea, and record why in an ADR if it was a real decision.
+
+## 1.0
+
+Express & Local 1.0 is done when a visitor or reviewer can check each of these ([ADR 0010](adr/0010-a-portfolio-piece-with-a-1-0.md)):
+
+1. It is live at a public URL, deployed from `main`, and a deploy waits for a green CI check.
+2. CI runs the format check, lint, typecheck, every test (the bar included), the TypeScript probes and a build on every push.
+3. The README opens with a fresh GIF, has a small architecture diagram, a **How this was built** section, and a license.
+4. NestJS, TypeScript and React have no near-duplicate questions.
+5. The interface a visitor notices first: play mode takes the screen, a Today band says what to do now, and a router makes Back work and gives every line a URL.
+6. A pasted save code is validated before it is trusted, and one end-to-end test rides a line against the production build.
+7. Ryan wrote at least one piece of core code with `/next learn`, passed an `/audit quiz`, wrote the case study in his own words, and tagged `v1.0`.
+
+**Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
 Status: 34 lines across 4 divisions, 98 tests, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
 
@@ -8,7 +22,17 @@ Status: 34 lines across 4 divisions, 98 tests, no backend, not deployed. NestJS,
 
 Depth first ([ADR 0002](adr/0002-depth-first.md)): finish one thing completely, with no loose threads, before starting the next. An inventory stop closes each block of work.
 
-### 1. Near-duplicate questions
+### 1. Foundation
+
+The checks and the deploy go in before more features, so every later change is checked and shipped the same way.
+
+- [ ] **Prettier and ESLint.** Defaults, applied in one formatting commit listed in `.git-blame-ignore-revs` so `git blame` skips it. Prettier picks whichever quote needs fewer escapes, which retires the escaped-apostrophe trap in the data files.
+- [ ] **CI on every push and pull request.** Format check, lint, typecheck, `npm test`, `npm run check` in `probes/ts`, build, and `npm audit --omit=dev` without blocking.
+- [ ] **Deploy** the static build from `main` to a host that waits for CI, with security headers.
+- [ ] **Validate pasted save codes.** `importSave` only checks for a `levels` key, then `migrate` spreads whatever else it finds into the save, so a damaged code could break the app later. Hand-written checks in `migrate()`, with tests for bad shapes. A good first `/next learn` item: "how do you treat input you don't control?" is a real interview question.
+- [ ] **One end-to-end test** with Playwright against the production build: ride a line on Local, reach the results screen, and round-trip a save code.
+
+### 2. Near-duplicate questions
 
 A cross-line review found pairs of questions that test the same fact with the same answer. A pair inside one line is the worse kind, because one run can show both, so the second is free. For each pair, keep the question in the line that owns the topic and give the other a new angle: a different fact the line should teach, written to the clarity standard, proven like any new question, with option lengths rebalanced. Same-line pairs first.
 
@@ -44,30 +68,31 @@ Smaller cleanups from the same review:
 - [ ] Main Line's flow note calls a middleware rate limiter "fine for a rate limit", while Dispatch Desk teaches `ThrottlerGuard`. Add a clause on when a guard is the better home (routes that opt out with `@SkipThrottle()`), proven in `probes/nest`.
 - [ ] The `@nestjs/throttler` claims on Dispatch Desk (`ThrottlerGuard`, `@SkipThrottle()`, in a sort card and a question's `why`) were checked against the docs but never run: the package was not in the sandbox. It is pinned in `probes/nest` now. Prove them, and fix anything the run contradicts.
 
-### 2. Inventory stop
+### 3. Inventory stop
 
-- [ ] A fact-check pass by a separate agent that did not write the changes (the `fact-checker` agent), over every question touched in step 1. Verify each finding by re-running its probe before fixing, then a fresh agent re-checks the fixes.
+- [ ] A fact-check pass by a separate agent that did not write the changes (the `fact-checker` agent), over every question touched in step 2. Verify each finding by re-running its probe before fixing, then a fresh agent re-checks the fixes.
 - [ ] Sanity pass: `npm test`, `npm run bar`, `npm run build`, the probes pass (see [DEVELOPMENT.md](DEVELOPMENT.md#inventory-stops), step 2), play each changed line end to end in a browser, and every doc still true.
 
-### 3. Interface
+### 4. Interface
 
-Orthogonal to the content work. In this order:
+What a visitor notices first. In this order:
 
 - [ ] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page.
 - [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar.
-- [ ] **Badges become a count that opens a panel.**
-- [ ] **Tabs on the intro screen.** Ride / Field guide / Say it out loud.
 - [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
-- [ ] **Split `App.tsx`.** Pull out `useRun` and `useDrills`.
-- [ ] **CI on push**, and **deploy it**, so it is a live thing and not a repo.
-- [ ] **Fresh screenshots** for the README, once the interface work above is done. The current ones predate the TypeScript and React puzzles and the clarity rewrite.
-- [ ] **Upgrade the repo to TypeScript 6.** The app is built with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The content's probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
-- [ ] **Split the bundle by division.** Every question ships in one chunk, now over 700 kB (about 225 kB gzipped), past Vite's warning line. Loading each division's content lazily fixes it, but LINES is a synchronous array used everywhere, so it is a real refactor.
+- [ ] **Accessibility checks as tests.** A test that fails when an input has no label or an icon-only button has no name, a contrast test against the color variables in `app.css` in light and dark, and a check at 375px wide (the smallest breakpoint today is 480px).
+- [ ] **README refresh.** A fresh GIF and screenshots (the current ones predate the TypeScript and React puzzles and the clarity rewrite), and a small architecture diagram.
 
-### 4. Inventory stop
+### 5. Inventory stop
 
-- [ ] Sanity pass after the interface work: everything in step 2's sanity pass, plus the app on a phone-width screen in light and dark, and keyboard-only play.
-- [ ] Decide what's next from **Parked for now** and **Later**, and record the decision in an ADR.
+- [ ] Sanity pass after the interface work: everything in step 3's sanity pass, plus the app on a phone-width screen in light and dark, and keyboard-only play.
+- [ ] `/audit`, and its findings sorted into 1.0 (only if they meet the freeze rule) or Parked.
+
+### 6. Ship 1.0
+
+- [ ] `/audit quiz`: Ryan answers the likely interview questions about the app, one at a time.
+- [ ] **The case study**, `docs/CASE-STUDY.md`, written by Ryan in his own words: what was built, what broke, what was decided and why, and how he worked with Claude. Claude can review it, not write it.
+- [ ] Tag `v1.0`, then decide what's next from **Parked**, and record the decision in an ADR.
 
 ## The bar
 
@@ -135,6 +160,9 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **New divisions.** SQL and Postgres, GraphQL, Git as a train yard.
 - **Engineer's Cab.** After Rush Hour, write the algorithm yourself against in-browser tests.
 - **Scenario mode.** Read a real situation, pick the right tool. Still the best idea in this file, and it needs the content above to draw from.
+- **Interface extras.** Badges become a count that opens a panel. Tabs on the intro screen (Ride / Field guide / Say it out loud). Split `App.tsx` into `useRun` and `useDrills` (pick this up with the router if `App.tsx` gets in the way).
+- **Upgrade the build to TypeScript 6.** The app builds with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
+- **Split the bundle by division.** Every question ships in one chunk, over 700 kB (about 225 kB gzipped). `LINES` is a synchronous array used everywhere, so it is a real refactor.
 
 ## Later: engine ideas
 
@@ -144,15 +172,9 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - [ ] **Diminishing returns.** The fourth ride of the same line in one day should pay less. Needs a new save field.
 - [ ] **Weekly report.** What decayed, what to drill, nothing else.
 
-## The fork
+## 2.0: a backend
 
-Whether this gets a backend.
-
-**For:** the roles being targeted are NestJS and Postgres, and "this is the tool I built to prepare for this interview, and here is the Nest API behind it" is a strong artifact. Cross-device sync would also mean phone and laptop share progress, which a save code does not really solve.
-
-**Against:** it stops being a static file you can open anywhere, and it is a weekend rather than an afternoon.
-
-**Call:** after the content bar is met. A thin app with a sync API is still a thin app.
+A NestJS and Postgres sync API, so phone and laptop share progress and the app shows the stack it drills. Decided against for 1.0 in [ADR 0010](adr/0010-a-portfolio-piece-with-a-1-0.md). If it happens, the backend half of the Snippr playbook is its plan.
 
 ## Principles
 
