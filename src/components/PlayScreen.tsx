@@ -62,12 +62,14 @@ export function PlayScreen({
   const [xp, setXp] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [held, setHeld] = useState(false);
+  // The ride's start time, read once. Render must stay pure.
+  const [startedAt] = useState(() => Date.now());
   const run = useRef({
     over: false,
     xp: 0,
     mistakes: 0,
     hearts: maxHearts,
-    t0: Date.now(),
+    t0: startedAt,
     heldAt: 0,
     answers: [] as RideStats["answers"],
   });

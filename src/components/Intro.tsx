@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LINES } from "../data";
 import {
   DAY,
@@ -54,9 +55,11 @@ export function Intro({
   const p = save.levels[line.id];
   const locked = !isUnlocked(save, idx);
   const top = maxTier(p);
+  // Read the clock once, when the screen opens. Render must stay pure.
+  const [now] = useState(() => Date.now());
   let status = "New line";
   if (p?.cleared) {
-    const d = Math.ceil((p.due - Date.now()) / DAY);
+    const d = Math.ceil((p.due - now) / DAY);
     status =
       d <= 0
         ? "Due for review today"
@@ -104,7 +107,7 @@ export function Intro({
                   {rehearseCount} prompts to answer in full sentences, then
                   check yourself.
                   {lastRehearsed
-                    ? ` Last done ${Math.max(0, Math.round((Date.now() - lastRehearsed) / DAY))} days ago.`
+                    ? ` Last done ${Math.max(0, Math.round((now - lastRehearsed) / DAY))} days ago.`
                     : " This is the one that gets you through the phone screen."}
                 </p>
               </div>
