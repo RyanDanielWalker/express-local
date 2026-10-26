@@ -24,5 +24,5 @@ Claude still never pushes.
 ## Consequences
 
 - `/next` starts each roadmap item by creating its branch, and drafts the pull request description in its report.
-- Every pull request has a one-line **Who wrote what**, so a reader can see how the work was split.
+- Every pull request has a one-line **Who wrote what**, so a reader can see how the work was split ([ADR 0012](0012-disclose-ai-in-the-readme.md)).
 - When unsure which kind a change is, it is a branch.

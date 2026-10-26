@@ -24,6 +24,7 @@ One short file per significant decision: the context, the options, what was deci
 | [0009](0009-terminal-workflow.md) | Day-to-day work happens in Claude Code, and the repo carries the context | Accepted, amended by 0011 |
 | [0010](0010-a-portfolio-piece-with-a-1-0.md) | A portfolio piece with a written 1.0, and the backend is 2.0 | Accepted |
 | [0011](0011-branches-for-features.md) | Features go on a branch and through a pull request; small fixes stay on main | Accepted |
+| [0012](0012-disclose-ai-in-the-readme.md) | AI use is disclosed in the README, not in commit trailers | Accepted |
 
 ## Template
 

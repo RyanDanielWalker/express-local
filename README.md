@@ -164,6 +164,8 @@ NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at
 - [ ] **No repeats:** rework questions that test the same fact as another question
 - [ ] **Reorganize the page:** a Today band, a play mode that takes over the screen, and real URLs
 
-## Credits
+## How this was built
 
-Designed by Ryan Walker. Built with [Claude](https://claude.ai) as a pair programmer.
+Designed by Ryan Walker, who set the direction and made the calls recorded in [docs/adr/](docs/adr/). [Claude](https://claude.ai) wrote most of the code and content as a pair programmer, under the rules in [CLAUDE.md](CLAUDE.md): every content claim proven against running code in `probes/`, every wrong option proven wrong, and an independent review before a division counts as finished. Ryan reviewed every commit before pushing it.
+
+Commits up to `c1e7326` carry a Claude co-author trailer. Later ones do not, because the disclosure lives here instead ([ADR 0012](docs/adr/0012-disclose-ai-in-the-readme.md)).
