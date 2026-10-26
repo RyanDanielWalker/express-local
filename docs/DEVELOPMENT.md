@@ -31,7 +31,7 @@ The app is not deployed. It runs locally.
 | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `npm run dev`       | Dev server with hot reload                                                                                       |
 | `npm test`          | Every test: algorithms, engine, content, the bar, the results screen. Run before every commit.                   |
-| `npm run typecheck` | `tsc --noEmit` over `src`                                                                                        |
+| `npm run typecheck` | `tsc --noEmit` over `src`, `e2e` and the two configs                                                             |
 | `npm run build`     | Typecheck, then a production build into `dist/`                                                                  |
 | `npm run preview`   | Serve the production build locally                                                                               |
 | `npm run bar`       | Where every line stands against the quality bar, division by division                                            |

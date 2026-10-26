@@ -4,11 +4,11 @@ Status: Accepted (2026-10-26). Amends [0013](0013-ci-on-github-actions.md).
 
 ## Context
 
-1.0 needs one end-to-end test that rides a line against the production build ([ADR 0010](0010-a-portfolio-piece-with-a-1-0.md)). Until the deploy, it is the only check that the built app works in a browser ([ADR 0014](0014-deploy-last.md)). The open question was whether it runs on every push or only by hand. CI takes about a minute longer per push to download Chromium and ride the line, and a private repo pays for Actions minutes.
+1.0 needs one end-to-end test that rides a line against the production build ([ADR 0010](0010-a-portfolio-piece-with-a-1-0.md)). Until the deploy, it is the only check that the built app works in a browser ([ADR 0014](0014-deploy-last.md)). The open question was whether it runs on every push or only by hand. Running it in CI adds a minute or two per push to download Chromium and ride the line. On a private repo, those minutes count against the plan's monthly Actions allowance.
 
 ## Options
 
-1. **Run it in CI.** Every push and pull request checks the production build in a real browser. It costs a minute or two of Actions time per push.
+1. **Run it in CI.** Every push and pull request checks the production build in a real browser. It costs those extra Actions minutes.
 2. **Run it by hand only.** No extra CI time. A test that runs only when someone remembers tends to break quietly between runs.
 
 ## Decision
