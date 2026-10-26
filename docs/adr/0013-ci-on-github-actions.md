@@ -1,6 +1,6 @@
 # 0013. CI on GitHub Actions, one job, actions pinned to a commit
 
-Status: Accepted (2026-10-26).
+Status: Accepted (2026-10-26). Amended by [0016](0016-end-to-end-test-in-ci.md): the end-to-end test runs after the build.
 
 ## Context
 

@@ -58,6 +58,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Rides a line against the production build that the step above made.
+      - name: Install Chromium for the end-to-end test
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end test
+        run: npx playwright test --forbid-only --reporter=github
+
       # Reports advisories in what ships to the browser, without failing the run.
       - name: Audit runtime dependencies
         run: npm audit --omit=dev

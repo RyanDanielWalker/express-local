@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
-Status: 34 lines across 4 divisions, 108 tests, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
+Status: 34 lines across 4 divisions, 108 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
 
 ## Next, in order
 
@@ -29,7 +29,7 @@ The checks go in before more features, so every later change is checked the same
 - [x] **Prettier and ESLint.** Defaults, applied in one formatting commit listed in `.git-blame-ignore-revs` so `git blame` skips it. Prettier picks whichever quote needs fewer escapes, which retires the escaped-apostrophe trap in the data files.
 - [x] **CI on every push and pull request.** `.github/workflows/ci.yml` runs the format check, lint, typecheck, `npm test`, the TypeScript probes and the build, then `npm audit --omit=dev` without blocking ([ADR 0013](adr/0013-ci-on-github-actions.md)). `npm audit fix` cleared the four dev-tooling advisories first (Vite 8.3.5, Vitest 5.0.5, source-map-js 1.2.2).
 - [x] **Validate pasted save codes.** `migrate()` checks every field by hand and repairs what it can: a wrong type gets its default, an unreadable entry is dropped, unknown keys are left out ([ADR 0015](adr/0015-repair-damaged-saves.md)). Built in normal mode at Ryan's call, so the `/next learn` piece for 1.0 moves to the Today band.
-- [ ] **One end-to-end test** with Playwright against the production build: ride a line on Local, reach the results screen, and round-trip a save code.
+- [x] **One end-to-end test.** `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium against the production build, solving a flow on one ride and a sort on the other, then moves the save code into a fresh browser. It runs in CI after the build, at Ryan's call ([ADR 0016](adr/0016-end-to-end-test-in-ci.md)).
 
 ### 2. Near-duplicate questions
 
@@ -163,6 +163,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **Interface extras.** Badges become a count that opens a panel. Tabs on the intro screen (Ride / Field guide / Say it out loud). Split `App.tsx` into `useRun` and `useDrills` (pick this up with the router if `App.tsx` gets in the way).
 - **Upgrade the build to TypeScript 6.** The app builds with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
 - **Dependabot for the workflow and npm.** The CI actions are pinned to commit hashes, which never update themselves ([ADR 0013](adr/0013-ci-on-github-actions.md)). Dependabot would open a pull request for each new release. Bumping by hand is fine while there are two actions.
+- **Keep the trace from a red end-to-end run in CI.** Playwright saves a trace (a step-by-step recording) when the test fails, but CI throws it away with the machine. Uploading it as a workflow artifact would show what the page looked like at the failure. Until then, reproduce a red run with `npm run e2e`, which keeps the trace in `test-results/`.
 - **Split the bundle by division.** Every question ships in one chunk, over 700 kB (about 225 kB gzipped). `LINES` is a synchronous array used everywhere, so it is a real refactor.
 
 ## Later: engine ideas
@@ -243,3 +244,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-26** Prettier and ESLint: the repo formatted in one commit that `git blame` skips, and all 18 lint findings fixed, among them state changed in place in the stack and queue game and the clock read during render
 - **2026-10-26** CI on GitHub Actions for every push and pull request, and the dev-tooling audit advisories cleared
 - **2026-10-26** Damaged save codes repaired field by field instead of trusted, so a bad field can't wipe progress or crash a ride
+- **2026-10-26** One end-to-end test: a Playwright ride through the production build, run in CI

@@ -10,9 +10,10 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 - `docs/ARCHITECTURE.md`: how the app and its content are structured, and how to add a question, puzzle, line or division.
 - `docs/DEVELOPMENT.md`: setup, scripts, the working agreement, and the full procedure for checking content.
 - `docs/adr/`: why things are the way they are. Append-only.
+- `e2e/`: one Playwright test that rides a line against the production build (`npm run e2e`, not part of `npm test`).
 - `probes/`: sandboxes that prove content against real React, NestJS and TypeScript. Not part of the app.
 - `.claude/skills/next/`: the `/next` command. `.claude/skills/audit/`: the `/audit` command, an outsider's review at the end of each phase (`/audit quiz` to rehearse the interview questions). `.claude/agents/fact-checker.md`: the independent content reviewer.
-- `.github/workflows/ci.yml`: CI on every push and pull request. It runs the format check, lint, typecheck, tests, the TypeScript probes and the build (see `docs/DEVELOPMENT.md`, "CI").
+- `.github/workflows/ci.yml`: CI on every push and pull request. It runs the format check, lint, typecheck, tests, the TypeScript probes, the build and the end-to-end test (see `docs/DEVELOPMENT.md`, "CI").
 
 ## How we work
 
@@ -26,7 +27,7 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 
 ## Stack and commands
 
-React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5. No backend; progress lives in `localStorage`. Node 22.12+ for the app (Vitest needs it), 22.22.2+ or 24.15+ for the React probes. `.nvmrc` says 22.
+React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5, Playwright 1.64 (Chromium only). No backend; progress lives in `localStorage`. Node 22.12+ for the app (Vitest needs it), 22.22.2+ or 24.15+ for the React probes. `.nvmrc` says 22.
 
 - `npm run dev`: dev server at http://localhost:5173
 - `npm test`: every test (run before every commit, with `lint` and `format:check`)
@@ -36,6 +37,7 @@ React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5. No backend; progress liv
 - `npm run build`: typecheck and production build
 - `npm run preview`: serve the production build
 - `npm run bar`: where every line stands against the quality bar
+- `npm run e2e`: build, then ride Repaint Line twice on Local in Chromium and move the save code to a fresh browser. Needs `npx playwright install chromium` once.
 
 ## Code rules
 
@@ -100,6 +102,7 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 - **Undo a planted bug by hand**, not with `git checkout -- <file>`, unless the real change is committed first. Checkout throws away every uncommitted edit in the file, not just the planted one.
 - **Don't run `tsc -b`.** It leaves a `tsconfig.tsbuildinfo` in the repo. Use the npm scripts.
 - **Don't kill processes by a pattern** (`pkill -f "vite preview"`) in a shell whose own command line matches it. Kill by PID or port.
+- **The end-to-end test leans on Repaint Line.** It expects exactly one Local flow and one Local sort there, so two rides cover both puzzle kinds. It also clicks buttons by their labels ("Board: Local", "Ride again", "Restore"). Adding a Local puzzle to that line, or renaming those buttons, fails `npm run e2e` until the test is updated.
 - **The bundle is over 700 kB.** Vite's size warning on build is expected for now; splitting it is on the roadmap.
 
 ## Voice

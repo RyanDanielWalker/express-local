@@ -16,6 +16,7 @@ src/
   hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount)
   lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals)
   styles/       one stylesheet, app.css
+e2e/            one Playwright test that rides a line against the production build
 probes/         sandboxes that prove the content against real code (not part of the app)
 ```
 
@@ -116,6 +117,8 @@ All of it runs on every `npm test`:
 - **`data/data.test.ts`** checks every line: unique ids and bullets, a guide and par for every line, the content each kind needs, every answer among its options, no answer 1.35x longer than its distractors, flows solvable and varied, sorts solvable with no card named after its own box, no em dashes in player-facing copy or field guides, and question ids unique inside a line.
 - **`data/bar.ts` and `bar.test.ts`** are the quality bar from [the roadmap](ROADMAP.md#the-bar): every tier can fill a run with 1.5x room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha, a puzzle beyond recognition, and no length position (longest, middle or shortest) holding the answer on more than half a line's questions. Divisions in `FINISHED` fail the tests if any line slips. `npm run bar` prints where every line stands.
 - **`components/results.test.tsx`** renders the results screen for every line.
+
+One more check runs outside `npm test`. `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle.
 
 What the tests cannot check is whether a claim is true. That is what `probes/` and the fact-check pass are for. See [DEVELOPMENT.md](DEVELOPMENT.md#checking-content).
 
