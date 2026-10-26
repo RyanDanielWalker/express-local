@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { pickQuestions, solidIn } from '../engine/questions';
-import type { Question } from '../engine/types';
-import { useKeys } from '../hooks/useKeys';
-import { Rich } from '../components/Rich';
-import { shuffle } from '../lib/random';
-import { Panel } from './parts';
-import type { GameProps } from './types';
+import { useEffect, useState } from "react";
+import { pickQuestions, solidIn } from "../engine/questions";
+import type { Question } from "../engine/types";
+import { useKeys } from "../hooks/useKeys";
+import { Rich } from "../components/Rich";
+import { shuffle } from "../lib/random";
+import { Panel } from "./parts";
+import type { GameProps } from "./types";
 
 /**
  * Multiple choice drill. Wrong costs a heart, and every answer shows why.
@@ -16,13 +16,25 @@ import type { GameProps } from './types';
  */
 export function QuizGame({ api, line, role, history }: GameProps) {
   const [items] = useState<Question[]>(() =>
-    line.preset ? (line.questions ?? []) : pickQuestions(line.questions ?? [], api.tier, undefined, solidIn(history, line.id)),
+    line.preset
+      ? (line.questions ?? [])
+      : pickQuestions(
+          line.questions ?? [],
+          api.tier,
+          undefined,
+          solidIn(history, line.id),
+        ),
   );
   const [i, setI] = useState(0);
-  const [opts, setOpts] = useState<string[]>(() => shuffle([...(items[0]?.opts ?? [])]));
+  const [opts, setOpts] = useState<string[]>(() =>
+    shuffle([...(items[0]?.opts ?? [])]),
+  );
   const [picked, setPicked] = useState<string | null>(null);
-  const [marks, setMarks] = useState<('ok' | 'no')[]>([]);
-  useEffect(() => api.say('Pick the answer you would give out loud in an interview.'), [api]);
+  const [marks, setMarks] = useState<("ok" | "no")[]>([]);
+  useEffect(
+    () => api.say("Pick the answer you would give out loud in an interview."),
+    [api],
+  );
 
   const q = items[i];
   const last = i + 1 >= items.length;
@@ -31,9 +43,9 @@ export function QuizGame({ api, line, role, history }: GameProps) {
     if (api.over || picked || !q) return;
     const ok = o === q.a;
     setPicked(o);
-    setMarks(m => [...m, ok ? 'ok' : 'no']);
+    setMarks((m) => [...m, ok ? "ok" : "no"]);
     api.record(q, ok);
-    if (ok) api.correct(10, 'Correct. Read why before you move on.');
+    if (ok) api.correct(10, "Correct. Read why before you move on.");
     else api.wrong(<>Not quite. The reason is below.</>);
     api.hold();
   }
@@ -48,10 +60,10 @@ export function QuizGame({ api, line, role, history }: GameProps) {
   }
 
   // Number keys pick, space or enter moves on, so a fast run never needs the mouse.
-  useKeys(e => {
+  useKeys((e) => {
     if (api.over) return;
     if (picked) {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         next();
       }
@@ -68,20 +80,34 @@ export function QuizGame({ api, line, role, history }: GameProps) {
       <div className="board">
         <div className="qcard">
           <div className="progress" aria-hidden="true">
-            {items.map((_, k) => <i key={k} className={marks[k] ?? (k === i ? 'now' : '')} />)}
+            {items.map((_, k) => (
+              <i key={k} className={marks[k] ?? (k === i ? "now" : "")} />
+            ))}
           </div>
-          <div className="eyebrow">Question {i + 1} of {items.length}</div>
-          <p className="q"><Rich text={q.q} /></p>
+          <div className="eyebrow">
+            Question {i + 1} of {items.length}
+          </div>
+          <p className="q">
+            <Rich text={q.q} />
+          </p>
           {q.code && <pre className="code">{q.code}</pre>}
           <div className="opts stack">
             {opts.map((o, k) => (
               <button
                 key={o}
                 disabled={!!picked}
-                className={picked && o === q.a ? 'right' : picked === o ? 'wrongpick' : ''}
+                className={
+                  picked && o === q.a
+                    ? "right"
+                    : picked === o
+                      ? "wrongpick"
+                      : ""
+                }
                 onClick={() => choose(o)}
               >
-                <span className="kb" aria-hidden="true">{k + 1}</span>
+                <span className="kb" aria-hidden="true">
+                  {k + 1}
+                </span>
                 <Rich text={o} />
               </button>
             ))}
@@ -89,14 +115,20 @@ export function QuizGame({ api, line, role, history }: GameProps) {
           {picked && (
             <>
               <div className="why">
-                <b>{picked === q.a ? 'Right' : 'The answer is: ' + q.a}</b>
+                <b>{picked === q.a ? "Right" : "The answer is: " + q.a}</b>
                 <Rich text={q.why} />
               </div>
               <div className="decide">
                 <button className="btn big" onClick={next} autoFocus>
-                  {!last ? 'Continue' : role === 'opener' ? 'On to the last stop' : 'See how you did'}
+                  {!last
+                    ? "Continue"
+                    : role === "opener"
+                      ? "On to the last stop"
+                      : "See how you did"}
                 </button>
-                <span className="hint" style={{ margin: 0 }}>or press space. The clock is paused.</span>
+                <span className="hint" style={{ margin: 0 }}>
+                  or press space. The clock is paused.
+                </span>
               </div>
             </>
           )}
@@ -105,14 +137,18 @@ export function QuizGame({ api, line, role, history }: GameProps) {
       <div className="side">
         {/* A line whose hook is the answer key gives a `drill` instead. Rush Hour gets neither. */}
         {api.assist && (
-          <Panel title={line.drill ? 'Think it through' : 'Remember it'}>
-            <p style={{ margin: 0 }}><Rich text={line.drill ?? line.hook} /></p>
+          <Panel title={line.drill ? "Think it through" : "Remember it"}>
+            <p style={{ margin: 0 }}>
+              <Rich text={line.drill ?? line.hook} />
+            </p>
           </Panel>
         )}
         <Panel title="Scoring">
           <div className="mono" style={{ lineHeight: 1.8 }}>
-            right = {marks.filter(m => m === 'ok').length}<br />
-            wrong = {marks.filter(m => m === 'no').length}<br />
+            right = {marks.filter((m) => m === "ok").length}
+            <br />
+            wrong = {marks.filter((m) => m === "no").length}
+            <br />
             left = {items.length - marks.length}
           </div>
         </Panel>

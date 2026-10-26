@@ -1,11 +1,36 @@
-import { shuffle } from '../lib/random';
-import type { Division, Flow, Line, Question, QuestionStat, SaveData, Sort, Tier } from './types';
+import { shuffle } from "../lib/random";
+import type {
+  Division,
+  Flow,
+  Line,
+  Question,
+  QuestionStat,
+  SaveData,
+  Sort,
+  Tier,
+} from "./types";
 
 export const DIVISIONS: { id: Division; name: string; blurb: string }[] = [
-  { id: 'algos', name: 'Algorithms', blurb: 'Be the algorithm. Click it out stop by stop.' },
-  { id: 'nest', name: 'NestJS', blurb: 'The backend half of the job, drilled as questions.' },
-  { id: 'react', name: 'React', blurb: 'Rendering, effects, forms and data, the parts that bite.' },
-  { id: 'ts', name: 'TypeScript', blurb: 'Narrowing, generics and the types you write all day.' },
+  {
+    id: "algos",
+    name: "Algorithms",
+    blurb: "Be the algorithm. Click it out stop by stop.",
+  },
+  {
+    id: "nest",
+    name: "NestJS",
+    blurb: "The backend half of the job, drilled as questions.",
+  },
+  {
+    id: "react",
+    name: "React",
+    blurb: "Rendering, effects, forms and data, the parts that bite.",
+  },
+  {
+    id: "ts",
+    name: "TypeScript",
+    blurb: "Narrowing, generics and the types you write all day.",
+  },
 ];
 
 /** How many questions a run asks at each tier. */
@@ -26,14 +51,15 @@ export function pickQuestions(
   count = QUESTIONS_PER_RUN[tier],
   isSolid: (q: Question) => boolean = () => false,
 ): Question[] {
-  const open = shuffle(pool.filter(q => q.t <= tier));
-  const fresh = open.filter(q => !isSolid(q));
-  const solid = open.filter(q => isSolid(q));
+  const open = shuffle(pool.filter((q) => q.t <= tier));
+  const fresh = open.filter((q) => !isSolid(q));
+  const solid = open.filter((q) => isSolid(q));
   return shuffle([...fresh, ...solid].slice(0, count));
 }
 
 /** True for a question you have answered and are not currently shaky on. */
-export const solidIn = (history: Record<string, QuestionStat> | undefined, lineId: string) =>
+export const solidIn =
+  (history: Record<string, QuestionStat> | undefined, lineId: string) =>
   (q: Question): boolean => {
     const stat = history?.[qid(lineId, q)];
     return !!stat && stat.missed === 0;
@@ -42,15 +68,22 @@ export const solidIn = (history: Record<string, QuestionStat> | undefined, lineI
 /** How many ordering puzzles a run asks at each tier. */
 export const FLOWS_PER_RUN: Record<Tier, number> = { 1: 2, 2: 3, 3: 4 };
 
-export function pickFlows(pool: Flow[], tier: Tier, count = FLOWS_PER_RUN[tier]): Flow[] {
-  return shuffle(pool.filter(f => f.t <= tier).slice()).slice(0, count);
+export function pickFlows(
+  pool: Flow[],
+  tier: Tier,
+  count = FLOWS_PER_RUN[tier],
+): Flow[] {
+  return shuffle(pool.filter((f) => f.t <= tier).slice()).slice(0, count);
 }
 
 /** The step that should be clicked next, or null when the flow is finished. */
-export const nextStep = (flow: Flow, placed: string[]): string | null => flow.steps[placed.length] ?? null;
+export const nextStep = (flow: Flow, placed: string[]): string | null =>
+  flow.steps[placed.length] ?? null;
 
 const listOf = (xs: string[]): string =>
-  xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`;
+  xs.length < 2
+    ? xs.join("")
+    : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
 
 /**
  * The recap for one step the player slipped on in a flow, shown once the order is complete:
@@ -59,18 +92,26 @@ const listOf = (xs: string[]): string =>
  */
 export function flowSlip(flow: Flow, want: string, tried: string[]): string {
   const at = flow.steps.indexOf(want);
-  const where = at <= 0 ? 'runs first.' : `comes right after ${flow.steps[at - 1]}.`;
+  const where =
+    at <= 0 ? "runs first." : `comes right after ${flow.steps[at - 1]}.`;
   const decoys = new Set(flow.decoys ?? []);
-  const later = tried.filter(t => !decoys.has(t));
-  const never = tried.filter(t => decoys.has(t));
+  const later = tried.filter((t) => !decoys.has(t));
+  const never = tried.filter((t) => decoys.has(t));
   const parts: string[] = [];
-  if (later.length) parts.push(`${listOf(later)}, which ${later.length > 1 ? 'come' : 'comes'} later`);
-  if (never.length) parts.push(`${listOf(never)}, which ${never.length > 1 ? 'do' : 'does'} not happen in this run`);
-  return parts.length ? `${where} You tried ${parts.join(', and ')}.` : where;
+  if (later.length)
+    parts.push(
+      `${listOf(later)}, which ${later.length > 1 ? "come" : "comes"} later`,
+    );
+  if (never.length)
+    parts.push(
+      `${listOf(never)}, which ${never.length > 1 ? "do" : "does"} not happen in this run`,
+    );
+  return parts.length ? `${where} You tried ${parts.join(", and ")}.` : where;
 }
 
 /** The puzzle a quiz line ends on. */
-export type Puzzle = { kind: 'flow'; flow: Flow } | { kind: 'sort'; sort: Sort };
+export type Puzzle =
+  { kind: "flow"; flow: Flow } | { kind: "sort"; sort: Sort };
 
 /**
  * Pick the one puzzle a quiz line ends on this run, from whatever it offers at
@@ -80,25 +121,39 @@ export type Puzzle = { kind: 'flow'; flow: Flow } | { kind: 'sort'; sort: Sort }
  * so two rides in a row never end on the same one. Without it, the pick is
  * random.
  */
-export function pickPuzzle(line: Line, tier: Tier, rand: () => number = Math.random, turn?: number): Puzzle | null {
+export function pickPuzzle(
+  line: Line,
+  tier: Tier,
+  rand: () => number = Math.random,
+  turn?: number,
+): Puzzle | null {
   const pool: Puzzle[] = [
-    ...(line.flows ?? []).filter(f => f.t <= tier).map(flow => ({ kind: 'flow' as const, flow })),
-    ...(line.sorts ?? []).filter(s => s.t <= tier).map(sort => ({ kind: 'sort' as const, sort })),
+    ...(line.flows ?? [])
+      .filter((f) => f.t <= tier)
+      .map((flow) => ({ kind: "flow" as const, flow })),
+    ...(line.sorts ?? [])
+      .filter((s) => s.t <= tier)
+      .map((sort) => ({ kind: "sort" as const, sort })),
   ];
   if (!pool.length) return null;
-  return turn === undefined ? pool[Math.floor(rand() * pool.length)] : pool[turn % pool.length];
+  return turn === undefined
+    ? pool[Math.floor(rand() * pool.length)]
+    : pool[turn % pool.length];
 }
 
 /** Whether a quiz line's run ends on a puzzle at this tier. Drills never do. */
 export const hasPuzzle = (line: Line, tier: Tier): boolean =>
-  !line.preset && line.kind === 'quiz' && [...(line.flows ?? []), ...(line.sorts ?? [])].some(p => p.t <= tier);
+  !line.preset &&
+  line.kind === "quiz" &&
+  [...(line.flows ?? []), ...(line.sorts ?? [])].some((p) => p.t <= tier);
 
 /**
  * Hearts for a line ride. A run that ends on a puzzle is roughly twice as many
  * decisions, so it gets one more heart rather than turning Local into the
  * place you get punished for learning.
  */
-export const heartsFor = (line: Line, tier: Tier): number => (hasPuzzle(line, tier) ? 4 : 3);
+export const heartsFor = (line: Line, tier: Tier): number =>
+  hasPuzzle(line, tier) ? 4 : 3;
 
 /**
  * Whether a miss should name the step you were looking for.
@@ -108,7 +163,8 @@ export const heartsFor = (line: Line, tier: Tier): number => (hasPuzzle(line, ti
  * one exception: on Local a second miss on the same slot names it, because
  * being stuck with no way forward teaches nothing either.
  */
-export const revealAfterMiss = (tier: Tier, misses: number): boolean => tier === 1 && misses >= 2;
+export const revealAfterMiss = (tier: Tier, misses: number): boolean =>
+  tier === 1 && misses >= 2;
 
 /** How many questions a cram drill asks. */
 export const CRAM_SIZE = 12;
@@ -118,13 +174,26 @@ export const CRAM_SIZE = 12;
  * Algorithm lines contribute their end-of-run code checks, so every division
  * can show up in the same drill.
  */
-export function cramPool(lines: Line[], isOpen: (line: Line, idx: number) => boolean, divisions?: Division[]): Question[] {
+export function cramPool(
+  lines: Line[],
+  isOpen: (line: Line, idx: number) => boolean,
+  divisions?: Division[],
+): Question[] {
   const pool: Question[] = [];
   lines.forEach((line, idx) => {
     if (!isOpen(line, idx)) return;
     if (divisions?.length && !divisions.includes(line.division)) return;
     for (const q of line.questions ?? []) pool.push(q);
-    for (const q of line.quiz ?? []) pool.push({ t: 1, from: line.id, q: 'What goes in the blank?', code: q.code, opts: q.opts, a: q.a, why: q.why });
+    for (const q of line.quiz ?? [])
+      pool.push({
+        t: 1,
+        from: line.id,
+        q: "What goes in the blank?",
+        code: q.code,
+        opts: q.opts,
+        a: q.a,
+        why: q.why,
+      });
   });
   return pool;
 }
@@ -133,23 +202,38 @@ export function cramPool(lines: Line[], isOpen: (line: Line, idx: number) => boo
  * A cram drill's questions. Up to half the drill is pulled from what you have
  * missed before, so the weak spots keep coming back around.
  */
-export function cramQuestions(pool: Question[], count = CRAM_SIZE, shaky: Question[] = []): Question[] {
-  const weak = shuffle(shaky.filter(q => pool.includes(q))).slice(0, Math.floor(count / 2));
-  const rest = shuffle(pool.filter(q => !weak.includes(q)));
+export function cramQuestions(
+  pool: Question[],
+  count = CRAM_SIZE,
+  shaky: Question[] = [],
+): Question[] {
+  const weak = shuffle(shaky.filter((q) => pool.includes(q))).slice(
+    0,
+    Math.floor(count / 2),
+  );
+  const rest = shuffle(pool.filter((q) => !weak.includes(q)));
   return shuffle([...weak, ...rest.slice(0, count - weak.length)]);
 }
 
 /** Lines that are due for review today, in map order. */
-export const dueLines = (lines: Line[], save: SaveData, now = Date.now()): Line[] =>
-  lines.filter(l => { const p = save.levels[l.id]; return !!p?.cleared && now >= p.due; });
+export const dueLines = (
+  lines: Line[],
+  save: SaveData,
+  now = Date.now(),
+): Line[] =>
+  lines.filter((l) => {
+    const p = save.levels[l.id];
+    return !!p?.cleared && now >= p.due;
+  });
 
 /* ---------- per-question history ---------- */
 
 /** Stable id for a question, derived from its text so it survives edits elsewhere. */
 export function qid(lineId: string, question: Question): string {
-  const text = question.q + (question.code ?? '');
+  const text = question.q + (question.code ?? "");
   let h = 5381;
-  for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < text.length; i++)
+    h = ((h * 33) ^ text.charCodeAt(i)) >>> 0;
   return `${question.from ?? lineId}:${h.toString(36)}`;
 }
 
@@ -160,7 +244,11 @@ export interface AnswerRecord {
 }
 
 /** Fold a run's answers into the save. Pure: returns a new save. */
-export function recordAnswers(save: SaveData, answers: AnswerRecord[], now = Date.now()): SaveData {
+export function recordAnswers(
+  save: SaveData,
+  answers: AnswerRecord[],
+  now = Date.now(),
+): SaveData {
   if (!answers.length) return save;
   const next: SaveData = { ...save, questions: { ...save.questions } };
   for (const { lineId, question, correct } of answers) {
@@ -184,13 +272,23 @@ export interface Shaky {
 }
 
 /** Questions you have missed and not yet recovered, worst first. */
-export function shakyQuestions(save: SaveData, lines: Line[], lineId?: string): Shaky[] {
+export function shakyQuestions(
+  save: SaveData,
+  lines: Line[],
+  lineId?: string,
+): Shaky[] {
   const out: Shaky[] = [];
   for (const line of lines) {
     if (lineId && line.id !== lineId) continue;
     for (const question of line.questions ?? []) {
       const stat = save.questions[qid(line.id, question)];
-      if (stat && stat.missed > 0) out.push({ lineId: line.id, question, missed: stat.missed, last: stat.last });
+      if (stat && stat.missed > 0)
+        out.push({
+          lineId: line.id,
+          question,
+          missed: stat.missed,
+          last: stat.last,
+        });
     }
   }
   return out.sort((a, b) => b.missed - a.missed || b.last - a.last);
