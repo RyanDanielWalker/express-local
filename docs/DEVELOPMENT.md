@@ -62,7 +62,8 @@ Every push and pull request runs `.github/workflows/ci.yml` on GitHub Actions, o
 5. `npm test`, which includes the bar
 6. `npm run check` in `probes/ts`
 7. `npm run build`
-8. `npm audit --omit=dev`, which reports but never fails the run
+8. Download Chromium, then run the end-to-end test against that build (`npx playwright test`, see "Checking the app")
+9. `npm audit --omit=dev`, which reports but never fails the run
 
 To reproduce a red run, run the same step locally. The React and Nest probes are not in CI. Run them by hand when content changes.
 

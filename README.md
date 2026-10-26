@@ -112,7 +112,7 @@ A few choices that shape how the app teaches. [docs/ROADMAP.md](docs/ROADMAP.md)
 - **Scoring is pure.** `finishTrip()`, `finishCram()`, `finishRehearsal()` and `finishDerail()` take a save and a run and return a new save plus everything the results screen shows. Readiness is computed from the save, never stored.
 - **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier with room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha in its field guide, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS, TypeScript and React) fail the tests if any line slips.
 - **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, and render the results screen for every line. One Playwright test rides a line twice on Local against the production build, then moves the save code into a fresh browser.
-- **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes and a production build on each push and pull request.
+- **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes, a production build and the end-to-end test on each push and pull request.
 - **Accessible.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced-motion support, and light and dark themes.
 
 ```
@@ -165,7 +165,7 @@ NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
 - [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and independently reviewed
 - [x] **React:** eight lines clearing the bar, every claim run against React 19.3, and independently reviewed
-- [ ] **Foundation:** formatting and lint, CI on every push, and an end-to-end test
+- [x] **Foundation:** formatting and lint, CI on every push, and an end-to-end test
 - [ ] **No repeats:** rework questions that test the same fact as another question
 - [ ] **Reorganize the page:** a Today band, a play mode that takes over the screen, and real URLs
 - [ ] **Ship 1.0:** a live deploy, a case study, and a `v1.0` tag

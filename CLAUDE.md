@@ -13,7 +13,7 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 - `e2e/`: one Playwright test that rides a line against the production build (`npm run e2e`, not part of `npm test`).
 - `probes/`: sandboxes that prove content against real React, NestJS and TypeScript. Not part of the app.
 - `.claude/skills/next/`: the `/next` command. `.claude/skills/audit/`: the `/audit` command, an outsider's review at the end of each phase (`/audit quiz` to rehearse the interview questions). `.claude/agents/fact-checker.md`: the independent content reviewer.
-- `.github/workflows/ci.yml`: CI on every push and pull request. It runs the format check, lint, typecheck, tests, the TypeScript probes and the build (see `docs/DEVELOPMENT.md`, "CI").
+- `.github/workflows/ci.yml`: CI on every push and pull request. It runs the format check, lint, typecheck, tests, the TypeScript probes, the build and the end-to-end test (see `docs/DEVELOPMENT.md`, "CI").
 
 ## How we work
 
