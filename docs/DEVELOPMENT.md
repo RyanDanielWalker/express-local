@@ -36,7 +36,8 @@ Use these scripts rather than calling the tools directly. `tsc -b`, for example,
 
 Ryan owns the project and makes the calls. Claude is the senior engineer: it writes the code and the content, and explaining the work is part of the job.
 
-- **Commit, never push.** Work happens on local `main` in small commits as the work goes, not one big commit at the end. Ryan reviews with `git log origin/main..HEAD` and `git show <sha>`, then pushes himself. Never push, and never rewrite a commit that has been pushed.
+- **Commit, never push.** Work happens in small commits as the work goes, not one big commit at the end. Ryan reviews with `git log origin/main..HEAD` and `git show <sha>`, then pushes himself. Never push, and never rewrite a commit that has been pushed.
+- **Features on a branch, small fixes on `main`** ([ADR 0011](adr/0011-branches-for-features.md)). A roadmap item (a feature, a content block, a refactor, anything risky) gets a branch named for it, like `feat/router` or `content/near-duplicates`. Ryan pushes the branch, opens a pull request from the template in `.github/`, and merges when CI is green. A docs fix, a wording tweak, moving a button or some padding goes straight to `main`. When unsure, branch.
 - **Conventional Commits.** `feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`, with an optional scope like `fix(react):`. The subject says what changed. The body says why, in plain sentences.
 - **Content commits say what they were checked against.** The body ends with a `Checked against:` line naming the docs page (as a URL path) and the probe that proved it, for example: `Checked against: react.dev/reference/react/useActionState; probes/react/forms.tsx.`
 - **Stop for real decisions.** Anything about scope, product direction, or a tradeoff Ryan would care about gets two or three options and a recommendation before work starts. Routine choices get made, then mentioned in the report.

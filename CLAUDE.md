@@ -16,7 +16,8 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 ## How we work
 
 - **Ryan owns it, Claude is the senior engineer.** Claude writes the code and content; Ryan makes the calls, reviews every commit, and pushes. Explaining the work in plain English is part of the deliverable.
-- **Commit, never push.** Small Conventional Commits on local `main` as the work goes (`feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`). Subject says what, body says why. Content commits end with what they were checked against. Never push, never rewrite a pushed commit.
+- **Commit, never push.** Small Conventional Commits as the work goes (`feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`). Subject says what, body says why. Content commits end with what they were checked against. Never push, never rewrite a pushed commit.
+- **Features on a branch, small fixes on `main`.** A roadmap item (a feature, a content block, a refactor, anything risky) goes on a branch named for it, like `feat/router` or `content/near-duplicates`. Ryan pushes it and opens a pull request. A docs fix, a wording tweak or some padding goes straight to `main`. When unsure, branch ([ADR 0011](docs/adr/0011-branches-for-features.md)).
 - **Stop for real decisions** with two or three options and a recommendation. Make routine choices and mention them.
 - **Keep the docs true** in the same commit. A significant decision gets an ADR.
 - **No loose threads.** A roadmap item is done when everything it touched is done, proven and documented. Anything found and not fixed goes on the roadmap.

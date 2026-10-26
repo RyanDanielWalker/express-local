@@ -1,6 +1,6 @@
 # 0009. Day-to-day work happens in Claude Code, and the repo carries the context
 
-Status: Accepted (2026-10-17).
+Status: Accepted (2026-10-17). Amended by [0011](0011-branches-for-features.md): features now go on a branch.
 
 ## Context
 

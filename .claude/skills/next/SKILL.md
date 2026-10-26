@@ -34,6 +34,8 @@ Write a short plan: what you'll change, which files, how you'll prove it, and wh
 
 Stop and ask Ryan (with two or three options, your recommendation first) when the item needs a call that is his to make: product direction, scope, anything a player would notice that the roadmap doesn't already decide, a dependency added to the app, or a tradeoff between two reasonable approaches. Don't ask about routine choices. Make them and list them in the report. Pinning a package in a `probes/` folder so a claim can be proven is routine.
 
+Then create the item's branch from an up-to-date `main` (`git switch -c feat/<item>` or `content/<item>`), unless it is a small fix or an inventory stop, which go on `main` (see `docs/DEVELOPMENT.md`, "Working agreement").
+
 Then decide which loop the item needs. Most items are content.
 
 ## 4a. The content loop
@@ -76,7 +78,7 @@ In the same commits as the work, not after:
 
 ## 6. Review your own work as a skeptic
 
-1. Read the full diff (`git diff origin/main..HEAD`) as if someone else wrote it and you expect it to be wrong.
+1. Read the full diff (`git diff origin/main...HEAD`) as if someone else wrote it and you expect it to be wrong.
 2. For content: run the `fact-checker` agent on what you changed. It didn't write it, so it isn't grading its own work. Verify each finding by re-running its probe before you change anything. Fix what's real, then have a fresh `fact-checker` re-check only the fields the fixes touched.
 3. If the item is an **inventory stop**, do the whole procedure in `docs/DEVELOPMENT.md` under "Inventory stops", and end it with a commit whose subject starts with `docs: inventory stop` so the next stop can find it.
 4. Final checks: `npm test`, `npm run bar`, `npm run build`, `git status` clean, nothing stray left in the repo (build caches, scratch files outside the `_review/` folders in `probes/`).
@@ -90,6 +92,7 @@ Tell Ryan, in plain English and briefly:
 - **Decisions I made for you:** anything routine you decided without asking.
 - **How it was checked:** the docs and probes behind the content, what the fact-checker found and what changed because of it, and anything you could not verify.
 - **One concept, simply:** one idea from this work, explained the way you'd explain it to a smart friend who's new to it, with a small example. Pick something he'd be asked about in an interview.
+- **Pull request:** on a branch, the branch name and a draft description filled in from `.github/pull_request_template.md`, including the **Who wrote what** line, ready for Ryan to paste.
 - **Next up:** what `/next` would pick up next time.
 
 Then stop. Don't push, and don't start the next item.
