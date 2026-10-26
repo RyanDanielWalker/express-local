@@ -12,63 +12,63 @@
 
 Hand-built games. You play the algorithm step by step.
 
-| | Line | Topic |
-|---|---|---|
-| **Q** | Push & Pop Shuttle | Stacks and queues |
-| **B** | The Local | Breadth-first search |
-| **D** | The Express | Depth-first search |
-| **S** | Split Line | Binary search |
-| **W** | Swap Yard | Bubble sort |
-| **R** | Call Stack Line | Recursion |
-| **H** | Coat Check | Hash tables |
-| **M** | Merge Junction | Merge sort |
-| **P** | Pivot Point | Quicksort |
-| **2** | Both Ends | Two pointers |
-| **J** | Shortest Route | Dijkstra |
+|       | Line               | Topic                |
+| ----- | ------------------ | -------------------- |
+| **Q** | Push & Pop Shuttle | Stacks and queues    |
+| **B** | The Local          | Breadth-first search |
+| **D** | The Express        | Depth-first search   |
+| **S** | Split Line         | Binary search        |
+| **W** | Swap Yard          | Bubble sort          |
+| **R** | Call Stack Line    | Recursion            |
+| **H** | Coat Check         | Hash tables          |
+| **M** | Merge Junction     | Merge sort           |
+| **P** | Pivot Point        | Quicksort            |
+| **2** | Both Ends          | Two pointers         |
+| **J** | Shortest Route     | Dijkstra             |
 
 ### NestJS
 
 Checked against the NestJS 12 documentation, then reviewed claim by claim against running Nest 12.1.3 code. Where a behavior depends on the version or the HTTP adapter, the content says which.
 
-| | Line | Topic |
-|---|---|---|
-| **1** | Main Line | The request lifecycle, in order |
-| **2** | Wiring Yard | DI, modules, dynamic modules, lifecycle hooks, "Nest can't resolve dependencies" |
-| **3** | Platform Signs | Controllers, routing, params, status codes |
-| **4** | Ticket Check | DTOs, ValidationPipe, and schema-first validation |
-| **5** | Dispatch Desk | Guard vs pipe vs interceptor vs filter vs middleware |
-| **6** | Fault Line | Exceptions, status codes, filters |
-| **7** | Tool Shed | What you implement: canActivate, transform, intercept, catch, use, and custom decorators |
-| **8** | Turnstile | Auth: tokens, guards, req.user, @Public(), 401 vs 403 |
-| **9** | Test Track | Testing modules, overrideProvider, unit vs e2e |
+|       | Line           | Topic                                                                                    |
+| ----- | -------------- | ---------------------------------------------------------------------------------------- |
+| **1** | Main Line      | The request lifecycle, in order                                                          |
+| **2** | Wiring Yard    | DI, modules, dynamic modules, lifecycle hooks, "Nest can't resolve dependencies"         |
+| **3** | Platform Signs | Controllers, routing, params, status codes                                               |
+| **4** | Ticket Check   | DTOs, ValidationPipe, and schema-first validation                                        |
+| **5** | Dispatch Desk  | Guard vs pipe vs interceptor vs filter vs middleware                                     |
+| **6** | Fault Line     | Exceptions, status codes, filters                                                        |
+| **7** | Tool Shed      | What you implement: canActivate, transform, intercept, catch, use, and custom decorators |
+| **8** | Turnstile      | Auth: tokens, guards, req.user, @Public(), 401 vs 403                                    |
+| **9** | Test Track     | Testing modules, overrideProvider, unit vs e2e                                           |
 
 ### React
 
 Every claim is run against React 19.3 in a test sandbox: real components, rendered with `react-dom`, with renders counted and DOM changes watched.
 
-| | Line | Topic |
-|---|---|---|
-| **C** | Repaint Line | What actually triggers a re-render |
-| **E** | Side Track | Effects, dependencies, cleanup |
-| **A** | Snapshot Line | State, batching, the updater form |
-| **K** | Key Change | Keys, lists, reconciliation |
-| **F** | Memo Yard | memo, useMemo, useCallback, profiling |
-| **N** | Hook Junction | Hook rules and the React 19 APIs |
-| **V** | Fare Machine | Forms, inputs and Actions |
+|       | Line           | Topic                                        |
+| ----- | -------------- | -------------------------------------------- |
+| **C** | Repaint Line   | What actually triggers a re-render           |
+| **E** | Side Track     | Effects, dependencies, cleanup               |
+| **A** | Snapshot Line  | State, batching, the updater form            |
+| **K** | Key Change     | Keys, lists, reconciliation                  |
+| **F** | Memo Yard      | memo, useMemo, useCallback, profiling        |
+| **N** | Hook Junction  | Hook rules and the React 19 APIs             |
+| **V** | Fare Machine   | Forms, inputs and Actions                    |
 | **L** | Arrivals Board | Fetching data, Suspense and error boundaries |
 
 ### TypeScript
 
 Every claim is proven with the compiler, with `strict` on, under TypeScript 5.9, 6.0 and 7.0 and `@types/react` 19.3.
 
-| | Line | Topic |
-|---|---|---|
-| **T** | Narrow Gauge | Narrowing, guards, discriminated unions |
-| **G** | Generic Line | Generics, constraints, inference |
-| **U** | Utility Yard | Partial, Pick, Omit, Record, ReturnType |
+|       | Line              | Topic                                         |
+| ----- | ----------------- | --------------------------------------------- |
+| **T** | Narrow Gauge      | Narrowing, guards, discriminated unions       |
+| **G** | Generic Line      | Generics, constraints, inference              |
+| **U** | Utility Yard      | Partial, Pick, Omit, Record, ReturnType       |
 | **X** | Unknown Territory | any vs unknown, assertions, satisfies, strict |
-| **Y** | Shape Yard | Structural typing, interfaces vs types |
-| **Z** | Typed Components | Props, events, refs and hooks in React |
+| **Y** | Shape Yard        | Structural typing, interfaces vs types        |
+| **Z** | Typed Components  | Props, events, refs and hooks in React        |
 
 ## How a ride works
 
@@ -135,6 +135,8 @@ Requires Node.js 22.12+.
 npm install
 npm run dev        # http://localhost:5173
 npm test           # unit and content tests
+npm run lint       # ESLint
+npm run format     # Prettier
 npm run bar        # where each line stands against the quality bar
 npm run build      # typecheck and production build into dist/
 ```

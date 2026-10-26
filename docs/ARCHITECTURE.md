@@ -14,7 +14,7 @@ src/
   games/        one component per algorithm line, plus QuizRun, QuizGame, FlowGame and SortGame
   components/   screens and shared UI: header, map, intro, play screen, results, rehearsal, badges
   hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount)
-  lib/          small helpers (random picks and shuffles, station labels)
+  lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals)
   styles/       one stylesheet, app.css
 probes/         sandboxes that prove the content against real code (not part of the app)
 ```
@@ -29,31 +29,31 @@ Three rules hold the code together:
 
 The subway theme runs through the names ([ADR 0001](adr/0001-subway-theme.md)), so here is the map:
 
-| Word | What it is |
-|---|---|
-| **Division** | A subject area: `algos`, `nest`, `react`, `ts`. Each has its own row on the map and unlocks on its own. Listed in `DIVISIONS` in `engine/questions.ts`. |
-| **Line** | One topic inside a division, like Side Track (React effects). The `Line` type in `engine/types.ts`. Shown on the map as a stop with a bullet. |
-| **Tier** | How hard a ride is: 1 Local, 2 Express, 3 Rush Hour. Local asks 6 questions, Express 8, Rush Hour 10 and turns the helper panels off. |
-| **Ride, trip, run** | One play of a line at a tier. |
-| **Question** | A multiple-choice item in a line's pool. `t` is the lowest tier it can appear on. |
-| **Puzzle, last stop** | The sort or flow a quiz run ends on. |
-| **Sort** | Put each card in the right box. |
-| **Flow** | Put steps in the order they actually run. Decoys are steps that do not happen in that scenario. |
-| **Field guide** | The study notes for a line: plain intro, vocabulary, a code example, talking points, the gotcha, and rehearsal prompts. The `Guide` type. |
-| **Rehearse** | Answer a prompt out loud, then compare with the model answer. |
-| **Station** | Only in the algorithm games: a node in a graph you click through. |
-| **The bar** | The checks a line has to pass to count as done. See below. |
+| Word                  | What it is                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Division**          | A subject area: `algos`, `nest`, `react`, `ts`. Each has its own row on the map and unlocks on its own. Listed in `DIVISIONS` in `engine/questions.ts`. |
+| **Line**              | One topic inside a division, like Side Track (React effects). The `Line` type in `engine/types.ts`. Shown on the map as a stop with a bullet.           |
+| **Tier**              | How hard a ride is: 1 Local, 2 Express, 3 Rush Hour. Local asks 6 questions, Express 8, Rush Hour 10 and turns the helper panels off.                   |
+| **Ride, trip, run**   | One play of a line at a tier.                                                                                                                           |
+| **Question**          | A multiple-choice item in a line's pool. `t` is the lowest tier it can appear on.                                                                       |
+| **Puzzle, last stop** | The sort or flow a quiz run ends on.                                                                                                                    |
+| **Sort**              | Put each card in the right box.                                                                                                                         |
+| **Flow**              | Put steps in the order they actually run. Decoys are steps that do not happen in that scenario.                                                         |
+| **Field guide**       | The study notes for a line: plain intro, vocabulary, a code example, talking points, the gotcha, and rehearsal prompts. The `Guide` type.               |
+| **Rehearse**          | Answer a prompt out loud, then compare with the model answer.                                                                                           |
+| **Station**           | Only in the algorithm games: a node in a graph you click through.                                                                                       |
+| **The bar**           | The checks a line has to pass to count as done. See below.                                                                                              |
 
 ## How content is structured
 
 Each division has one data file that exports its lines and its guides:
 
-| Division | Lines | Guides |
-|---|---|---|
-| Algorithms | `data/lines.ts` (`ALGO_LINES`) | `data/guide.ts` (`ALGO_GUIDE`) |
-| NestJS | `data/nest.ts` (`NEST_LINES`) | same file (`NEST_GUIDE`) |
-| React | `data/react.ts` (`REACT_LINES`) | same file (`REACT_GUIDE`) |
-| TypeScript | `data/typescript.ts` (`TS_LINES`) | same file (`TS_GUIDE`) |
+| Division   | Lines                             | Guides                         |
+| ---------- | --------------------------------- | ------------------------------ |
+| Algorithms | `data/lines.ts` (`ALGO_LINES`)    | `data/guide.ts` (`ALGO_GUIDE`) |
+| NestJS     | `data/nest.ts` (`NEST_LINES`)     | same file (`NEST_GUIDE`)       |
+| React      | `data/react.ts` (`REACT_LINES`)   | same file (`REACT_GUIDE`)      |
+| TypeScript | `data/typescript.ts` (`TS_LINES`) | same file (`TS_GUIDE`)         |
 
 `data/index.ts` merges them into `LINES` (map order) and `GUIDE` (keyed by line id).
 

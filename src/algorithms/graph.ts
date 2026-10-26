@@ -1,4 +1,4 @@
-import { rnd } from '../lib/random';
+import { rnd } from "../lib/random";
 
 export interface GraphNode {
   x: number;
@@ -17,7 +17,8 @@ export interface Graph {
  * not just a tree. Labels follow reading order.
  */
 export function makeGraph(tier = 1): Graph {
-  const sizes = tier >= 2 ? [1, 3, 4, rnd(2, 3)] : [1, rnd(2, 3), rnd(3, 4), rnd(1, 2)];
+  const sizes =
+    tier >= 2 ? [1, 3, 4, rnd(2, 3)] : [1, rnd(2, 3), rnd(3, 4), rnd(1, 2)];
   const nodes: GraphNode[] = [];
   const layers: number[][] = [];
   sizes.forEach((n, layer) => {
@@ -38,7 +39,10 @@ export function makeGraph(tier = 1): Graph {
     adj[b].add(a);
   };
   layers.forEach((row, layer) => {
-    if (layer) row.forEach(n => link(n, layers[layer - 1][rnd(0, layers[layer - 1].length - 1)]));
+    if (layer)
+      row.forEach((n) =>
+        link(n, layers[layer - 1][rnd(0, layers[layer - 1].length - 1)]),
+      );
   });
   const wanted = tier >= 2 ? 3 : 2;
   for (let extra = 0, tries = 0; extra < wanted && tries < 40; tries++) {
@@ -48,12 +52,13 @@ export function makeGraph(tier = 1): Graph {
     const pos = row.indexOf(u);
     let v: number | undefined;
     if (Math.random() < 0.5 && pos + 1 < row.length) v = row[pos + 1];
-    else if (layer + 1 < layers.length) v = layers[layer + 1][rnd(0, layers[layer + 1].length - 1)];
+    else if (layer + 1 < layers.length)
+      v = layers[layer + 1][rnd(0, layers[layer + 1].length - 1)];
     if (v === undefined || adj[u].has(v)) continue;
     link(u, v);
     extra++;
   }
-  return { nodes, adj: adj.map(s => [...s].sort((a, b) => a - b)) };
+  return { nodes, adj: adj.map((s) => [...s].sort((a, b) => a - b)) };
 }
 
 export interface StackEntry {
@@ -75,11 +80,15 @@ export interface Traversal {
  * DFS: stack, mark seen when popped, push neighbors in reverse so the
  * alphabetically first one comes off first. Same visit order as recursive DFS.
  */
-export function traverse(adj: number[][], kind: 'bfs' | 'dfs', start = 0): Traversal {
+export function traverse(
+  adj: number[][],
+  kind: "bfs" | "dfs",
+  start = 0,
+): Traversal {
   const order: number[] = [];
   const snaps: StackEntry[][] = [];
   const parent: Record<number, number | null> = {};
-  if (kind === 'bfs') {
+  if (kind === "bfs") {
     const seen = new Set([start]);
     const queue = [start];
     parent[start] = null;
@@ -93,19 +102,22 @@ export function traverse(adj: number[][], kind: 'bfs' | 'dfs', start = 0): Trave
           queue.push(m);
         }
       }
-      snaps.push(queue.map(n => ({ n })));
+      snaps.push(queue.map((n) => ({ n })));
     }
   } else {
     const seen = new Set<number>();
-    const stack: { n: number; from: number | null }[] = [{ n: start, from: null }];
+    const stack: { n: number; from: number | null }[] = [
+      { n: start, from: null },
+    ];
     while (stack.length) {
       const e = stack.pop()!;
       if (seen.has(e.n)) continue;
       seen.add(e.n);
       parent[e.n] = e.from;
       order.push(e.n);
-      for (const m of [...adj[e.n]].reverse()) if (!seen.has(m)) stack.push({ n: m, from: e.n });
-      snaps.push(stack.map(x => ({ n: x.n, skip: seen.has(x.n) })));
+      for (const m of [...adj[e.n]].reverse())
+        if (!seen.has(m)) stack.push({ n: m, from: e.n });
+      snaps.push(stack.map((x) => ({ n: x.n, skip: seen.has(x.n) })));
     }
   }
   return { order, snaps, parent };

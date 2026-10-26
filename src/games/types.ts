@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
-import type { Line, Question, QuestionStat, Tier } from '../engine/types';
+import type { ReactNode } from "react";
+import type { Line, Question, QuestionStat, Tier } from "../engine/types";
 
-export type Tone = 'good' | 'bad' | '';
+export type Tone = "good" | "bad" | "";
 
 /** What the play screen hands every game. Games own the rules, the play screen owns hearts, XP, and the clock. */
 export interface GameApi {
@@ -31,7 +31,7 @@ export interface GameProps {
    * instead of finishing; a `finale` is that puzzle, the run's last stop.
    * Unset means the game is the whole run.
    */
-  role?: 'opener' | 'finale';
+  role?: "opener" | "finale";
   /** Your answer history, so a run can show unseen and shaky questions first. */
   history?: Record<string, QuestionStat>;
   /** How many times this line has been ridden, so its last stop rotates. */

@@ -1,0 +1,7 @@
+# Commits that only reformat code. git blame skips them, so each line still
+# points at the commit that last changed what it says.
+# GitHub reads this file on its own. Locally, run once:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style: format the repo with Prettier
+4a06d9695ccfae9979b808359b6fa41a83c910f4

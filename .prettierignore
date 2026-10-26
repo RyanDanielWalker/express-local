@@ -1,0 +1,4 @@
+# Sandboxes with their own packages. Some probes rely on exact line placement
+# (a @ts-expect-error must sit on the line above the error), so leave them as written.
+probes/
+package-lock.json

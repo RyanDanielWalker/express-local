@@ -1,18 +1,27 @@
-import { useEffect, useState } from 'react';
-import { flowSlip, nextStep, pickFlows, revealAfterMiss } from '../engine/questions';
-import type { Flow } from '../engine/types';
-import { useKeys } from '../hooks/useKeys';
-import { Rich } from '../components/Rich';
-import { shuffle } from '../lib/random';
-import { Panel } from './parts';
-import type { GameProps } from './types';
+import { useEffect, useState } from "react";
+import {
+  flowSlip,
+  nextStep,
+  pickFlows,
+  revealAfterMiss,
+} from "../engine/questions";
+import type { Flow } from "../engine/types";
+import { useKeys } from "../hooks/useKeys";
+import { Rich } from "../components/Rich";
+import { shuffle } from "../lib/random";
+import { Panel } from "./parts";
+import type { GameProps } from "./types";
 
 /** Steps already on the board when a puzzle opens (`start`), so it begins mid-flight. */
-const given = (flow?: Flow): string[] => flow?.steps.slice(0, flow.start ?? 0) ?? [];
+const given = (flow?: Flow): string[] =>
+  flow?.steps.slice(0, flow.start ?? 0) ?? [];
 
 /** Everything the player can click: what is left to place, plus steps that never happen here. */
 const trayFor = (flow?: Flow): string[] =>
-  shuffle([...(flow?.steps.slice(flow.start ?? 0) ?? []), ...(flow?.decoys ?? [])]);
+  shuffle([
+    ...(flow?.steps.slice(flow.start ?? 0) ?? []),
+    ...(flow?.decoys ?? []),
+  ]);
 
 /** Put the steps of a process back in order. A miss says only that it was a miss. */
 export function FlowGame({ api, line, role }: GameProps) {
@@ -23,12 +32,15 @@ export function FlowGame({ api, line, role }: GameProps) {
   const [done, setDone] = useState(false);
   /** Wrong picks per slot, keyed by the step that was wanted. Drives the hint and the recap. */
   const [misses, setMisses] = useState<Record<string, string[]>>({});
-  useEffect(() => api.say('Click the stages in the order they actually run.'), [api]);
+  useEffect(
+    () => api.say("Click the stages in the order they actually run."),
+    [api],
+  );
 
   const flow = flows[i];
-  useKeys(e => {
+  useKeys((e) => {
     if (!done || api.over) return;
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       next();
     }
@@ -45,13 +57,20 @@ export function FlowGame({ api, line, role }: GameProps) {
       // One message for every miss. Saying "not yet" would give away that the
       // step happens later, and naming the decoy would give away that it never
       // does. Which kind of wrong you were is the thing being drilled.
-      const tried = misses[want ?? ''] ?? [];
+      const tried = misses[want ?? ""] ?? [];
       const n = tried.length + 1;
-      setMisses(m => ({ ...m, [want ?? '']: tried.includes(step) ? tried : [...tried, step] }));
+      setMisses((m) => ({
+        ...m,
+        [want ?? ""]: tried.includes(step) ? tried : [...tried, step],
+      }));
       return api.wrong(
-        revealAfterMiss(api.tier, n)
-          ? <>Not that one. <b>{want}</b> comes next.</>
-          : 'Not that one.',
+        revealAfterMiss(api.tier, n) ? (
+          <>
+            Not that one. <b>{want}</b> comes next.
+          </>
+        ) : (
+          "Not that one."
+        ),
       );
     }
     const next = [...placed, step];
@@ -59,7 +78,7 @@ export function FlowGame({ api, line, role }: GameProps) {
     api.correct(8, `${step}. Keep going.`);
     if (next.length < flow.steps.length) return;
     setDone(true);
-    api.say('Full order. Read why it goes that way, then carry on.', 'good');
+    api.say("Full order. Read why it goes that way, then carry on.", "good");
     // Held, not timed: the note under the board is the point of the puzzle.
     api.hold();
   }
@@ -80,23 +99,48 @@ export function FlowGame({ api, line, role }: GameProps) {
     <>
       <div className="board">
         <div className="qcard">
-          {role !== 'finale' && (
+          {role !== "finale" && (
             <div className="progress" aria-hidden="true">
-              {flows.map((_, k) => <i key={k} className={k < i ? 'ok' : k === i ? 'now' : ''} />)}
+              {flows.map((_, k) => (
+                <i key={k} className={k < i ? "ok" : k === i ? "now" : ""} />
+              ))}
             </div>
           )}
-          <div className="eyebrow">{role === 'finale' ? 'Last stop' : `Order ${i + 1} of ${flows.length}`}</div>
-          <p className="scenario"><Rich text={flow.title} /></p>
-          {head > 0 && <p className="hint">That much already happened. Keep it going from there.</p>}
+          <div className="eyebrow">
+            {role === "finale"
+              ? "Last stop"
+              : `Order ${i + 1} of ${flows.length}`}
+          </div>
+          <p className="scenario">
+            <Rich text={flow.title} />
+          </p>
+          {head > 0 && (
+            <p className="hint">
+              That much already happened. Keep it going from there.
+            </p>
+          )}
           <div className="flow">
-            {placed.length === 0 && <div className="slot"><span className="n">1</span>What runs first?</div>}
+            {placed.length === 0 && (
+              <div className="slot">
+                <span className="n">1</span>What runs first?
+              </div>
+            )}
             {placed.map((s, k) => (
-              <div key={s} className={`slot done${k < head ? ' given' : ''}`}><span className="n">{k + 1}</span>{s}</div>
+              <div key={s} className={`slot done${k < head ? " given" : ""}`}>
+                <span className="n">{k + 1}</span>
+                {s}
+              </div>
             ))}
           </div>
           <div className="steps">
-            {tray.map(s => (
-              <button key={s} disabled={placed.includes(s)} onClick={() => pick(s)}>{s}</button>
+            {tray.map((s) => (
+              <button
+                key={s}
+                disabled={placed.includes(s)}
+                onClick={() => pick(s)}
+              >
+                {s}
+              </button>
             ))}
           </div>
           {done && (
@@ -105,7 +149,11 @@ export function FlowGame({ api, line, role }: GameProps) {
               <Rich text={flow.note} />
               {fumbled.length > 0 && (
                 <ul className="fumbles">
-                  {fumbled.map(want => <li key={want}><em>{want}</em> {flowSlip(flow, want, misses[want])}</li>)}
+                  {fumbled.map((want) => (
+                    <li key={want}>
+                      <em>{want}</em> {flowSlip(flow, want, misses[want])}
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
@@ -113,9 +161,11 @@ export function FlowGame({ api, line, role }: GameProps) {
           {done && (
             <div className="decide">
               <button className="btn big" onClick={next} autoFocus>
-                {i + 1 >= flows.length ? 'See how you did' : 'Next scenario'}
+                {i + 1 >= flows.length ? "See how you did" : "Next scenario"}
               </button>
-              <span className="hint" style={{ margin: 0 }}>or press space. The clock is paused.</span>
+              <span className="hint" style={{ margin: 0 }}>
+                or press space. The clock is paused.
+              </span>
             </div>
           )}
         </div>
@@ -123,7 +173,11 @@ export function FlowGame({ api, line, role }: GameProps) {
       <div className="side">
         {/* Never `line.hook` here: on an ordering puzzle the hook is the answer key. */}
         {api.assist && line.drill && (
-          <Panel title="Think it through"><p style={{ margin: 0 }}><Rich text={line.drill} /></p></Panel>
+          <Panel title="Think it through">
+            <p style={{ margin: 0 }}>
+              <Rich text={line.drill} />
+            </p>
+          </Panel>
         )}
       </div>
     </>
