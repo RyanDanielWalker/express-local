@@ -11,6 +11,12 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
+The end-to-end test needs a Chromium that Playwright downloads once:
+
+```bash
+npx playwright install chromium
+```
+
 To check content against real code, also install the probes once (see [probes/README.md](../probes/README.md)):
 
 ```bash
@@ -21,18 +27,19 @@ The app is not deployed. It runs locally.
 
 ## Scripts
 
-| Command             | What it does                                                                                              |
-| ------------------- | --------------------------------------------------------------------------------------------------------- |
-| `npm run dev`       | Dev server with hot reload                                                                                |
-| `npm test`          | Every test: algorithms, engine, content, the bar, the results screen. Run before every commit.            |
-| `npm run typecheck` | `tsc --noEmit` over `src`                                                                                 |
-| `npm run build`     | Typecheck, then a production build into `dist/`                                                           |
-| `npm run preview`   | Serve the production build locally                                                                        |
-| `npm run bar`       | Where every line stands against the quality bar, division by division                                     |
-| `npm run lint`      | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.  |
-| `npm run format`    | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit. |
+| Command             | What it does                                                                                                     |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`       | Dev server with hot reload                                                                                       |
+| `npm test`          | Every test: algorithms, engine, content, the bar, the results screen. Run before every commit.                   |
+| `npm run typecheck` | `tsc --noEmit` over `src`                                                                                        |
+| `npm run build`     | Typecheck, then a production build into `dist/`                                                                  |
+| `npm run preview`   | Serve the production build locally                                                                               |
+| `npm run bar`       | Where every line stands against the quality bar, division by division                                            |
+| `npm run e2e`       | Builds, then rides a line in Chromium against the production build (`e2e/ride.spec.ts`). Not part of `npm test`. |
+| `npm run lint`      | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.         |
+| `npm run format`    | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit.        |
 
-Both skip `probes/`. Those are sandboxes with their own packages, and some depend on exact line placement, like a `@ts-expect-error` on the line above an error.
+Lint and format both skip `probes/`. Those are sandboxes with their own packages, and some depend on exact line placement, like a `@ts-expect-error` on the line above an error.
 
 So that `git blame` skips commits that only reformat, run this once:
 
@@ -123,7 +130,9 @@ The data files are large TypeScript files of strings.
 
 ## Checking the app
 
-For any change a player would see, run it and look:
+`npm run e2e` checks one path through the production build in a real browser. It boards Repaint Line (React's first quiz line) on Local and answers every question right. It solves the last stop, reaches the results screen, then rides again so the other puzzle kind comes up. Then it copies the save code into a fresh browser and checks the progress arrived. It fails on any error in the browser console. It looks up the right answers in `src/data`, so it works whichever questions a ride picks. Run it after changing a screen, the save code, or anything else on that path.
+
+It is one path, not a substitute for looking. For any change a player would see, run it and look:
 
 ```bash
 npm run build && npm run preview

@@ -111,7 +111,7 @@ A few choices that shape how the app teaches. [docs/ROADMAP.md](docs/ROADMAP.md)
 - **Content is data.** Quiz lines, flows and sorts are entries in `src/data/`, so adding a topic means writing questions, not components.
 - **Scoring is pure.** `finishTrip()`, `finishCram()`, `finishRehearsal()` and `finishDerail()` take a save and a run and return a new save plus everything the results screen shows. Readiness is computed from the save, never stored.
 - **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier with room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha in its field guide, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS, TypeScript and React) fail the tests if any line slips.
-- **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, and render the results screen for every line.
+- **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, and render the results screen for every line. One Playwright test rides a line twice on Local against the production build, then moves the save code into a fresh browser.
 - **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes and a production build on each push and pull request.
 - **Accessible.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced-motion support, and light and dark themes.
 
@@ -124,6 +124,7 @@ src/
   components/   screens: header, map, intro, play, results, rehearsal, cram band, badges
   hooks/        useKeys, useTimers
   lib/          small helpers
+e2e/            one Playwright test that rides a line against the production build
 probes/         sandboxes that prove the content against real React, NestJS and TypeScript
 docs/           roadmap, architecture, development guide, and decision records
 ```
@@ -140,6 +141,7 @@ npm run lint       # ESLint
 npm run format     # Prettier
 npm run bar        # where each line stands against the quality bar
 npm run build      # typecheck and production build into dist/
+npm run e2e        # build, then ride a line in Chromium (run `npx playwright install chromium` once)
 ```
 
 ## Adding a line
