@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import {
   bubbleInit,
   bubbleShouldSwap,
@@ -24,13 +24,14 @@ export function BubbleSortGame({ api }: GameProps) {
   };
   const [round, setRound] = useState(0);
   const [s, setS] = useState(() => build(0));
-  useEffect(
-    () =>
-      api.say(
-        `Array 1 of ${SIZES.length}. Pass 1: is ${s.a[0]} bigger than ${s.a[1]}?`,
-      ),
-    [api],
+  // The opening message, once per ride. It reads the starting state
+  // without re-running each time that state changes.
+  const sayOpening = useEffectEvent(() =>
+    api.say(
+      `Array 1 of ${SIZES.length}. Pass 1: is ${s.a[0]} bigger than ${s.a[1]}?`,
+    ),
   );
+  useEffect(() => sayOpening(), [api]);
   const max = Math.max(...s.a);
 
   function decide(swap: boolean) {

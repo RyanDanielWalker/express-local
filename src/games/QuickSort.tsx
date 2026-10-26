@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import {
   quickInit,
   quickNextRange,
@@ -30,7 +30,10 @@ export function QuickSortGame({ api }: GameProps) {
     while (a.every((v, i) => !i || a[i - 1] < v));
     return quickInit(a);
   });
-  useEffect(() => api.say(rangeIntro(s, N)), [api]);
+  // The opening message, once per ride. It reads the starting state
+  // without re-running each time that state changes.
+  const sayOpening = useEffectEvent(() => api.say(rangeIntro(s, N)));
+  useEffect(() => sayOpening(), [api]);
   const max = Math.max(...s.a);
 
   function decide(send: boolean) {

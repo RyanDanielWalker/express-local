@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { hashOf, lookup } from "../algorithms/searching";
 import { range, rnd, shuffle } from "../lib/random";
 import { useTimers } from "../hooks/useTimers";
@@ -53,16 +53,17 @@ export function HashTableGame({ api }: GameProps) {
     range(0, sizes[0] - 1).map(() => []),
   );
   const [lit, setLit] = useState<Lit | null>(null);
-  useEffect(
-    () =>
-      api.say(
-        <>
-          Table 1 of {sizes.length}: {sizes[0]} buckets. Where does{" "}
-          <b>{ops[0].k}</b> go?
-        </>,
-      ),
-    [api],
+  // The opening message, once per ride. It reads the starting state
+  // without re-running each time that state changes.
+  const sayOpening = useEffectEvent(() =>
+    api.say(
+      <>
+        Table 1 of {sizes.length}: {sizes[0]} buckets. Where does{" "}
+        <b>{ops[0].k}</b> go?
+      </>,
+    ),
   );
+  useEffect(() => sayOpening(), [api]);
 
   function pick(b: number) {
     if (api.over || oi >= ops.length) return;

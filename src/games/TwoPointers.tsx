@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import {
   hasPair,
   twoInit,
@@ -36,15 +36,16 @@ export function TwoPointersGame({ api }: GameProps) {
   };
   const [round, setRound] = useState(0);
   const [s, setS] = useState(() => build(0));
-  useEffect(
-    () =>
-      api.say(
-        <>
-          Array 1 of {ROUNDS}. Find two values that add to <b>{s.target}</b>.
-        </>,
-      ),
-    [api],
+  // The opening message, once per ride. It reads the starting state
+  // without re-running each time that state changes.
+  const sayOpening = useEffectEvent(() =>
+    api.say(
+      <>
+        Array 1 of {ROUNDS}. Find two values that add to <b>{s.target}</b>.
+      </>,
+    ),
   );
+  useEffect(() => sayOpening(), [api]);
   const pairs = (N * (N - 1)) / 2;
 
   function next() {
