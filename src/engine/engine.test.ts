@@ -37,7 +37,14 @@ import {
   solidIn,
 } from "./questions";
 import type { Flow, Question, Tier } from "./types";
-import { emptySave, exportSave, importSave, migrate } from "./save";
+import {
+  emptyProgress,
+  emptySave,
+  exportSave,
+  importSave,
+  loadSave,
+  migrate,
+} from "./save";
 import type { SaveData } from "./types";
 
 const NOW = new Date("2026-09-21T15:00:00").getTime();
@@ -69,6 +76,103 @@ describe("save data", () => {
 
   it("explains what is wrong with a bad code", () => {
     expect(() => importSave("hello")).toThrow(/save code/);
+  });
+});
+
+describe("damaged saves", () => {
+  const line = LINES.find((l) => l.questions?.length)!;
+  const question = line.questions![0];
+
+  it("keeps every field of a good save", () => {
+    let s = finishTrip(emptySave(), outcome, NOW).save;
+    s = recordAnswers(s, [{ lineId: line.id, question, correct: false }], NOW);
+    s = finishRehearsal(
+      s,
+      { lineId: "di", nailed: [], shaky: ["c"] },
+      NOW,
+    ).save;
+    ensureDailyPick(s, NOW);
+    expect(migrate(JSON.parse(JSON.stringify(s)))).toEqual(s);
+  });
+
+  it("swaps a field of the wrong type for its default", () => {
+    const s = migrate({
+      xp: "lots",
+      levels: {},
+      badges: ["first"],
+      stats: "busy",
+      streak: { count: -3, last: 7 },
+      daily: 5,
+      questions: "all of them",
+      rehearsal: { di: { last: 1, shaky: 5 } },
+    });
+    expect(s).toEqual({
+      ...emptySave(),
+      rehearsal: { di: { last: 1, shaky: [] } },
+    });
+  });
+
+  it("drops entries it cannot read and keeps the rest", () => {
+    const stat = { seen: 2, missed: 1, last: 5 };
+    const s = migrate({
+      levels: { sq: "cleared", bfs: { cleared: true, tier: 2 } },
+      questions: { a: null, b: stat, c: { seen: "2", missed: 0, last: 0 } },
+      badges: { first: "2026-10-01", bad: 1 },
+      rehearsal: { di: { last: 1, shaky: ["ok", 2] }, ts: [] },
+    });
+    expect(Object.keys(s.levels)).toEqual(["bfs"]);
+    expect(s.questions).toEqual({ b: stat });
+    expect(s.badges).toEqual({ first: "2026-10-01" });
+    expect(s.rehearsal).toEqual({ di: { last: 1, shaky: ["ok"] } });
+  });
+
+  it("resets line progress it cannot trust", () => {
+    const p = migrate({
+      levels: {
+        bfs: {
+          cleared: "yes",
+          box: 99,
+          due: "soon",
+          trips: -1,
+          tier: 7,
+          best: { 1: { m: 0, t: 40 }, 2: "fast", 9: { m: 0, t: 1 } },
+        },
+      },
+    }).levels.bfs;
+    expect(p).toEqual({ ...emptyProgress(), best: { 1: { m: 0, t: 40 } } });
+  });
+
+  it("leaves out keys a save should not have", () => {
+    expect(migrate({ levels: {}, admin: true })).toEqual(emptySave());
+  });
+
+  it("drops a Daily Ride pick that is not a pick, without crashing", () => {
+    for (const dailyPick of ["bfs", 3, { day: 1, id: "bfs" }])
+      expect(migrate({ levels: {}, dailyPick }).dailyPick).toBeUndefined();
+  });
+
+  it("refuses a code whose line progress is not a set of lines", () => {
+    for (const levels of [null, [], "bfs", 3])
+      expect(() => importSave(JSON.stringify({ levels }))).toThrow(
+        /line progress/,
+      );
+  });
+
+  it("keeps the good parts of a damaged save in this browser", () => {
+    const txt = JSON.stringify({ xp: 50, levels: {}, dailyPick: "bfs" });
+    expect(loadSave({ getItem: () => txt }).xp).toBe(50);
+  });
+
+  it("loads a damaged code that can still be played", () => {
+    const id = LINES[outcome.lineIdx].id;
+    const s = importSave(
+      `{"xp":1e999,"levels":{"${id}":{"cleared":true,"box":99,"best":"fast"}},` +
+        `"rehearsal":{"${id}":{"last":0,"shaky":5}}}`,
+    );
+    expect(s.xp).toBe(0);
+    expect(Number.isFinite(readinessOf(LINES, s, NOW))).toBe(true);
+    expect(s.rehearsal[id]?.shaky).toEqual([]);
+    expect(() => finishTrip(s, outcome, NOW)).not.toThrow();
   });
 });
 

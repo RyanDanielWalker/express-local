@@ -104,7 +104,9 @@ Readiness (the headline number per division) comes from `readinessReport()`: wha
 
 ## Saves
 
-`engine/save.ts` defines `SaveData`, `emptySave()` and `migrate()`. Saves refer to lines by id, never by position, so lines can be added anywhere. A new save field needs a default in `emptySave()` and handling in `migrate()`, so old saves keep loading. Unlock order is the order of lines inside a division.
+`engine/save.ts` defines `SaveData`, `emptySave()` and `migrate()`. Saves refer to lines by id, never by position, so lines can be added anywhere. A new save field needs a default in `emptySave()` and a check in `migrate()`, so old saves keep loading.
+
+A save from `localStorage` or a pasted code is untrusted input, and `migrate()` is where it gets checked. It builds a new save field by field: a field of the wrong type gets its default, an entry it can't read is dropped, and keys a save doesn't have are left out. So `migrate()` never throws on parsed JSON, and a field it doesn't list is lost on the next load. `importSave()` also refuses a code with no readable line progress. See [ADR 0015](adr/0015-repair-damaged-saves.md). Unlock order is the order of lines inside a division.
 
 ## What keeps content from shipping broken
 

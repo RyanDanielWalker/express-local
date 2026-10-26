@@ -40,7 +40,7 @@ React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5. No backend; progress liv
 ## Code rules
 
 - Game rules and scoring are pure functions with tests, in `src/algorithms/` or `src/engine/`. Components ask and render; they never decide what's correct.
-- Don't break saves. A new save field needs a default in `emptySave()` and handling in `migrate()`.
+- Don't break saves. A new save field needs a default in `emptySave()` and a check in `migrate()`. `migrate()` builds the save field by field, so a field it doesn't list is dropped on the next load ([ADR 0015](docs/adr/0015-repair-damaged-saves.md)).
 - Use `useTimers()` (cleaned up on unmount) and `useKeys()` for keyboard shortcuts.
 - Tiers: 1 Local, 2 Express, 3 Rush Hour. `api.assist` is false on Rush Hour; hide helper panels when it is.
 - After tests pass, break the code once on purpose and confirm a test catches it.
