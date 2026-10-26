@@ -2,6 +2,7 @@
   "name": "express-local",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "A subway-themed practice app for technical interviews: algorithms, NestJS, React and TypeScript.",
   "scripts": {
