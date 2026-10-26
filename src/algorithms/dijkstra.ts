@@ -63,7 +63,10 @@ function connected(adj: Neighbor[][]): boolean {
   const stack = [0];
   while (stack.length)
     for (const { v } of adj[stack.pop()!])
-      if (!seen.has(v)) (seen.add(v), stack.push(v));
+      if (!seen.has(v)) {
+        seen.add(v);
+        stack.push(v);
+      }
   return seen.size === adj.length;
 }
 

@@ -27,9 +27,8 @@ export function TwoPointersGame({ api }: GameProps) {
       return a[p] + a[rnd(p + 1, N - 1)];
     };
     if (round < ROUNDS - 1) return twoInit(a, present());
-    let target = 0;
     for (let tries = 0; tries < 300; tries++) {
-      target = rnd(a[0] + a[1], a[N - 1] + a[N - 2]);
+      const target = rnd(a[0] + a[1], a[N - 1] + a[N - 2]);
       if (!hasPair(a, target)) return twoInit(a, target);
     }
     return twoInit(a, present());
@@ -101,8 +100,14 @@ export function TwoPointersGame({ api }: GameProps) {
   }
 
   useKeys((e) => {
-    if (e.key === "ArrowRight") (e.preventDefault(), move("lo"));
-    if (e.key === "ArrowLeft") (e.preventDefault(), move("hi"));
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      move("lo");
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      move("hi");
+    }
     if (e.key === "f" || e.key === "F") move("found");
   });
 

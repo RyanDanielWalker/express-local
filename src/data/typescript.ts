@@ -559,7 +559,7 @@ export const TS_LINES: Line[] = [
       {
         t: 2,
         q: "What does `K extends keyof T` give you here?",
-        code: `function get<T, K extends keyof T>(obj: T, key: K): T[K]\n\nconst user = { id: \'1\', age: 38 };`,
+        code: `function get<T, K extends keyof T>(obj: T, key: K): T[K]\n\nconst user = { id: '1', age: 38 };`,
         opts: [
           "Real keys, with the matching value type",
           "Any string at all as a key, with an any value",
