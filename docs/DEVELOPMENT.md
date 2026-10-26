@@ -44,6 +44,23 @@ A future reformatting commit gets its full hash added to that file, and its bran
 
 Use these scripts rather than calling the tools directly. `tsc -b`, for example, writes a `tsconfig.tsbuildinfo` file the repo does not want.
 
+## CI
+
+Every push and pull request runs `.github/workflows/ci.yml` on GitHub Actions, on the Node version in `.nvmrc` ([ADR 0013](adr/0013-ci-on-github-actions.md)). It runs these steps in order and stops at the first failure:
+
+1. `npm ci`, here and in `probes/ts`
+2. `npm run format:check`
+3. `npm run lint`
+4. `npm run typecheck`
+5. `npm test`, which includes the bar
+6. `npm run check` in `probes/ts`
+7. `npm run build`
+8. `npm audit --omit=dev`, which reports but never fails the run
+
+To reproduce a red run, run the same step locally. The React and Nest probes are not in CI. Run them by hand when content changes.
+
+The actions are pinned to a commit hash, with the release beside it in a comment. To bump one, find the new release's commit (`gh api repos/actions/checkout/commits/<tag> --jq .sha`) and change the hash and the comment together.
+
 ## Working agreement
 
 Ryan owns the project and makes the calls. Claude is the senior engineer: it writes the code and the content, and explaining the work is part of the job.

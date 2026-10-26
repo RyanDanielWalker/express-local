@@ -1,0 +1,64 @@
+# Runs every check from the working agreement on each push and pull request.
+# Actions are pinned to a commit, with the release it belongs to beside it.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            probes/ts/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Install the TypeScript probes
+        run: npm ci
+        working-directory: probes/ts
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests, the bar included
+        run: npm test
+
+      - name: TypeScript probes on 5.9, 6.0 and 7.0
+        run: npm run check
+        working-directory: probes/ts
+
+      - name: Build
+        run: npm run build
+
+      # Reports advisories in what ships to the browser, without failing the run.
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev
+        continue-on-error: true
