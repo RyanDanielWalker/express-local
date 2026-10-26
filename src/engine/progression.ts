@@ -1,12 +1,9 @@
 import { LINES } from "../data";
 import { qid } from "./questions";
-import { emptyProgress } from "./save";
+import { BOX_DAYS, emptyProgress } from "./save";
 import type { Line, LineProgress, SaveData, Tier } from "./types";
 
 export const DAY = 864e5;
-/** Leitner boxes: days until the next review after each successful one. */
-export const BOX_DAYS = [1, 3, 7, 14, 30];
-
 export const TIERS: Record<
   Tier,
   { name: string; mult: number; blurb: string }
