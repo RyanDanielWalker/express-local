@@ -163,9 +163,10 @@ NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
 - [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and independently reviewed
 - [x] **React:** eight lines clearing the bar, every claim run against React 19.3, and independently reviewed
-- [ ] **Foundation:** formatting and lint, CI on every push, a live deploy, and an end-to-end test
+- [ ] **Foundation:** formatting and lint, CI on every push, and an end-to-end test
 - [ ] **No repeats:** rework questions that test the same fact as another question
 - [ ] **Reorganize the page:** a Today band, a play mode that takes over the screen, and real URLs
+- [ ] **Ship 1.0:** a live deploy, a case study, and a `v1.0` tag
 
 ## How this was built
 

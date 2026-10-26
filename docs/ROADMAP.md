@@ -24,11 +24,10 @@ Depth first ([ADR 0002](adr/0002-depth-first.md)): finish one thing completely, 
 
 ### 1. Foundation
 
-The checks and the deploy go in before more features, so every later change is checked and shipped the same way.
+The checks go in before more features, so every later change is checked the same way. The deploy waits until the end ([ADR 0014](adr/0014-deploy-last.md)).
 
 - [x] **Prettier and ESLint.** Defaults, applied in one formatting commit listed in `.git-blame-ignore-revs` so `git blame` skips it. Prettier picks whichever quote needs fewer escapes, which retires the escaped-apostrophe trap in the data files.
 - [x] **CI on every push and pull request.** `.github/workflows/ci.yml` runs the format check, lint, typecheck, `npm test`, the TypeScript probes and the build, then `npm audit --omit=dev` without blocking ([ADR 0013](adr/0013-ci-on-github-actions.md)). `npm audit fix` cleared the four dev-tooling advisories first (Vite 8.3.5, Vitest 5.0.5, source-map-js 1.2.2).
-- [ ] **Deploy** the static build from `main` to a host that waits for CI, with security headers. Fix `index.html`'s meta description first: it still calls this a game for learning algorithms, and it is what a shared link shows. The repo is private, and GitHub only enforces a required check (branch protection) on a private repo on a paid plan. So decide first: make the repo public, which a portfolio piece needs anyway, or have the host wait for the check itself.
 - [ ] **Validate pasted save codes.** `importSave` only checks for a `levels` key, then `migrate` spreads whatever else it finds into the save, so a damaged code could break the app later. Hand-written checks in `migrate()`, with tests for bad shapes. A good first `/next learn` item: "how do you treat input you don't control?" is a real interview question.
 - [ ] **One end-to-end test** with Playwright against the production build: ride a line on Local, reach the results screen, and round-trip a save code.
 
@@ -90,6 +89,7 @@ What a visitor notices first. In this order:
 
 ### 6. Ship 1.0
 
+- [ ] **Deploy** the static build from `main`, with security headers ([ADR 0014](adr/0014-deploy-last.md)). Fix `index.html`'s meta description first: it still calls this a game for learning algorithms, and it is what a shared link shows. Decide first whether the repo goes public. A public repo lets a visitor read the code, and lets GitHub block a deploy until CI passes (branch protection on a private repo needs a paid plan). A private repo can still deploy: the CI workflow runs the deploy as its last step, only after every check passes.
 - [ ] `/audit quiz`: Ryan answers the likely interview questions about the app, one at a time.
 - [ ] **The case study**, `docs/CASE-STUDY.md`, written by Ryan in his own words: what was built, what broke, what was decided and why, and how he worked with Claude. Claude can review it, not write it.
 - [ ] Tag `v1.0`, then decide what's next from **Parked**, and record the decision in an ADR.
