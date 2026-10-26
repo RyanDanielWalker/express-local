@@ -135,6 +135,8 @@ Requires Node.js 22.12+.
 npm install
 npm run dev        # http://localhost:5173
 npm test           # unit and content tests
+npm run lint       # ESLint
+npm run format     # Prettier
 npm run bar        # where each line stands against the quality bar
 npm run build      # typecheck and production build into dist/
 ```

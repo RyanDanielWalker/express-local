@@ -61,8 +61,8 @@ A line isn't done until it clears the bar and every claim on it is proven.
 1. **Tests first, or alongside.** Pure logic goes in `src/engine/` or `src/algorithms/` with tests, not in components.
 2. **Break it on purpose once.** After the tests pass, change the code so it is wrong in the way the tests are meant to catch, confirm they fail, then put it back. Say in the report what you broke and which test caught it. A test that can't fail proves nothing.
 3. **Keep saves working.** A new save field needs a default in `emptySave()` and handling in `migrate()`.
-4. **Run it.** `npm run typecheck`, `npm test`, `npm run build`. For anything a player sees, `npm run preview` and actually play it: Local at least twice, the browser console clean, phone width and dark mode for layout changes. If you have no browser tool, write Ryan the exact steps to check (which line, which tier, what to look for) and say in the report that it is not yet checked in a browser.
-5. **Commit small.** `feat:`, `fix:`, `refactor:`, `test:`, `chore:`. Subject says what, body says why.
+4. **Run it.** `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test`, `npm run build`. For anything a player sees, `npm run preview` and actually play it: Local at least twice, the browser console clean, phone width and dark mode for layout changes. If you have no browser tool, write Ryan the exact steps to check (which line, which tier, what to look for) and say in the report that it is not yet checked in a browser.
+5. **Commit small.** `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `style:`. Subject says what, body says why.
 
 ## 5. Keep the docs true
 
@@ -81,7 +81,7 @@ In the same commits as the work, not after:
 1. Read the full diff (`git diff origin/main...HEAD`) as if someone else wrote it and you expect it to be wrong.
 2. For content: run the `fact-checker` agent on what you changed. It didn't write it, so it isn't grading its own work. Verify each finding by re-running its probe before you change anything. Fix what's real, then have a fresh `fact-checker` re-check only the fields the fixes touched.
 3. If the item is an **inventory stop**, do the whole procedure in `docs/DEVELOPMENT.md` under "Inventory stops", and end it with a commit whose subject starts with `docs: inventory stop` so the next stop can find it.
-4. Final checks: `npm test`, `npm run bar`, `npm run build`, `git status` clean, nothing stray left in the repo (build caches, scratch files outside the `_review/` folders in `probes/`).
+4. Final checks: `npm test`, `npm run lint`, `npm run format:check`, `npm run bar`, `npm run build`, `git status` clean, nothing stray left in the repo (build caches, scratch files outside the `_review/` folders in `probes/`).
 
 ## 7. Report, then stop
 

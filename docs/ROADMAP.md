@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
-Status: 34 lines across 4 divisions, 98 tests, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
+Status: 34 lines across 4 divisions, 99 tests, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
 
 ## Next, in order
 
@@ -26,9 +26,9 @@ Depth first ([ADR 0002](adr/0002-depth-first.md)): finish one thing completely, 
 
 The checks and the deploy go in before more features, so every later change is checked and shipped the same way.
 
-- [ ] **Prettier and ESLint.** Defaults, applied in one formatting commit listed in `.git-blame-ignore-revs` so `git blame` skips it. Prettier picks whichever quote needs fewer escapes, which retires the escaped-apostrophe trap in the data files.
-- [ ] **CI on every push and pull request.** Format check, lint, typecheck, `npm test`, `npm run check` in `probes/ts`, build, and `npm audit --omit=dev` without blocking.
-- [ ] **Deploy** the static build from `main` to a host that waits for CI, with security headers.
+- [x] **Prettier and ESLint.** Defaults, applied in one formatting commit listed in `.git-blame-ignore-revs` so `git blame` skips it. Prettier picks whichever quote needs fewer escapes, which retires the escaped-apostrophe trap in the data files.
+- [ ] **CI on every push and pull request.** Format check, lint, typecheck, `npm test`, `npm run check` in `probes/ts`, build, and `npm audit --omit=dev` without blocking. `npm audit` already reports four advisories in dev tooling (Vite 8.3.0 to 8.3.2, Vitest 5.0.0 to 5.0.2, source-map-js); `npm audit fix` bumps them, so do that here and check the build and tests after.
+- [ ] **Deploy** the static build from `main` to a host that waits for CI, with security headers. Fix `index.html`'s meta description first: it still calls this a game for learning algorithms, and it is what a shared link shows.
 - [ ] **Validate pasted save codes.** `importSave` only checks for a `levels` key, then `migrate` spreads whatever else it finds into the save, so a damaged code could break the app later. Hand-written checks in `migrate()`, with tests for bad shapes. A good first `/next learn` item: "how do you treat input you don't control?" is a real interview question.
 - [ ] **One end-to-end test** with Playwright against the production build: ride a line on Local, reach the results screen, and round-trip a save code.
 
@@ -238,4 +238,5 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-16** Independent review of React: 55 items fixed, re-checked, and React added to `FINISHED`
 - **2026-10-16** React gaps closed: Fare Machine (forms and Actions), Arrivals Board (Suspense and error boundaries), and `useEffectEvent` and `<Activity>` on Side Track. React has no open items
 - **2026-10-16** Consistency pass across all 34 lines: older React answers updated for `<Activity>`, Actions and `useEffectEvent`, two React questions that repeated others replaced, stale comments and docs fixed, and the new lines played end to end in a browser
+- **2026-10-26** Prettier and ESLint: the repo formatted in one commit that `git blame` skips, and all 18 lint findings fixed, among them state changed in place in the stack and queue game and the clock read during render
 - **2026-10-17** Moved to a terminal workflow: `CLAUDE.md` rewritten for Claude Code, `docs/` (this roadmap, architecture, development, decision records), the `/next` command, a `fact-checker` agent, the fact-check sandboxes committed under `probes/`, and a test that keeps question ids unique within a line

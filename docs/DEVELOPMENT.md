@@ -21,14 +21,26 @@ The app is not deployed. It runs locally.
 
 ## Scripts
 
-| Command             | What it does                                                                                   |
-| ------------------- | ---------------------------------------------------------------------------------------------- |
-| `npm run dev`       | Dev server with hot reload                                                                     |
-| `npm test`          | Every test: algorithms, engine, content, the bar, the results screen. Run before every commit. |
-| `npm run typecheck` | `tsc --noEmit` over `src`                                                                      |
-| `npm run build`     | Typecheck, then a production build into `dist/`                                                |
-| `npm run preview`   | Serve the production build locally                                                             |
-| `npm run bar`       | Where every line stands against the quality bar, division by division                          |
+| Command             | What it does                                                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| `npm run dev`       | Dev server with hot reload                                                                                |
+| `npm test`          | Every test: algorithms, engine, content, the bar, the results screen. Run before every commit.            |
+| `npm run typecheck` | `tsc --noEmit` over `src`                                                                                 |
+| `npm run build`     | Typecheck, then a production build into `dist/`                                                           |
+| `npm run preview`   | Serve the production build locally                                                                        |
+| `npm run bar`       | Where every line stands against the quality bar, division by division                                     |
+| `npm run lint`      | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.  |
+| `npm run format`    | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit. |
+
+Both skip `probes/`. Those are sandboxes with their own packages, and some depend on exact line placement, like a `@ts-expect-error` on the line above an error.
+
+So that `git blame` skips commits that only reformat, run this once:
+
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+A future reformatting commit gets its full hash added to that file, and its branch is merged with a merge commit. Squashing or rebasing gives the commit a new hash, and the file would point at nothing.
 
 Use these scripts rather than calling the tools directly. `tsc -b`, for example, writes a `tsconfig.tsbuildinfo` file the repo does not want.
 
@@ -39,7 +51,7 @@ Ryan owns the project and makes the calls. Claude is the senior engineer: it wri
 - **Commit, never push.** Work happens in small commits as the work goes, not one big commit at the end. Ryan reviews with `git log origin/main..HEAD` and `git show <sha>`, then pushes himself. Never push, and never rewrite a commit that has been pushed.
 - **No co-author trailer.** `.claude/settings.json` turns off Claude Code's commit and pull request attribution. The README's **How this was built** section and each pull request's **Who wrote what** line carry the disclosure instead ([ADR 0012](adr/0012-disclose-ai-in-the-readme.md)). If Ryan writes a piece himself (a `/next learn` item), add it to that README section.
 - **Features on a branch, small fixes on `main`** ([ADR 0011](adr/0011-branches-for-features.md)). A roadmap item (a feature, a content block, a refactor, anything risky) gets a branch named for it, like `feat/router` or `content/near-duplicates`. Ryan pushes the branch, opens a pull request from the template in `.github/`, and merges when CI is green. A docs fix, a wording tweak, moving a button or some padding goes straight to `main`. When unsure, branch.
-- **Conventional Commits.** `feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`, with an optional scope like `fix(react):`. The subject says what changed. The body says why, in plain sentences.
+- **Conventional Commits.** `feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`, and `style:` for a commit that only reformats, with an optional scope like `fix(react):`. The subject says what changed. The body says why, in plain sentences.
 - **Content commits say what they were checked against.** The body ends with a `Checked against:` line naming the docs page (as a URL path) and the probe that proved it, for example: `Checked against: react.dev/reference/react/useActionState; probes/react/forms.tsx.`
 - **Stop for real decisions.** Anything about scope, product direction, or a tradeoff Ryan would care about gets two or three options and a recommendation before work starts. Routine choices get made, then mentioned in the report.
 - **Plain English.** Explanations to Ryan follow the same clarity standard as the content: one idea per sentence, the example before the name, every term defined.
@@ -84,9 +96,9 @@ When a block of content work is done, and always before an inventory stop:
 
 ## Editing content files
 
-The data files are large TypeScript files of single-quoted strings.
+The data files are large TypeScript files of strings.
 
-- An apostrophe inside a single-quoted string must be escaped (`'don\'t'`), or use a double-quoted string for that one value. When a script writes the file, double-check it didn't escape twice (`\\'`), which has broken the file before.
+- Run `npm run format` after editing. Prettier picks whichever quote needs fewer escapes, so `"don't"` needs none. ESLint flags a needless `\'`. When a script writes the file, double-check it didn't escape twice (`\\'`), which has broken the file before.
 - A question's answer appears twice: once in `opts` and again in `a`. Change both, or the test that checks the answer is an option fails.
 - Rewording a question's `q` or `code` resets the player's history for that question (see [ARCHITECTURE.md](ARCHITECTURE.md#a-question)). That's fine, just know it.
 - Sort card names cannot contain the first word of their own box, and cannot contain backticks.
@@ -116,7 +128,7 @@ git diff <that sha>..HEAD -- src/data/                     # what changed since
 The roadmap's status line names the last stop's commit until the first one made this way exists. At each stop:
 
 1. The fact-check pass above, over everything changed since the last stop.
-2. `npm test`, `npm run bar`, `npm run build`, and the probes (see "What counts as passing" in [probes/README.md](../probes/README.md)): `npm run check` in `probes/ts`, and every React and Nest probe that backs changed content.
+2. `npm test`, `npm run lint`, `npm run format:check`, `npm run bar`, `npm run build`, and the probes (see "What counts as passing" in [probes/README.md](../probes/README.md)): `npm run check` in `probes/ts`, and every React and Nest probe that backs changed content.
 3. Play every changed line in a browser.
 4. Read `README.md`, `CLAUDE.md` and everything in `docs/` against the code. Every number and claim must still be true.
 5. `git status` clean, nothing stray (build caches, scratch files) left in the repo.

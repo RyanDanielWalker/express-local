@@ -16,7 +16,7 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 ## How we work
 
 - **Ryan owns it, Claude is the senior engineer.** Claude writes the code and content; Ryan makes the calls, reviews every commit, and pushes. Explaining the work in plain English is part of the deliverable.
-- **Commit, never push.** Small Conventional Commits as the work goes (`feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`). Subject says what, body says why. Content commits end with what they were checked against. Never push, never rewrite a pushed commit. No Claude co-author trailer: the README's How this was built section carries the disclosure instead ([ADR 0012](docs/adr/0012-disclose-ai-in-the-readme.md)).
+- **Commit, never push.** Small Conventional Commits as the work goes (`feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`, and `style:` for a commit that only reformats). Subject says what, body says why. Content commits end with what they were checked against. Never push, never rewrite a pushed commit. No Claude co-author trailer: the README's How this was built section carries the disclosure instead ([ADR 0012](docs/adr/0012-disclose-ai-in-the-readme.md)).
 - **Features on a branch, small fixes on `main`.** A roadmap item (a feature, a content block, a refactor, anything risky) goes on a branch named for it, like `feat/router` or `content/near-duplicates`. Ryan pushes it and opens a pull request. A docs fix, a wording tweak or some padding goes straight to `main`. When unsure, branch ([ADR 0011](docs/adr/0011-branches-for-features.md)).
 - **Stop for real decisions** with two or three options and a recommendation. Make routine choices and mention them.
 - **Keep the docs true** in the same commit. A significant decision gets an ADR.
@@ -28,7 +28,9 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5. No backend; progress lives in `localStorage`. Node 22.12+ for the app (Vitest needs it), 22.22.2+ or 24.15+ for the React probes. `.nvmrc` says 22.
 
 - `npm run dev`: dev server at http://localhost:5173
-- `npm test`: every test (run before every commit)
+- `npm test`: every test (run before every commit, with `lint` and `format:check`)
+- `npm run lint`: ESLint, with the React hooks rules
+- `npm run format`: Prettier on default settings (`format:check` only reports). Skips `probes/`.
 - `npm run typecheck`: `tsc --noEmit`
 - `npm run build`: typecheck and production build
 - `npm run preview`: serve the production build
@@ -86,13 +88,15 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 
 ## Known traps
 
-- **Escaped quotes.** The data files are single-quoted strings. An apostrophe needs `\'`. A script that writes `\\'` breaks the file; this has happened several times.
+- **Quotes.** Run `npm run format` after editing; Prettier picks the quote that needs fewer escapes, so write `"don't"`, not `'don\'t'`. A script that writes `\\'` into a file still breaks it.
+- **A reformatting commit** goes in `.git-blame-ignore-revs`, and its branch is merged with a merge commit, never squashed or rebased, so the hash in that file survives.
 - **An answer lives in two places**, `opts` and `a`. Change both.
 - **Rewording a question resets its history.** A question's id is its line id plus a hash of its `q` and `code`, so moving it to another line resets it too.
 - **Rebalancing option lengths can make a wrong option true.** Re-prove after every rewording.
 - **jsdom details:** submit forms with `button.click()`; use jsdom's own `FormData` (the probes harness does). A Suspense boundary hides old content with `display: none` but leaves it in the DOM, so `textContent` still includes it.
 - **React facts that look wrong in the docs:** an effect loop only warns, it isn't stopped. StrictMode runs setup, cleanup, setup but keeps state (not a real remount). Error boundaries catch errors in rendering, effects and Actions like a form action, but not in plain event handlers or timers.
 - **NestJS facts that look wrong in the docs:** `@HttpCode()` still applies alongside `@Res()`. A missing `@Injectable()` can boot with an undefined dependency instead of failing.
+- **Undo a planted bug by hand**, not with `git checkout -- <file>`, unless the real change is committed first. Checkout throws away every uncommitted edit in the file, not just the planted one.
 - **Don't run `tsc -b`.** It leaves a `tsconfig.tsbuildinfo` in the repo. Use the npm scripts.
 - **Don't kill processes by a pattern** (`pkill -f "vite preview"`) in a shell whose own command line matches it. Kill by PID or port.
 - **The bundle is over 700 kB.** Vite's size warning on build is expected for now; splitting it is on the roadmap.

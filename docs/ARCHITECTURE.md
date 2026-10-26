@@ -14,7 +14,7 @@ src/
   games/        one component per algorithm line, plus QuizRun, QuizGame, FlowGame and SortGame
   components/   screens and shared UI: header, map, intro, play screen, results, rehearsal, badges
   hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount)
-  lib/          small helpers (random picks and shuffles, station labels)
+  lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals)
   styles/       one stylesheet, app.css
 probes/         sandboxes that prove the content against real code (not part of the app)
 ```
