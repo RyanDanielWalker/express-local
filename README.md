@@ -112,6 +112,7 @@ A few choices that shape how the app teaches. [docs/ROADMAP.md](docs/ROADMAP.md)
 - **Scoring is pure.** `finishTrip()`, `finishCram()`, `finishRehearsal()` and `finishDerail()` take a save and a run and return a new save plus everything the results screen shows. Readiness is computed from the save, never stored.
 - **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier with room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha in its field guide, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS, TypeScript and React) fail the tests if any line slips.
 - **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration), validate every piece of content, and render the results screen for every line.
+- **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes and a production build on each push and pull request.
 - **Accessible.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced-motion support, and light and dark themes.
 
 ```

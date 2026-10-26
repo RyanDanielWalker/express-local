@@ -27,8 +27,8 @@ Depth first ([ADR 0002](adr/0002-depth-first.md)): finish one thing completely, 
 The checks and the deploy go in before more features, so every later change is checked and shipped the same way.
 
 - [x] **Prettier and ESLint.** Defaults, applied in one formatting commit listed in `.git-blame-ignore-revs` so `git blame` skips it. Prettier picks whichever quote needs fewer escapes, which retires the escaped-apostrophe trap in the data files.
-- [ ] **CI on every push and pull request.** Format check, lint, typecheck, `npm test`, `npm run check` in `probes/ts`, build, and `npm audit --omit=dev` without blocking. `npm audit` already reports four advisories in dev tooling (Vite 8.3.0 to 8.3.2, Vitest 5.0.0 to 5.0.2, source-map-js); `npm audit fix` bumps them, so do that here and check the build and tests after.
-- [ ] **Deploy** the static build from `main` to a host that waits for CI, with security headers. Fix `index.html`'s meta description first: it still calls this a game for learning algorithms, and it is what a shared link shows.
+- [x] **CI on every push and pull request.** `.github/workflows/ci.yml` runs the format check, lint, typecheck, `npm test`, the TypeScript probes and the build, then `npm audit --omit=dev` without blocking ([ADR 0013](adr/0013-ci-on-github-actions.md)). `npm audit fix` cleared the four dev-tooling advisories first (Vite 8.3.5, Vitest 5.0.5, source-map-js 1.2.2).
+- [ ] **Deploy** the static build from `main` to a host that waits for CI, with security headers. Fix `index.html`'s meta description first: it still calls this a game for learning algorithms, and it is what a shared link shows. The repo is private, and GitHub only enforces a required check (branch protection) on a private repo on a paid plan. So decide first: make the repo public, which a portfolio piece needs anyway, or have the host wait for the check itself.
 - [ ] **Validate pasted save codes.** `importSave` only checks for a `levels` key, then `migrate` spreads whatever else it finds into the save, so a damaged code could break the app later. Hand-written checks in `migrate()`, with tests for bad shapes. A good first `/next learn` item: "how do you treat input you don't control?" is a real interview question.
 - [ ] **One end-to-end test** with Playwright against the production build: ride a line on Local, reach the results screen, and round-trip a save code.
 
@@ -162,6 +162,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **Scenario mode.** Read a real situation, pick the right tool. Still the best idea in this file, and it needs the content above to draw from.
 - **Interface extras.** Badges become a count that opens a panel. Tabs on the intro screen (Ride / Field guide / Say it out loud). Split `App.tsx` into `useRun` and `useDrills` (pick this up with the router if `App.tsx` gets in the way).
 - **Upgrade the build to TypeScript 6.** The app builds with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
+- **Dependabot for the workflow and npm.** The CI actions are pinned to commit hashes, which never update themselves ([ADR 0013](adr/0013-ci-on-github-actions.md)). Dependabot would open a pull request for each new release. Bumping by hand is fine while there are two actions.
 - **Split the bundle by division.** Every question ships in one chunk, over 700 kB (about 225 kB gzipped). `LINES` is a synchronous array used everywhere, so it is a real refactor.
 
 ## Later: engine ideas
@@ -238,5 +239,6 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-16** Independent review of React: 55 items fixed, re-checked, and React added to `FINISHED`
 - **2026-10-16** React gaps closed: Fare Machine (forms and Actions), Arrivals Board (Suspense and error boundaries), and `useEffectEvent` and `<Activity>` on Side Track. React has no open items
 - **2026-10-16** Consistency pass across all 34 lines: older React answers updated for `<Activity>`, Actions and `useEffectEvent`, two React questions that repeated others replaced, stale comments and docs fixed, and the new lines played end to end in a browser
-- **2026-10-26** Prettier and ESLint: the repo formatted in one commit that `git blame` skips, and all 18 lint findings fixed, among them state changed in place in the stack and queue game and the clock read during render
 - **2026-10-17** Moved to a terminal workflow: `CLAUDE.md` rewritten for Claude Code, `docs/` (this roadmap, architecture, development, decision records), the `/next` command, a `fact-checker` agent, the fact-check sandboxes committed under `probes/`, and a test that keeps question ids unique within a line
+- **2026-10-26** Prettier and ESLint: the repo formatted in one commit that `git blame` skips, and all 18 lint findings fixed, among them state changed in place in the stack and queue game and the clock read during render
+- **2026-10-26** CI on GitHub Actions for every push and pull request, and the dev-tooling audit advisories cleared
