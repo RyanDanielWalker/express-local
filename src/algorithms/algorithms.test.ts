@@ -36,7 +36,7 @@ import {
   dijRelax,
   dijShouldUpdate,
 } from "./dijkstra";
-import { sqNext, sqRemove } from "./stackQueue";
+import { splitPools, sqNext, sqPatterns, sqRemove } from "./stackQueue";
 import { range, shuffle } from "../lib/random";
 
 const sorted = (a: number[]) => [...a].sort((x, y) => x - y);
@@ -47,6 +47,15 @@ describe("stack vs queue", () => {
     expect(sqNext("stack", [4, 9, 2])).toBe(2);
     expect(sqNext("queue", [4, 9, 2])).toBe(4);
     expect(sqRemove("queue", [4, 9, 2])).toEqual([9, 2]);
+  });
+
+  it("each script gets one value per push, and no value is used twice", () => {
+    const scripts = [...sqPatterns(1), ...sqPatterns(3)];
+    const pools = splitPools(scripts, range(10, 98));
+    pools.forEach((pool, i) =>
+      expect(pool.length).toBe(scripts[i].filter((x) => x === "push").length),
+    );
+    expect(new Set(pools.flat()).size).toBe(pools.flat().length);
   });
 });
 

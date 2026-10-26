@@ -3,6 +3,7 @@ import {
   sqNext,
   sqPatterns,
   sqRemove,
+  splitPools,
   type SqMode,
   type SqOp,
 } from "../algorithms/stackQueue";
@@ -16,6 +17,8 @@ import type { GameProps } from "./types";
 interface Scenario {
   mode: SqMode;
   steps: SqOp[];
+  /** The values this scenario pushes, in order. */
+  pool: number[];
   k: number;
   items: number[];
   log: { op: SqOp; v?: number }[];
@@ -24,10 +27,10 @@ interface Scenario {
 }
 
 /** Run pushes until the next remove. Returns null when the script is done. */
-function advance(sc: Scenario, nextVal: () => number): Scenario | null {
+function advance(sc: Scenario): Scenario | null {
   let { k, items, log } = sc;
   while (k < sc.steps.length && sc.steps[k] === "push") {
-    const v = nextVal();
+    const v = sc.pool[log.filter((e) => e.op === "push").length];
     items = [...items, v];
     log = [...log, { op: "push", v }];
     k++;
@@ -55,27 +58,23 @@ export function StackQueueGame({ api }: GameProps) {
     return {
       modes,
       scripts,
-      vals: shuffle(range(10, 98)),
+      pools: splitPools(scripts, shuffle(range(10, 98))),
       total: scripts.reduce(
         (a, s) => a + s.filter((x) => x === "pop").length,
         0,
       ),
     };
   });
-  const [vi] = useState(() => ({ n: 0 }));
-  const nextVal = () => plan.vals[vi.n++];
   const fresh = (si: number) =>
-    advance(
-      {
-        mode: plan.modes[si],
-        steps: plan.scripts[si],
-        k: 0,
-        items: [],
-        log: [],
-        display: [],
-      },
-      nextVal,
-    )!;
+    advance({
+      mode: plan.modes[si],
+      steps: plan.scripts[si],
+      pool: plan.pools[si],
+      k: 0,
+      items: [],
+      log: [],
+      display: [],
+    })!;
 
   const [si, setSi] = useState(0);
   const [sc, setSc] = useState<Scenario>(() => fresh(0));
@@ -125,7 +124,7 @@ export function StackQueueGame({ api }: GameProps) {
         ? `Yes. ${v} was pushed last, so it pops first.`
         : `Yes. ${v} got in line first, so it leaves first.`,
     );
-    const next = advance(done, nextVal);
+    const next = advance(done);
     if (next) return setSc(next);
     setSc(done);
     if (si + 1 < plan.modes.length)

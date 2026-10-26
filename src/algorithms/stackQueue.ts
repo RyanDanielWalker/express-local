@@ -22,3 +22,13 @@ export const sqNext = (mode: SqMode, items: number[]): number =>
 /** The items left after that remove. */
 export const sqRemove = (mode: SqMode, items: number[]): number[] =>
   mode === "stack" ? items.slice(0, -1) : items.slice(1);
+
+/** Give each script its own values, in order, one per push. No value is used twice. */
+export function splitPools(scripts: SqOp[][], vals: number[]): number[][] {
+  let used = 0;
+  return scripts.map((s) => {
+    const n = s.filter((x) => x === "push").length;
+    used += n;
+    return vals.slice(used - n, used);
+  });
+}
