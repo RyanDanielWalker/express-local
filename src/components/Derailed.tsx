@@ -1,6 +1,6 @@
 import { GUIDE } from "../data";
 import type { Line, Question } from "../engine/types";
-import { lineStyle } from "./Bullet";
+import { lineStyle } from "../lib/lineStyle";
 import { Prose, Rich } from "./Rich";
 
 interface Props {

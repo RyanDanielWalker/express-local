@@ -3,7 +3,7 @@ import { Rich } from "./Rich";
 import type { Line, QuizQuestion } from "../engine/types";
 import { shuffle } from "../lib/random";
 import { useTimers } from "../hooks/useTimers";
-import { lineStyle } from "./Bullet";
+import { lineStyle } from "../lib/lineStyle";
 
 /** Remember the last question per line so a replay never repeats it back to back. */
 const lastAsked: Partial<Record<string, QuizQuestion>> = {};

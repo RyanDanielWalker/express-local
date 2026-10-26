@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { hashOf, lookup } from "../algorithms/searching";
 import { range, rnd, shuffle } from "../lib/random";
 import { useTimers } from "../hooks/useTimers";
-import { CodePanel, Panel, plural } from "./parts";
+import { CodePanel, Panel } from "./parts";
+import { plural } from "../lib/plural";
 import type { GameProps } from "./types";
 
 interface Op {

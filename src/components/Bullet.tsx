@@ -1,8 +1,5 @@
-import type { CSSProperties } from "react";
 import type { Line } from "../engine/types";
-
-export const lineStyle = (line: Line) =>
-  ({ "--c": `var(${line.color})` }) as CSSProperties;
+import { lineStyle } from "../lib/lineStyle";
 
 export function Bullet({ line, size }: { line: Line; size?: "sm" | "lg" }) {
   return (

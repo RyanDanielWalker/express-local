@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { GUIDE } from "../data";
 import type { Line, SaveData } from "../engine/types";
-import { Bullet, lineStyle } from "./Bullet";
+import { Bullet } from "./Bullet";
+import { lineStyle } from "../lib/lineStyle";
 import { Rich } from "./Rich";
 
 interface Props {

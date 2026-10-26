@@ -32,6 +32,3 @@ export const Mono = ({ children }: { children: ReactNode }) => (
 export const Kbd = ({ children }: { children: ReactNode }) => (
   <kbd>{children}</kbd>
 );
-
-export const plural = (n: number, word: string) =>
-  `${n} ${word}${n === 1 ? "" : "s"}`;

@@ -13,7 +13,8 @@ import type {
   Tier,
 } from "../engine/types";
 import { useTimers } from "../hooks/useTimers";
-import { Bullet, lineStyle } from "./Bullet";
+import { Bullet } from "./Bullet";
+import { lineStyle } from "../lib/lineStyle";
 import { Words } from "./FieldGuide";
 import { Prose } from "./Rich";
 

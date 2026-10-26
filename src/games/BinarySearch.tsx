@@ -11,7 +11,8 @@ import { range, rnd, shuffle } from "../lib/random";
 import { useTimers } from "../hooks/useTimers";
 import { LINES } from "../data";
 import { Rich } from "../components/Rich";
-import { Panel, plural } from "./parts";
+import { Panel } from "./parts";
+import { plural } from "../lib/plural";
 import type { GameProps } from "./types";
 
 const ROUNDS = 3;

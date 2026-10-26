@@ -1,7 +1,7 @@
 import { GUIDE } from "../data";
 import { fmtTime, TIERS, type TripResult } from "../engine/progression";
 import type { Line, Tier } from "../engine/types";
-import { lineStyle } from "./Bullet";
+import { lineStyle } from "../lib/lineStyle";
 import { Rich } from "./Rich";
 import type { RideStats } from "./PlayScreen";
 import { BadgeCard } from "./Badges";

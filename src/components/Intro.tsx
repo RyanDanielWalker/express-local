@@ -8,7 +8,8 @@ import {
 } from "../engine/progression";
 import { hasPuzzle, heartsFor } from "../engine/questions";
 import type { Line, SaveData, Tier } from "../engine/types";
-import { Bullet, lineStyle } from "./Bullet";
+import { Bullet } from "./Bullet";
+import { lineStyle } from "../lib/lineStyle";
 import { FieldGuide } from "./FieldGuide";
 import { Rich } from "./Rich";
 
