@@ -27,6 +27,7 @@ One short file per significant decision: the context, the options, what was deci
 | [0012](0012-disclose-ai-in-the-readme.md)    | AI use is disclosed in the README, not in commit trailers                    | Accepted                           |
 | [0013](0013-ci-on-github-actions.md)         | CI on GitHub Actions, one job, actions pinned to a commit                    | Accepted                           |
 | [0014](0014-deploy-last.md)                  | The deploy moves to the end of 1.0, and the repo stays private until then    | Accepted                           |
+| [0015](0015-repair-damaged-saves.md)         | A damaged save is repaired field by field, not rejected                      | Accepted                           |
 
 ## Template
 

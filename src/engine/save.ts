@@ -1,4 +1,4 @@
-import type { LineId, LineProgress, SaveData } from "./types";
+import type { LineId, LineProgress, SaveData, Tier } from "./types";
 
 export const STORAGE_KEY = "express-local-v1";
 
@@ -26,36 +26,101 @@ export const emptyProgress = (): LineProgress => ({
 });
 
 /**
- * Fill in anything missing. Handles saves from the original single-file
- * version, which predate tiers, badges, and streaks.
+ * Turn whatever was loaded or pasted into a save the app can trust. Nothing
+ * is taken on faith: a field of the wrong type gets its default, an entry
+ * that can't be read is dropped, and keys a save doesn't have are left out.
+ * Also handles saves from the original single-file version, which predate
+ * tiers, badges, and streaks.
  */
 export function migrate(raw: unknown): SaveData {
   const base = emptySave();
-  if (!raw || typeof raw !== "object" || !("levels" in raw)) return base;
-  const r = raw as Partial<SaveData>;
-  const levels: SaveData["levels"] = {};
-  for (const [id, p] of Object.entries(r.levels ?? {})) {
-    if (!p) continue;
-    const prog = { ...emptyProgress(), ...p };
-    if (prog.cleared && !prog.tier) prog.tier = 1;
-    prog.best = prog.best ?? {};
-    levels[id as LineId] = prog;
-  }
+  if (!isRecord(raw) || !("levels" in raw)) return base;
+  const stats = isRecord(raw.stats) ? raw.stats : {};
+  const streak = isRecord(raw.streak) ? raw.streak : {};
+  const pick = raw.dailyPick;
   return {
-    ...base,
-    ...r,
-    xp: Number(r.xp) || 0,
-    levels,
-    badges: r.badges ?? {},
-    stats: { ...base.stats, ...r.stats },
-    streak: { ...base.streak, ...r.streak },
-    daily: r.daily ?? "",
-    questions: r.questions ?? {},
-    rehearsal: r.rehearsal ?? {},
+    xp: num(raw.xp),
+    levels: readEach(raw.levels, readProgress),
+    badges: readEach(raw.badges, (v) => (typeof v === "string" ? v : null)),
+    stats: { reviews: num(stats.reviews), trips: num(stats.trips) },
+    streak: { count: num(streak.count), last: str(streak.last) },
+    daily: str(raw.daily),
+    questions: readEach(raw.questions, (v) =>
+      isRecord(v) && isNum(v.seen) && isNum(v.missed) && isNum(v.last)
+        ? { seen: v.seen, missed: v.missed, last: v.last }
+        : null,
+    ),
+    rehearsal: readEach(raw.rehearsal, (v) =>
+      isRecord(v)
+        ? {
+            last: num(v.last),
+            shaky: Array.isArray(v.shaky)
+              ? v.shaky.filter((s) => typeof s === "string")
+              : [],
+          }
+        : null,
+    ),
     // An index-based pick from an older save cannot be trusted once lines move,
     // so drop it and let today's ride be picked again.
-    dailyPick: r.dailyPick && "id" in r.dailyPick ? r.dailyPick : undefined,
+    dailyPick:
+      isRecord(pick) &&
+      typeof pick.day === "string" &&
+      typeof pick.id === "string"
+        ? { day: pick.day, id: pick.id as LineId }
+        : undefined,
   };
+}
+
+function readProgress(raw: unknown): LineProgress | null {
+  if (!isRecord(raw)) return null;
+  const cleared = raw.cleared === true;
+  const tier = TIERS.find((t) => t === raw.tier) ?? 0;
+  const best: LineProgress["best"] = {};
+  if (isRecord(raw.best))
+    for (const t of TIERS) {
+      const b = raw.best[t];
+      if (isRecord(b) && isNum(b.m) && isNum(b.t)) best[t] = { m: b.m, t: b.t };
+    }
+  return {
+    cleared,
+    box:
+      Number.isInteger(raw.box) && num(raw.box) < BOX_DAYS.length
+        ? num(raw.box)
+        : 0,
+    due: num(raw.due),
+    trips: num(raw.trips),
+    // Saves from before tiers only say a line was cleared.
+    tier: cleared && !tier ? 1 : tier,
+    best,
+  };
+}
+
+const TIERS: Tier[] = [1, 2, 3];
+
+/** An object with keys, not null or an array. */
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+/** A real number, zero or more. Rules out NaN, Infinity and negatives. */
+const isNum = (v: unknown): v is number =>
+  typeof v === "number" && Number.isFinite(v) && v >= 0;
+
+const num = (v: unknown): number => (isNum(v) ? v : 0);
+const str = (v: unknown): string => (typeof v === "string" ? v : "");
+
+/** Keep the entries `read` can make sense of. It returns null for the rest. */
+function readEach<T>(
+  raw: unknown,
+  read: (v: unknown) => T | null,
+): Record<string, T> {
+  const out: [string, T][] = [];
+  if (isRecord(raw))
+    for (const [k, v] of Object.entries(raw)) {
+      const ok = read(v);
+      if (ok !== null) out.push([k, ok]);
+    }
+  // fromEntries, not out[k] = ok, so a "__proto__" key stays a plain key.
+  return Object.fromEntries(out);
 }
 
 export function loadSave(
@@ -115,7 +180,7 @@ export function importSave(code: string): SaveData {
       "That doesn't look like a save code. It should start with EL1.",
     );
   }
-  if (!data || typeof data !== "object" || !("levels" in data))
+  if (!isRecord(data) || !isRecord(data.levels))
     throw new Error(
       "That code is missing line progress, so there is nothing to import.",
     );

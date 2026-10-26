@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
-Status: 34 lines across 4 divisions, 99 tests, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
+Status: 34 lines across 4 divisions, 108 tests, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
 
 ## Next, in order
 
@@ -28,7 +28,7 @@ The checks go in before more features, so every later change is checked the same
 
 - [x] **Prettier and ESLint.** Defaults, applied in one formatting commit listed in `.git-blame-ignore-revs` so `git blame` skips it. Prettier picks whichever quote needs fewer escapes, which retires the escaped-apostrophe trap in the data files.
 - [x] **CI on every push and pull request.** `.github/workflows/ci.yml` runs the format check, lint, typecheck, `npm test`, the TypeScript probes and the build, then `npm audit --omit=dev` without blocking ([ADR 0013](adr/0013-ci-on-github-actions.md)). `npm audit fix` cleared the four dev-tooling advisories first (Vite 8.3.5, Vitest 5.0.5, source-map-js 1.2.2).
-- [ ] **Validate pasted save codes.** `importSave` only checks for a `levels` key, then `migrate` spreads whatever else it finds into the save, so a damaged code could break the app later. Hand-written checks in `migrate()`, with tests for bad shapes. A good first `/next learn` item: "how do you treat input you don't control?" is a real interview question.
+- [x] **Validate pasted save codes.** `migrate()` checks every field by hand and repairs what it can: a wrong type gets its default, an unreadable entry is dropped, unknown keys are left out ([ADR 0015](adr/0015-repair-damaged-saves.md)). Built in normal mode at Ryan's call, so the `/next learn` piece for 1.0 moves to the Today band.
 - [ ] **One end-to-end test** with Playwright against the production build: ride a line on Local, reach the results screen, and round-trip a save code.
 
 ### 2. Near-duplicate questions
@@ -77,7 +77,7 @@ Smaller cleanups from the same review:
 What a visitor notices first. In this order:
 
 - [ ] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page.
-- [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar.
+- [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar. Run it with `/next learn`: picking what to do now is a pure function in `src/engine/` with tests, and 1.0 needs Ryan to write one piece of core code.
 - [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
 - [ ] **Accessibility checks as tests.** A test that fails when an input has no label or an icon-only button has no name, a contrast test against the color variables in `app.css` in light and dark, and a check at 375px wide (the smallest breakpoint today is 480px).
 - [ ] **README refresh.** A fresh GIF and screenshots (the current ones predate the TypeScript and React puzzles and the clarity rewrite), and a small architecture diagram.
@@ -242,3 +242,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-17** Moved to a terminal workflow: `CLAUDE.md` rewritten for Claude Code, `docs/` (this roadmap, architecture, development, decision records), the `/next` command, a `fact-checker` agent, the fact-check sandboxes committed under `probes/`, and a test that keeps question ids unique within a line
 - **2026-10-26** Prettier and ESLint: the repo formatted in one commit that `git blame` skips, and all 18 lint findings fixed, among them state changed in place in the stack and queue game and the clock read during render
 - **2026-10-26** CI on GitHub Actions for every push and pull request, and the dev-tooling audit advisories cleared
+- **2026-10-26** Damaged save codes repaired field by field instead of trusted, so a bad field can't wipe progress or crash a ride
