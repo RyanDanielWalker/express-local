@@ -103,3 +103,39 @@ const i1 = <input onChange={wrongChange} />;
 function rightChange(e: ChangeEvent<HTMLInputElement>) { const v: string = e.target.value; }
 const i2 = <input onChange={rightChange} />;
 export {};
+
+// Q (replaced "React 19. How does a function component accept a ref?"): typing the ref prop
+function RefInput({ ref }: { ref?: Ref<HTMLInputElement> }) { return <input ref={ref} />; }
+function UsesMyInput() {
+  const r = useRef<HTMLInputElement>(null);
+  return <>
+    <RefInput ref={r} />
+    <RefInput ref={el => { el?.focus(); }} />
+    <RefInput ref={null} />
+    <RefInput />
+  </>;
+}
+// RefObject<HTMLInputElement | null> also works for object refs, but not callback refs
+function ObjInput({ ref }: { ref?: React.RefObject<HTMLInputElement | null> }) { return <input ref={ref} />; }
+function UsesObj() { const r = useRef<HTMLInputElement>(null); return <ObjInput ref={r} />; }
+
+// Q (replaced the conditional-prop t3): a custom hook's returned array is not a tuple
+function useToggleArr() {
+  const [on, setOn] = useState(false);
+  const toggle = () => setOn(o => !o);
+  return [on, toggle];
+}
+function useToggleTuple() {
+  const [on, setOn] = useState(false);
+  const toggle = () => setOn(o => !o);
+  return [on, toggle] as const;
+}
+const [onA, toggleA] = useToggleArr();
+const ta1: Expect<typeof onA, boolean | (() => void)> = true;
+const ta2: Expect<ReturnType<typeof useToggleArr>, (boolean | (() => void))[]> = true;
+if (onA) { /* compiles: a union with a function is still testable */ }
+const [onT, toggleT] = useToggleTuple();
+const tt1: Expect<typeof onT, boolean> = true;
+const tt2: Expect<typeof toggleT, () => void> = true;
+const tt3: Expect<ReturnType<typeof useToggleTuple>, readonly [boolean, () => void]> = true;
+toggleT();

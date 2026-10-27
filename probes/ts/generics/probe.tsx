@@ -96,3 +96,11 @@ const tp1: Expect<typeof kv, [string, number]> = true;
 const tp2: Expect<typeof kv, (string | number)[]> = false;
 const tp3: Expect<typeof kv, [unknown, unknown]> = false;
 const tp4: Expect<typeof kv[1], number> = true;
+
+// Q (replaced the List component t3): NoInfer, TypeScript 5.4+
+function pickNo<T extends string>(options: T[], initial: NoInfer<T>): T { return initial; }
+function pickYes<T extends string>(options: T[], initial: T): T { return initial; }
+const ok1 = pickNo(['sm', 'lg'], 'lg'); const n1: Expect<typeof ok1, 'sm' | 'lg'> = true;
+const ok2 = pickYes(['sm', 'lg'], 'md'); const n2: Expect<typeof ok2, 'sm' | 'lg' | 'md'> = true; // without NoInfer the typo compiles and joins T
+// @ts-expect-error with NoInfer, 'md' is checked against 'sm' | 'lg' and fails
+pickNo(['sm', 'lg'], 'md');
