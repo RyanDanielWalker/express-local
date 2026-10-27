@@ -64,3 +64,16 @@ function shape(s: { kind: 'circle'; radius: number } | { kind: 'square'; side: n
     // @ts-expect-error no side on a circle
     s.side; } }
 }
+
+// Q (replaced the `as` t1): assignment narrows to the part of the declared type the value fits
+function asg() {
+  let id: string | number = 'a1';
+  const s0: Expect<typeof id, string> = true;
+  id = 42;
+  const s1: Expect<typeof id, number> = true;
+  id = 'b2';
+  const s2: Expect<typeof id, string> = true;
+  let lit: string | 1 | 42 = 'x';
+  lit = 42;
+  const s3: Expect<typeof lit, 42> = true; // with a literal in the declared type, it narrows to the literal
+}

@@ -61,3 +61,13 @@ const nv: never = 1;
 // catch variable
 try {} catch (err) { const t: Expect<typeof err, unknown> = true; }
 export {};
+
+// Q (replaced "What is never good for?"): @ts-expect-error vs @ts-ignore
+function directives() {
+  // @ts-expect-error hides the error on the next line
+  const a: number = 'x';
+  // @ts-ignore hides it too
+  const b: number = 'y';
+  // @ts-ignore on a line with no error: silent, compiles
+  const c: number = 1;
+}
