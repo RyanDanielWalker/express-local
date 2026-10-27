@@ -11,7 +11,28 @@ function readAs(pct: number): string {
   return "Nothing locked in yet. Clear a line.";
 }
 
-export function Header({ save }: { save: SaveData }) {
+/**
+ * The full header while deciding. While riding (`onLeave` set), just the name
+ * and a way back, so the ride gets the page.
+ */
+export function Header({
+  save,
+  onLeave,
+}: {
+  save: SaveData;
+  onLeave?: () => void;
+}) {
+  if (onLeave)
+    return (
+      <header className="top riding">
+        <div className="brand">
+          <h1>Express &amp; Local</h1>
+        </div>
+        <button className="btn ghost" onClick={onLeave}>
+          Back to the map
+        </button>
+      </header>
+    );
   const r = rankFor(save.xp);
   const ready = readinessReport(save);
   return (

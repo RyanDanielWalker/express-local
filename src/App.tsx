@@ -35,6 +35,7 @@ import { SaveTransfer } from "./components/SaveTransfer";
 import { CramBand } from "./components/CramBand";
 import { Rehearse } from "./components/Rehearse";
 import { GUIDE } from "./data";
+import { isDoing } from "./lib/modes";
 
 type Screen =
   | { kind: "intro" }
@@ -73,13 +74,19 @@ export default function App() {
 
   useEffect(() => persistSave(save), [save]);
 
+  // Riding collapses the map, cram band, badges and save box. See lib/modes.ts.
+  const doing = isDoing(screen.kind);
+
   // Keep the stage in view when the screen changes (e.g. quiz after a long ride).
+  // Boarding from low on the map would otherwise land at the ride's bottom,
+  // since the page shrinks under the scroll position: start a ride at the top.
   const stageRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const el = stageRef.current;
-    if (el && el.getBoundingClientRect().top < 0)
+    if (doing) window.scrollTo({ top: 0 });
+    else if (el && el.getBoundingClientRect().top < 0)
       el.scrollIntoView({ block: "start", behavior: "smooth" });
-  }, [screen.kind, current]);
+  }, [screen.kind, current, doing]);
 
   const line = LINES[current];
   const top = maxTier(save.levels[line.id]);
@@ -335,13 +342,15 @@ export default function App() {
 
   return (
     <div className="wrap">
-      <Header save={save} />
-      <LineMap
-        save={save}
-        current={current}
-        dailyIdx={dailyIdx}
-        onSelect={select}
-      />
+      <Header save={save} onLeave={doing ? toIntro : undefined} />
+      {!doing && (
+        <LineMap
+          save={save}
+          current={current}
+          dailyIdx={dailyIdx}
+          onSelect={select}
+        />
+      )}
       {screen.kind === "intro" && (
         <CramBand
           divisions={cramDivisions}
@@ -359,15 +368,19 @@ export default function App() {
       <main className="stage" ref={stageRef}>
         {stage}
       </main>
-      <Badges save={save} />
-      <SaveTransfer
-        save={save}
-        onImport={(s) => {
-          ensureDailyPick(s);
-          setSave(s);
-          select(startingLine(s));
-        }}
-      />
+      {!doing && (
+        <>
+          <Badges save={save} />
+          <SaveTransfer
+            save={save}
+            onImport={(s) => {
+              ensureDailyPick(s);
+              setSave(s);
+              select(startingLine(s));
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -14,7 +14,7 @@ src/
   games/        one component per algorithm line, plus QuizRun, QuizGame, FlowGame and SortGame
   components/   screens and shared UI: header, map, intro, play screen, results, rehearsal, badges
   hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount)
-  lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals)
+  lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals, which screens are a ride)
   styles/       one stylesheet, app.css
 e2e/            one Playwright test that rides a line against the production build
 probes/         sandboxes that prove the content against real code (not part of the app)
@@ -96,6 +96,8 @@ Copy everywhere supports `` `code` `` and `**bold**`, rendered by `<Rich />`. Lo
 
 `App.tsx` is a small screen state machine: map, intro, play, results (or derailed). It also runs the cram drill, the shaky drill and rehearsal, none of which change line progress.
 
+Each screen is either deciding or doing (`isDoing()` in `lib/modes.ts`). Deciding screens (the intro, results and derailed) show the full header, the map, the badges and the save box; the intro also shows the cram band. Doing screens (a ride, a drill, rehearsal, the code check) hide all of that, so the ride gets the page. The header shrinks to the name and a **Back to the map** button, which drops the ride at no cost, and the page scrolls to the top. A new screen kind has to be added to the table in `lib/modes.ts`, or the typecheck fails.
+
 1. **Pick.** `pickQuestions()` draws the tier's questions, putting unseen and shaky ones first. `pickPuzzle()` picks the last stop and rotates it from ride to ride.
 2. **Play.** `PlayScreen` owns hearts, XP and the clock. `QuizRun` plays the questions through `QuizGame`, then the puzzle through `SortGame` or `FlowGame`. Algorithm lines play their own component from `games/index.ts`. Every game gets a `GameApi` (`say`, `correct`, `wrong`, `record`, `hold`, `resume`, `finish`, `tier`, `assist`, `over`).
 3. **Score.** `finishTrip()` returns the new save: tier cleared, the next review date (Leitner boxes at 1, 3, 7, 14 and 30 days), XP, streak, badges and personal bests. `recordAnswers()` updates per-question history.
@@ -118,7 +120,7 @@ All of it runs on every `npm test`:
 - **`data/bar.ts` and `bar.test.ts`** are the quality bar from [the roadmap](ROADMAP.md#the-bar): every tier can fill a run with 1.5x room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha, a puzzle beyond recognition, and no length position (longest, middle or shortest) holding the answer on more than half a line's questions. Divisions in `FINISHED` fail the tests if any line slips. `npm run bar` prints where every line stands.
 - **`components/results.test.tsx`** renders the results screen for every line.
 
-One more check runs outside `npm test`. `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle.
+One more check runs outside `npm test`. `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). Before the first ride it boards at phone width, checks the map and badges collapse and the ride starts at the top of the screen, and leaves by **Back to the map**. It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle.
 
 What the tests cannot check is whether a claim is true. That is what `probes/` and the fact-check pass are for. See [DEVELOPMENT.md](DEVELOPMENT.md#checking-content).
 

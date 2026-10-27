@@ -109,10 +109,29 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   browser,
 }) => {
   const errors = watchConsole(page);
+  // Phone width first: on a short page the browser lands at the top anyway,
+  // so only a phone shows whether boarding scrolls the ride into view.
+  await page.setViewportSize({ width: 375, height: 760 });
   await page.goto("/");
 
   await stop(page, 0).click();
   await expect(page.getByRole("heading", { name: line.name })).toBeVisible();
+  const boardButton = page.getByRole("button", { name: "Board: Local" });
+  await boardButton.scrollIntoViewIfNeeded();
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  await boardButton.click();
+
+  // Riding gives the ride the page: the map and badges collapse, the ride
+  // starts at the top of the screen, and one button leads back. Leaving a
+  // ride costs nothing, so board again after.
+  await expect(page.locator(".qcard")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await expect(stop(page, 0)).toBeHidden();
+  await expect(page.getByRole("region", { name: "Badges" })).toBeHidden();
+  await page.getByRole("button", { name: "Back to the map" }).click();
+  await expect(stop(page, 0)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Badges" })).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.getByRole("button", { name: "Board: Local" }).click();
 
   const first = await ride(page);
