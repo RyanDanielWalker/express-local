@@ -40,6 +40,7 @@ const s = app.getHttpServer();
 const a = await request(s).get('/admin');
 const b = await request(s).get('/boom');
 const c = await request(s).get('/n/abc');
+const d = await request(s).get('/no-such-page');
 console.log('/admin', a.status, JSON.stringify(a.body), '| /boom', b.status, '| /n/abc', c.status, JSON.stringify(counted));
 ok(a.status === 403 && a.body.message === 'Forbidden', 'super.catch() keeps the normal 403 response');
 ok(counted.filter.includes('/admin'), 'the filter counts the guard rejection');
@@ -47,6 +48,9 @@ ok(!counted.interceptor.includes('/admin'), 'the interceptor never sees the guar
 ok(counted.filter.includes('/boom') && counted.interceptor.includes('/boom'), 'control: both see an error from the handler');
 ok(counted.filter.includes('/n/abc'), 'the filter also counts a pipe rejection');
 console.log('interceptor saw the pipe rejection:', counted.interceptor.includes('/n/abc'));
+// Dispatch Desk t1's why: an interceptor never runs for a URL no route matches; a global filter sees the 404.
+ok(d.status === 404 && counted.filter.includes('/no-such-page'), 'the global filter catches the 404 for an unmatched URL');
+ok(!counted.interceptor.includes('/no-such-page'), 'the interceptor never sees it');
 ok(false, 'SANITY should fail');
 await app.close();
 done();
