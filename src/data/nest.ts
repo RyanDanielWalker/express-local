@@ -96,7 +96,7 @@ export const NEST_LINES: Line[] = [
           "Route handler",
           "Exception filter",
         ],
-        note: "On the default Express adapter, middleware gets Express's plain req, res and next. If it sends the response and never calls next(), Nest never gets the request. So no guard, interceptor or exception filter sees it. Fine for a rate limit. Bad for anything you want an interceptor to log.",
+        note: "On the default Express adapter, middleware gets Express's plain req, res and next. Here it sends the 429 itself and never calls next(). So the request never gets past the middleware. No guard, interceptor, pipe or handler runs. No exception filter runs either, because nothing was thrown. That is fine for a rate limit. To leave some routes out, list their paths with exclude() where you apply the middleware. To exempt a route with the @SkipThrottle() decorator on its handler, use ThrottlerGuard from @nestjs/throttler instead. Middleware cannot tell which handler will run, so it cannot read that decorator.",
       },
       {
         t: 2,
@@ -365,7 +365,7 @@ export class OrdersModule {}`,
           "Register both in one module and drop the imports",
         ],
         a: "Wrap both references in forwardRef(() => Other)",
-        why: "Each side injects the other with @Inject(forwardRef(() => UsersService)), and the same the other way around. forwardRef tells Nest to look the class up later, once both exist. @Global() and a shared module do not help, because each service still needs the other to be built first. Worth saying in an interview: a circle like this often means the two services split their jobs badly.",
+        why: "Each side injects the other with @Inject(forwardRef(() => UsersService)), and the same the other way around. This is Nest's forwardRef, from @nestjs/common. It is unrelated to React's forwardRef. It tells Nest to look the class up later, once both exist. @Global() and a shared module do not help, because each service still needs the other to be built first. Worth saying in an interview: a circle like this often means the two services split their jobs badly.",
       },
       {
         t: 2,
@@ -1494,7 +1494,7 @@ findOne(@Param('id') id: number) {}`,
           "Interceptor: wrap the handler",
         ],
         a: "Guard: is this request allowed?",
-        why: "@nestjs/throttler ships ThrottlerGuard for this. It is a yes-or-no gate on the request, and as a guard it can honor @SkipThrottle() on a route. An interceptor runs after guards, so the request gets further before it is rejected. A pipe only checks the value of one handler argument.",
+        why: "@nestjs/throttler ships ThrottlerGuard for this. It is a yes-or-no gate on the request. An interceptor runs after guards, so the request gets further before it is rejected. A pipe only checks the value of one handler argument.",
       },
       {
         t: 3,
@@ -2775,7 +2775,7 @@ export class OrdersModule {}`,
         prompt:
           'You get "Nest can\'t resolve dependencies of OrdersService". How do you debug it?',
         answer:
-          "Three checks, in order. Is the class in the providers of the module that owns it? Does that module export it? Is that module imported where I need it? If the error does not name the dependency's class, Nest got nothing it can use at runtime. For an interface, I switch to an injection token. For an `import type`, I change it to a normal import. If two files import each other, I use forwardRef. A missing @Injectable() is a different bug: no error, the dependency is just undefined. If two services need each other, that is forwardRef.",
+          "Three checks, in order. Is the class in the providers of the module that owns it? Does that module export it? Is that module imported where I need it? If the error does not name the dependency's class, Nest got nothing it can use at runtime. For an interface, I switch to an injection token. For an `import type`, I change it to a normal import. If two services inject each other, I wrap both references in forwardRef. If the class doing the injecting is missing @Injectable(), that is a different bug. Nest starts without an error. The dependency is undefined, and the first request that uses it fails with a 500.",
       },
       {
         prompt: "What does dependency injection actually buy you here?",

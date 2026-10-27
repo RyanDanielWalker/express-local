@@ -63,9 +63,9 @@ Across lines (each line should own its topic):
 
 Smaller cleanups from the same review:
 
-- [ ] "forwardRef" means React's ref forwarding on Hook Junction and Typed Components, but Nest's circular-dependency helper on Wiring Yard. Say "Nest's `forwardRef` (from `@nestjs/common`, unrelated to React's)" once on Wiring Yard. Its rehearse answer also recommends `forwardRef` twice.
-- [ ] Main Line's flow note calls a middleware rate limiter "fine for a rate limit", while Dispatch Desk teaches `ThrottlerGuard`. Add a clause on when a guard is the better home (routes that opt out with `@SkipThrottle()`), proven in `probes/nest`.
-- [ ] The `@nestjs/throttler` claims on Dispatch Desk (`ThrottlerGuard`, `@SkipThrottle()`, in a sort card and a question's `why`) were checked against the docs but never run: the package was not in the sandbox. It is pinned in `probes/nest` now. Prove them, and fix anything the run contradicts.
+- [x] "forwardRef" means React's ref forwarding on Hook Junction and Typed Components, but Nest's circular-dependency helper on Wiring Yard. Say "Nest's `forwardRef` (from `@nestjs/common`, unrelated to React's)" once on Wiring Yard. Its rehearse answer also recommends `forwardRef` twice.
+- [x] Main Line's flow note calls a middleware rate limiter "fine for a rate limit", while Dispatch Desk teaches `ThrottlerGuard`. Add a clause on when a guard is the better home (routes that opt out with `@SkipThrottle()`), proven in `probes/nest`.
+- [x] The `@nestjs/throttler` claims on Dispatch Desk (`ThrottlerGuard`, `@SkipThrottle()`, in a sort card and a question's `why`) were checked against the docs but never run: the package was not in the sandbox. It is pinned in `probes/nest` now. Prove them, and fix anything the run contradicts.
 
 ### 3. Inventory stop
 
@@ -248,3 +248,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-27** The seven same-line near-duplicate pairs: eight questions replaced with new angles on Repaint Line, Memo Yard, Generic Line, Dispatch Desk, Test Track and Platform Signs, each proven in `probes/` and fact-checked
 - **2026-10-27** Ten of the thirteen cross-line near-duplicate pairs: five React questions and five TypeScript questions replaced with new angles, so Memo Yard keeps memo and the compiler, Unknown Territory keeps `as`, Narrow Gauge keeps exhaustive `never`, and Shape Yard keeps unions of valid shapes
 - **2026-10-27** The last three cross-line near-duplicate pairs, all NestJS: Turnstile keeps authentication versus authorization and the @Public() route, Fault Line keeps APP_FILTER, and Fault Line, Dispatch Desk and Tool Shed get new questions on an un-awaited rejection crashing the server, a guard's 403 reaching the exception filter but never an interceptor, and an `APP_GUARD` covering every route
+- **2026-10-27** The three smaller cleanups from the near-duplicate review: Wiring Yard says its `forwardRef` is Nest's, not React's, Main Line's middleware rate limiter says when `ThrottlerGuard` is the better home, and the `@nestjs/throttler` claims on Dispatch Desk were run against the real package. They held up, but one question's `why` leaned on `@SkipThrottle()`, which an interceptor can read too, so that reason was dropped. The fact-checker also tightened Wiring Yard's missing `@Injectable()` sentence: Nest starts fine, and the first request that uses the dependency fails with a 500
