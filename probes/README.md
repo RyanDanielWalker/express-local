@@ -48,7 +48,7 @@ npm run probe:prod -- prod.tsx     # production build
 - A Suspense boundary that hides content keeps it in the DOM with `display: none`. So `textContent` includes the hidden content. Check the style, not just the text.
 - Run anything about StrictMode, warnings or timing in both development and production.
 
-Files are named for the line or topic they prove: `render`, `render2`, `effect`, `effect2`, `effect-types`, `state`, `lists`, `perf`, `hooks`, `forms`, `forms2`, `data`, `data2`, `gaps1` (`useEffectEvent` and `<Activity>`), `select`, `select2`, `select3`, `snippets` (the field guide code), and `prod` (production-build behavior).
+Files are named for the line or topic they prove: `render`, `render2`, `effect`, `effect2`, `effect-types`, `state`, `lists`, `perf`, `perf2` (a custom memo compare, and `<Profiler>` in production; run it in both builds), `render3`, `hooks`, `forms`, `forms2`, `data`, `data2`, `gaps1` (`useEffectEvent` and `<Activity>`), `select`, `select2`, `select3`, `snippets` (the field guide code), and `prod` (production-build behavior).
 
 ## nest/
 
