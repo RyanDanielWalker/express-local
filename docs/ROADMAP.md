@@ -57,9 +57,9 @@ Across lines (each line should own its topic):
 - [x] "Why put this `never` line in the default of a switch?" (Narrow Gauge, t2) vs "What is `never` good for?" (Unknown Territory, t2).
 - [x] "How do you type a React component that takes a list of anything?" (Generic Line, t3) vs "What does making this component generic give you?" (Typed Components, t3).
 - [x] "Data should only exist once status is done..." (Shape Yard, t3) vs "A prop should be required only when another prop is set. How?" (Typed Components, t3).
-- [ ] "When do you use 401 versus 403?" (Fault Line, t2) vs "What is the difference between authentication and authorization?" (Turnstile, t1).
-- [ ] "A global auth guard is on, but /health has to stay public." (Dispatch Desk, t2) vs "A global auth guard is on. How does /health stay reachable?" (Turnstile, t1).
-- [ ] "Why register a global guard with APP_GUARD instead of app.useGlobalGuards()?" (Tool Shed, t2) vs "Your global exception filter injects a LoggerService..." (Fault Line, t2). Same `APP_*` provider idea; keep only if the angles differ.
+- [x] "When do you use 401 versus 403?" (Fault Line, t2) vs "What is the difference between authentication and authorization?" (Turnstile, t1).
+- [x] "A global auth guard is on, but /health has to stay public." (Dispatch Desk, t2) vs "A global auth guard is on. How does /health stay reachable?" (Turnstile, t1).
+- [x] "Why register a global guard with APP_GUARD instead of app.useGlobalGuards()?" (Tool Shed, t2) vs "Your global exception filter injects a LoggerService..." (Fault Line, t2). Same `APP_*` provider idea; keep only if the angles differ.
 
 Smaller cleanups from the same review:
 
@@ -247,3 +247,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-26** One end-to-end test: a Playwright ride through the production build, run in CI
 - **2026-10-27** The seven same-line near-duplicate pairs: eight questions replaced with new angles on Repaint Line, Memo Yard, Generic Line, Dispatch Desk, Test Track and Platform Signs, each proven in `probes/` and fact-checked
 - **2026-10-27** Ten of the thirteen cross-line near-duplicate pairs: five React questions and five TypeScript questions replaced with new angles, so Memo Yard keeps memo and the compiler, Unknown Territory keeps `as`, Narrow Gauge keeps exhaustive `never`, and Shape Yard keeps unions of valid shapes
+- **2026-10-27** The last three cross-line near-duplicate pairs, all NestJS: Turnstile keeps authentication versus authorization and the @Public() route, Fault Line keeps APP_FILTER, and Fault Line, Dispatch Desk and Tool Shed get new questions on an un-awaited rejection crashing the server, a guard's 403 reaching the exception filter but never an interceptor, and an `APP_GUARD` covering every route
