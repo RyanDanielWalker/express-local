@@ -47,16 +47,16 @@ Same line:
 
 Across lines (each line should own its topic):
 
-- [ ] "What does wrapping a component in memo do?" (Repaint Line, t1) vs "What does React.memo do?" (Memo Yard, t1). They share a distractor too.
-- [ ] "What does the React Compiler do?" (Repaint Line, t3) vs "Your team turns on the React Compiler..." (Memo Yard, t3).
-- [ ] The memoized child with `style={{ margin: 8 }}` (Repaint Line, t2) vs the memoized child with an inline arrow (Memo Yard, t2, "Why does this memoized child still re-render...").
-- [ ] "What is wrong with this?" (Side Track, t2: a full name computed in an effect) vs "You store filteredItems in state and update it in an effect..." (Snapshot Line, t3). Both answer "compute it during render".
-- [ ] "Two components both call useCounter()..." (Hook Junction, t2) vs "useWindowWidth()... How many listeners?" (Hook Junction, t1).
-- [ ] "What is new in React 19 for passing a ref into a function component?" (Hook Junction, t2) vs "React 19. How does a function component accept a ref?" (Typed Components, t2).
-- [ ] "`(pet as Cat).meow()`... What does the `as` do when the code runs?" (Narrow Gauge, t1) vs "What does `as User` actually do?" (Unknown Territory, t1).
-- [ ] "Why put this `never` line in the default of a switch?" (Narrow Gauge, t2) vs "What is `never` good for?" (Unknown Territory, t2).
-- [ ] "How do you type a React component that takes a list of anything?" (Generic Line, t3) vs "What does making this component generic give you?" (Typed Components, t3).
-- [ ] "Data should only exist once status is done..." (Shape Yard, t3) vs "A prop should be required only when another prop is set. How?" (Typed Components, t3).
+- [x] "What does wrapping a component in memo do?" (Repaint Line, t1) vs "What does React.memo do?" (Memo Yard, t1). They share a distractor too.
+- [x] "What does the React Compiler do?" (Repaint Line, t3) vs "Your team turns on the React Compiler..." (Memo Yard, t3).
+- [x] The memoized child with `style={{ margin: 8 }}` (Repaint Line, t2) vs the memoized child with an inline arrow (Memo Yard, t2, "Why does this memoized child still re-render...").
+- [x] "What is wrong with this?" (Side Track, t2: a full name computed in an effect) vs "You store filteredItems in state and update it in an effect..." (Snapshot Line, t3). Both answer "compute it during render".
+- [x] "Two components both call useCounter()..." (Hook Junction, t2) vs "useWindowWidth()... How many listeners?" (Hook Junction, t1).
+- [x] "What is new in React 19 for passing a ref into a function component?" (Hook Junction, t2) vs "React 19. How does a function component accept a ref?" (Typed Components, t2).
+- [x] "`(pet as Cat).meow()`... What does the `as` do when the code runs?" (Narrow Gauge, t1) vs "What does `as User` actually do?" (Unknown Territory, t1).
+- [x] "Why put this `never` line in the default of a switch?" (Narrow Gauge, t2) vs "What is `never` good for?" (Unknown Territory, t2).
+- [x] "How do you type a React component that takes a list of anything?" (Generic Line, t3) vs "What does making this component generic give you?" (Typed Components, t3).
+- [x] "Data should only exist once status is done..." (Shape Yard, t3) vs "A prop should be required only when another prop is set. How?" (Typed Components, t3).
 - [ ] "When do you use 401 versus 403?" (Fault Line, t2) vs "What is the difference between authentication and authorization?" (Turnstile, t1).
 - [ ] "A global auth guard is on, but /health has to stay public." (Dispatch Desk, t2) vs "A global auth guard is on. How does /health stay reachable?" (Turnstile, t1).
 - [ ] "Why register a global guard with APP_GUARD instead of app.useGlobalGuards()?" (Tool Shed, t2) vs "Your global exception filter injects a LoggerService..." (Fault Line, t2). Same `APP_*` provider idea; keep only if the angles differ.
@@ -246,3 +246,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-26** Damaged save codes repaired field by field instead of trusted, so a bad field can't wipe progress or crash a ride
 - **2026-10-26** One end-to-end test: a Playwright ride through the production build, run in CI
 - **2026-10-27** The seven same-line near-duplicate pairs: eight questions replaced with new angles on Repaint Line, Memo Yard, Generic Line, Dispatch Desk, Test Track and Platform Signs, each proven in `probes/` and fact-checked
+- **2026-10-27** Ten of the thirteen cross-line near-duplicate pairs: five React questions and five TypeScript questions replaced with new angles, so Memo Yard keeps memo and the compiler, Unknown Territory keeps `as`, Narrow Gauge keeps exhaustive `never`, and Shape Yard keeps unions of valid shapes
