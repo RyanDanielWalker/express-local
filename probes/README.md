@@ -21,7 +21,7 @@ Versions are pinned to what the content claims to cover. When the content moves 
 | Folder | A healthy result |
 |---|---|
 | `react/` | Every check prints `PASS` except exactly one: `FAIL SANITY should fail`. So the last line reads `fails 1`. |
-| `nest/` | The same, for probes that use `ok()` (the `example/` template, `auth/jwt-clarity.ts`, `gaps/p1.ts`, `dupes/n.ts`). |
+| `nest/` | The same, for probes that use `ok()` (the `example/` template, `auth/jwt-clarity.ts`, `gaps/p1.ts`, `dupes/`). |
 | `ts/` | `npm run check` ends with `all as expected`. CI runs it on every push. |
 
 Some older probes are **observation probes**: they print what happened (statuses, render counts, effect logs) without `ok()` checks, and the content was checked by reading that output. They are kept as evidence. Re-run one and compare its output with the claim it backs. Every new probe uses `ok()` and a SANITY line.
@@ -61,7 +61,7 @@ npm run probe -- example smoke     # compiles example/ and runs example/smoke.ts
 
 Each probe is a folder with a `tsconfig.json` that extends `../tsconfig.base.json`. `run.mjs` compiles the folder to `dist/` and runs the file you name. To start a new probe, copy `example/`: `smoke.ts` is a complete template with `ok()`, `done()` and a SANITY line. Build each claim as a small module with `Test.createTestingModule`, hit it with supertest, and check what actually happens: the status, the body, and which hooks and filters ran. In `_review/<name>/`, change `extends` to `../../tsconfig.base.json` and run `npm run probe -- _review/<name> <file>`.
 
-Folders: `example`, `life` (request lifecycle), `di`, `route`, `dto`, `err`, `auth` (including the JWT and Passport probes from the reviews, `jwt-*.ts`), `test`, `gaps` (dynamic modules, decorators, GraphQL guards, shutdown hooks), and `dupes` (the questions that replaced the last cross-line near-duplicates: an un-awaited rejection, `ParseArrayPipe`, and where an `APP_GUARD` applies; `n.ts` runs `crash-app.ts` as a child process, because the claim is that the process dies). Shutdown hooks need a real process and real signals:
+Folders: `example`, `life` (request lifecycle), `di`, `route`, `dto`, `err`, `auth` (including the JWT and Passport probes from the reviews, `jwt-*.ts`), `test`, `gaps` (dynamic modules, decorators, GraphQL guards, shutdown hooks), and `dupes` (the questions that replaced the last cross-line near-duplicates: an un-awaited rejection and where an `APP_GUARD` applies in `n.ts`, which runs `crash-app.ts` as a child process because the claim is that the process dies; a guard's rejection reaching a filter but not an interceptor in `count.ts`). Shutdown hooks need a real process and real signals:
 
 ```bash
 npx tsc -p gaps && node gaps/sdrun.mjs

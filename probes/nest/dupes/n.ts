@@ -1,13 +1,12 @@
 import 'reflect-metadata';
-import { CallHandler, CanActivate, Controller, ExecutionContext, Get, Injectable, Module, NestInterceptor, ParseArrayPipe, Query } from '@nestjs/common';
+import { CanActivate, Controller, Get, Injectable, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { tap } from 'rxjs';
 import request from 'supertest';
 
-// Proves the three replacement questions from the last NestJS near-duplicate pairs.
+// Proves two of the replacement questions (Dispatch Desk's is in count.ts) from the last NestJS near-duplicate pairs.
 let fails = 0;
 const ok = (c: unknown, m: string) => { console.log(c ? 'PASS' : 'FAIL', m); if (!c) fails++; };
 const done = () => console.log('fails', fails);
@@ -25,36 +24,6 @@ const caught = spawnSync(process.execPath, [crashApp, 'catch'], { encoding: 'utf
 console.log('--- with a listener, exit', caught.status, '\n' + caught.stdout);
 ok(caught.status === 0 && /UNHANDLED smtp down/.test(caught.stdout) && /STILL SERVING 201/.test(caught.stdout),
   'control: the same app survives once something handles the rejection');
-
-// --- Dispatch Desk: ?ids=1,2,3 into an array of numbers is a pipe job (ParseArrayPipe).
-const order: string[] = [];
-@Injectable() class Spy implements CanActivate { canActivate() { order.push('guard'); return true; } }
-@Injectable() class Wrap implements NestInterceptor {
-  intercept(_: ExecutionContext, next: CallHandler) { order.push('interceptor before'); return next.handle().pipe(tap(() => order.push('interceptor after'))); }
-}
-@Controller('posts') class Posts {
-  @Get() list(@Query('ids', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[]) {
-    order.push('handler');
-    return { ids, types: ids.map((i) => typeof i) };
-  }
-}
-@Module({ controllers: [Posts], providers: [Spy, Wrap] }) class PipeModule {}
-{
-  const m = await Test.createTestingModule({ imports: [PipeModule] }).compile();
-  const app = m.createNestApplication({ logger: false });
-  app.useGlobalGuards(app.get(Spy));
-  app.useGlobalInterceptors(app.get(Wrap));
-  await app.init();
-  const good = await request(app.getHttpServer()).get('/posts?ids=1,2,3');
-  const bad = await request(app.getHttpServer()).get('/posts?ids=1,x');
-  console.log('ids=1,2,3 ->', good.status, JSON.stringify(good.body), '| ids=1,x ->', bad.status, JSON.stringify(bad.body));
-  console.log('order', order.join(' > '));
-  ok(good.status === 200 && JSON.stringify(good.body.ids) === '[1,2,3]' && good.body.types.every((t: string) => t === 'number'),
-    'ParseArrayPipe turns ?ids=1,2,3 into [1, 2, 3], all numbers');
-  ok(bad.status === 400, 'ParseArrayPipe rejects ?ids=1,x with a 400 before the handler');
-  ok(order.indexOf('guard') < order.indexOf('handler'), 'a guard only answers yes or no before the handler; it hands the handler no value');
-  await app.close();
-}
 
 // --- Tool Shed: an APP_GUARD listed in UsersModule guards every route in the app.
 @Injectable() class DenyAll implements CanActivate { canActivate() { return false; } }
