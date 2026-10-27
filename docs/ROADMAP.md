@@ -37,13 +37,13 @@ A cross-line review found pairs of questions that test the same fact with the sa
 
 Same line:
 
-- [ ] **Memo Yard:** "A table renders 10,000 rows and scrolling stutters. What actually fixes it?" (t3) vs "What does virtualization do for a long list?" (t1). Nearly the same answer text.
-- [ ] **Memo Yard:** "How do you find out what is actually slow?" (t3) vs "What should you do before adding memo anywhere?" (t1). Both answer "measure with the Profiler first".
-- [ ] **Repaint Line:** "A parent re-renders. Its child gets exactly the same props..." (t1) vs "A parent's state changes. Its child takes no props at all..." (t1).
-- [ ] **Generic Line:** "Why use a generic instead of any?" (t1) vs "Which signature keeps the type of what you pass in?" (t1).
-- [ ] **Dispatch Desk:** "Send your own JSON shape whenever a NotFoundException is thrown." (t1) vs "Turn every thrown error into your standard error JSON shape, and log it." (t1).
-- [ ] **Test Track:** "Unit testing OrdersService, which injects PaymentsService. What goes in providers?" (t1) vs "OrdersService calls PaymentsService, which calls Stripe... What do you fake?" (t1).
-- [ ] **Platform Signs (weaker):** the two route-order questions, "GET /users/me. Which handler runs?" (t1) and "A catch-all route is declared first..." (t3). Also the two status-code questions: "How do you make a handler send 204...?" (t1) and "What status does this return on success?" (t2). Keep both of a pair only if they really test different things.
+- [x] **Memo Yard:** "A table renders 10,000 rows and scrolling stutters. What actually fixes it?" (t3) vs "What does virtualization do for a long list?" (t1). Nearly the same answer text.
+- [x] **Memo Yard:** "How do you find out what is actually slow?" (t3) vs "What should you do before adding memo anywhere?" (t1). Both answer "measure with the Profiler first".
+- [x] **Repaint Line:** "A parent re-renders. Its child gets exactly the same props..." (t1) vs "A parent's state changes. Its child takes no props at all..." (t1).
+- [x] **Generic Line:** "Why use a generic instead of any?" (t1) vs "Which signature keeps the type of what you pass in?" (t1).
+- [x] **Dispatch Desk:** "Send your own JSON shape whenever a NotFoundException is thrown." (t1) vs "Turn every thrown error into your standard error JSON shape, and log it." (t1).
+- [x] **Test Track:** "Unit testing OrdersService, which injects PaymentsService. What goes in providers?" (t1) vs "OrdersService calls PaymentsService, which calls Stripe... What do you fake?" (t1).
+- [x] **Platform Signs (weaker):** the two route-order questions, "GET /users/me. Which handler runs?" (t1) and "A catch-all route is declared first..." (t3). Also the two status-code questions: "How do you make a handler send 204...?" (t1) and "What status does this return on success?" (t2). Keep both of a pair only if they really test different things.
 
 Across lines (each line should own its topic):
 
@@ -245,3 +245,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-26** CI on GitHub Actions for every push and pull request, and the dev-tooling audit advisories cleared
 - **2026-10-26** Damaged save codes repaired field by field instead of trusted, so a bad field can't wipe progress or crash a ride
 - **2026-10-26** One end-to-end test: a Playwright ride through the production build, run in CI
+- **2026-10-27** The seven same-line near-duplicate pairs: eight questions replaced with new angles on Repaint Line, Memo Yard, Generic Line, Dispatch Desk, Test Track and Platform Signs, each proven in `probes/` and fact-checked
