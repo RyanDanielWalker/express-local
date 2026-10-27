@@ -743,13 +743,20 @@ export class UsersController { @Get() findAll() {} }`,
       },
       {
         t: 2,
-        q: "What status does this return on success?",
+        q: "There is no user with this id. What does the client get?",
         code: `@Delete(':id')
 @HttpCode(204)
-remove(@Param('id') id: string) { return this.users.remove(id); }`,
-        opts: ["204 No Content", "200 OK anyway", "201 Created"],
-        a: "204 No Content",
-        why: "@HttpCode overrides the default. 204 is the usual choice for a delete that returns nothing.",
+remove(@Param('id') id: string) {
+  if (!this.users.has(id)) throw new NotFoundException();
+  return this.users.remove(id);
+}`,
+        opts: [
+          "404, with the error JSON",
+          "204, with an empty body",
+          "500, since the status was fixed",
+        ],
+        a: "404, with the error JSON",
+        why: "@HttpCode only sets the status of a successful response. A thrown exception skips it. Nest's exception layer turns NotFoundException into a 404 with a JSON body. So the 204 only happens when the handler finishes. It is not a 500 either, because Nest knows this exception and maps it to its own status.",
       },
       {
         t: 2,
@@ -801,14 +808,19 @@ one(@Param() params) {}`,
       },
       {
         t: 3,
-        q: "Default Express setup, no extra options. A catch-all route is declared first in the controller. What happens to the routes below it?",
+        q: "Nest 11 or later, on the default Express 5 adapter. A request comes in for /files/docs/2026/plan.pdf. What does @Param('path') give you?",
+        code: `@Controller('files')
+export class FilesController {
+  @Get('*path')
+  download(@Param('path') path) {}
+}`,
         opts: [
-          "They never match. Declaration order wins",
-          "They still match: specific routes win",
-          "Nest throws a route conflict at startup",
+          "An array: ['docs', '2026', 'plan.pdf']",
+          "A string: 'docs/2026/plan.pdf'",
+          "Just the first part: 'docs'",
         ],
-        a: "They never match. Declaration order wins",
-        why: "By default, Nest registers routes in the order you declare them, and Express takes the first match. So list routes from most specific to least. The other two answers describe real features, just not defaults. Nest 12 can sort routes by specificity (routeResolutionStrategy) or flag the shadowing at startup (routeConflictPolicy). Fastify ranks by specificity anyway.",
+        a: "An array: ['docs', '2026', 'plan.pdf']",
+        why: "Since Express 5, a wildcard needs a name, like *path. A named wildcard gives you every path segment it matched, as an array. It is not one string, so to get one, join it: path.join('/'). It is not just 'docs' either. A :path parameter matches only one segment, so it would not match this URL at all, and the client would get a 404. Nest still accepts a bare * and converts it for you, with a warning at startup.",
       },
       {
         t: 3,
@@ -1354,14 +1366,14 @@ findOne(@Param('id') id: number) {}`,
       },
       {
         t: 1,
-        q: "Send your own JSON shape whenever a NotFoundException is thrown.",
+        q: "Log the method and URL of every request, even ones that match no route.",
         opts: [
-          "Filter: turn an error into a response",
-          "Interceptor: wrap the handler",
           "Middleware: raw request, pre-routing",
+          "Interceptor: wrap the handler",
+          "Guard: is this request allowed?",
         ],
-        a: "Filter: turn an error into a response",
-        why: "Put @Catch(NotFoundException) on a filter class and bind it. A filter only runs once something was thrown, and it decides what the client gets back. An interceptor could catch it with catchError, but it would miss errors thrown before it runs, like a guard's.",
+        a: "Middleware: raw request, pre-routing",
+        why: "Middleware bound to every path, with forRoutes('*') or app.use(), runs before Nest picks a route. So it sees every request, even one that ends in a 404. A guard and an interceptor belong to a handler. When no route matches, there is no handler, so neither of them runs. An interceptor is the usual home for timing a handler, but it never sees those 404s.",
       },
       {
         t: 1,
@@ -2480,10 +2492,14 @@ remove() {}`,
       },
       {
         t: 1,
-        q: "OrdersService calls PaymentsService, which calls Stripe. You are unit testing OrdersService. What do you fake?",
-        opts: ["PaymentsService", "OrdersService", "Both of them, to be safe"],
-        a: "PaymentsService",
-        why: "Keep the thing under test real, and fake what it talks to. Faking OrdersService would test nothing. Faking PaymentsService keeps Stripe out of the test, without caring how payments work inside. Faking both throws away the code you meant to test.",
+        q: "OrdersService only ever calls payments.charge(). What does the useValue fake for PaymentsService need?",
+        opts: [
+          "Only the charge method the code calls",
+          "Every method the real class defines",
+          "An instance of the real PaymentsService",
+        ],
+        a: "Only the charge method the code calls",
+        why: 'useValue hands Nest a plain object, and Nest never checks its shape. So the fake only needs what the code under test calls: an object with a charge method. Copying every method is busywork. A real instance would run the real payment code, which is what the fake is there to avoid. If the code later calls a method the fake lacks, the test crashes with "is not a function", which tells you what to add.',
       },
       {
         t: 1,

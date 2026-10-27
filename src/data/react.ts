@@ -224,14 +224,14 @@ export const REACT_LINES: Line[] = [
       },
       {
         t: 1,
-        q: "A parent's state changes. Its child takes no props at all. Does the child re-render?",
+        q: "A parent re-renders and passes a brand new arrow function to `<button onClick>`. What happens to the button in the page?",
         opts: [
-          "Yes, children re-render with their parent",
-          "No, it has no props that could change",
-          "Only if the child has state of its own",
+          "It stays. React just uses the new handler",
+          "React removes it and adds a new button",
+          "React adds a second click listener to it",
         ],
-        a: "Yes, children re-render with their parent",
-        why: "When a component renders, React renders everything it returns, by default. Having no props does not opt the child out. Wrapping it in memo would, because memo skips a component whose props are unchanged, and no props never change.",
+        a: "It stays. React just uses the new handler",
+        why: "React keeps the same button element in the page. It only remembers the new function, so the next click runs it, once. React never attaches your function to the button itself, so there is nothing to replace or add. A new function every render only costs something when something compares it, like a memo child or an effect's dependency array.",
       },
       {
         t: 1,
@@ -1330,25 +1330,30 @@ setUser(user);`,
       },
       {
         t: 3,
-        q: "A table renders 10,000 rows and scrolling stutters. What actually fixes it?",
+        q: "This custom compare returns true when the ids match. The parent re-renders with a new filter. What happens when you click Row?",
+        code: `const Row = memo(RowImpl, (prev, next) =>
+  prev.id === next.id
+);
+
+<Row id={id} onSelect={() => select(id, filter)} />`,
         opts: [
-          "Render only the rows on screen",
-          "Wrap every row in memo",
-          "Paginate on the server only",
+          "It calls an old onSelect, which sees an old filter",
+          "It calls the new onSelect, since Row re-rendered",
+          "It calls nothing, since the handler was dropped",
         ],
-        a: "Render only the rows on screen",
-        why: "The cost is the number of DOM nodes, not the render function. memo still leaves 10,000 rows in the page. Rendering only the visible rows, called virtualization, keeps the page small. Libraries like react-window and TanStack Virtual do it. Server pagination helps too, but it changes the product rather than fixing the table.",
+        a: "It calls an old onSelect, which sees an old filter",
+        why: "Returning true tells memo the props are equal, so React skips Row. Row keeps the onSelect from the last time it rendered. That old function still holds the filter from back then. This is called a stale closure. Row never re-rendered, so it never got the new handler, and nothing was dropped either. React's docs say a custom compare must check every prop, functions included. Usually the better fix is no custom compare, and useCallback to keep onSelect stable.",
       },
       {
         t: 3,
-        q: "How do you find out what is actually slow?",
+        q: 'You wrap the app in `<Profiler id="app" onRender={log}>` and ship a normal production build. What does log receive?',
         opts: [
-          "React DevTools Profiler, with why-rendered on",
-          "console.time around each component's render function",
-          "The Chrome memory tab over a few minutes",
+          "Nothing. onRender is off in production",
+          "Every commit, the same as in development",
+          "Only the commits that took over 16 ms",
         ],
-        a: "React DevTools Profiler, with why-rendered on",
-        why: 'The React DevTools Profiler records every render and how long it took. Turn on "Record why each component rendered while profiling" in its settings, and it tells you what caused each one. console.time cannot see React\'s work, and the memory tab is for leaks, not speed. Saying this in an interview beats listing memo APIs.',
+        a: "Nothing. onRender is off in production",
+        why: "Profiling costs time, so React turns it off in the normal production build. There, onRender never runs. In development it runs after every commit inside the Profiler, fast or slow. A commit is React writing a render's changes into the page. There is no 16 ms cutoff. To measure in production, React ships a special profiling build, react-dom/profiling, which turns onRender back on.",
       },
       {
         t: 3,

@@ -500,14 +500,15 @@ export const TS_LINES: Line[] = [
       },
       {
         t: 1,
-        q: "Which signature keeps the type of what you pass in?",
-        opts: [
-          "function identity<T>(x: T): T",
-          "function identity(x: any): any",
-          "function identity(x: unknown): unknown",
-        ],
-        a: "function identity<T>(x: T): T",
-        why: "With <T>, pass in a User and you get a User back. Pass in an Order and you get an Order. With any, you get any back, and TypeScript stops checking it. With unknown, you get unknown back, and you have to check it all over again.",
+        q: "What is the type of `kv`?",
+        code: `function pair<A, B>(a: A, b: B): [A, B] {
+  return [a, b];
+}
+
+const kv = pair('id', 42);`,
+        opts: ["[string, number]", "(string | number)[]", "[unknown, unknown]"],
+        a: "[string, number]",
+        why: "A generic can have more than one type parameter. Each argument fills in its own, so A becomes string and B becomes number. The return type [A, B] is a tuple: an array with a fixed length and a type for each slot. So kv is [string, number]. It is not a mixed array like (string | number)[], because the signature promises a tuple. Nothing is unknown, because both types come from the arguments.",
       },
       {
         t: 1,
