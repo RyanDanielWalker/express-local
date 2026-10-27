@@ -241,7 +241,7 @@ export const REACT_LINES: Line[] = [
           "React adds a second click listener to it",
         ],
         a: "It stays. React just uses the new handler",
-        why: "React keeps the same button element in the page. It only remembers the new function, so the next click runs it, once. React never attaches your function to the button itself, so there is nothing to replace or add. A new function every render only costs something when something compares it, like a memo child or an effect's dependency array.",
+        why: "React keeps the same button element in the page. It only remembers the new function, so the next click runs it, once. React never adds your function to the button as a listener. It listens for clicks once, on the element you passed to createRoot, and runs the newest handler when a click arrives. So there is nothing to replace or add. A new function every render only costs something when something compares it, like a memo child or an effect's dependency array.",
       },
       {
         t: 1,

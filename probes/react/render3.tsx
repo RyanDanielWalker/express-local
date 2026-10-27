@@ -5,6 +5,9 @@ import { createRoot } from 'react-dom/client';
 
 const container = document.createElement('div');
 document.body.appendChild(container);
+const rootListeners: string[] = [];
+const rootAdd = container.addEventListener.bind(container);
+container.addEventListener = ((type: string, ...rest: any[]) => { rootListeners.push(type); return (rootAdd as any)(type, ...rest); }) as any;
 const seen: number[] = [];
 let bump!: () => void;
 function Parent() {
@@ -39,6 +42,10 @@ ok(removed.length === 0 && added.length === 0, 'React did not remove or add any 
 ok(attrs.length === 0, 'React did not touch any attribute (no onclick attribute either)');
 ok(seen.length === 1 && seen[0] === 2, 'one click runs the newest handler once, and it sees count 2');
 ok(listeners.length === 0, 'React never calls addEventListener on the button itself');
+ok(rootListeners.filter(t => t === 'click').length === 2, 'React listens for click once at the root (bubble and capture), not on the button');
+const rootBefore = rootListeners.length;
+await act(() => bump());
+ok(rootListeners.length === rootBefore, 'a re-render adds no listener at the root either');
 ok(first.getAttribute('onclick') === null, 'the handler is not written into the DOM');
 ok(false, 'SANITY should fail');
 done();
