@@ -47,7 +47,7 @@ So that `git blame` skips commits that only reformat, run this once:
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
-A future reformatting commit gets its full hash added to that file, and its branch is merged with a merge commit. Squashing or rebasing gives the commit a new hash, and the file would point at nothing.
+A future reformatting commit gets its full hash added to that file. If it goes on a branch, that branch is merged with a merge commit. Squashing or rebasing gives the commit a new hash, and the file would point at nothing.
 
 Use these scripts rather than calling the tools directly. `tsc -b`, for example, writes a `tsconfig.tsbuildinfo` file the repo does not want.
 

@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
-Status: 34 lines across 4 divisions, 108 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: the 2026-10-16 consistency pass, ending at commit `e52a045`.
+Status: 34 lines across 4 divisions, 108 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-27, after the near-duplicate work (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -69,8 +69,8 @@ Smaller cleanups from the same review:
 
 ### 3. Inventory stop
 
-- [ ] A fact-check pass by a separate agent that did not write the changes (the `fact-checker` agent), over every question touched in step 2. Verify each finding by re-running its probe before fixing, then a fresh agent re-checks the fixes.
-- [ ] Sanity pass: `npm test`, `npm run bar`, `npm run build`, the probes pass (see [DEVELOPMENT.md](DEVELOPMENT.md#inventory-stops), step 2), play each changed line end to end in a browser, and every doc still true.
+- [x] A fact-check pass by a separate agent that did not write the changes (the `fact-checker` agent), over every question touched in step 2. Verify each finding by re-running its probe before fixing, then a fresh agent re-checks the fixes.
+- [x] Sanity pass: `npm test`, `npm run bar`, `npm run build`, the probes pass (see [DEVELOPMENT.md](DEVELOPMENT.md#inventory-stops), step 2), play each changed line end to end in a browser, and every doc still true.
 
 ### 4. Interface
 
@@ -249,3 +249,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-27** Ten of the thirteen cross-line near-duplicate pairs: five React questions and five TypeScript questions replaced with new angles, so Memo Yard keeps memo and the compiler, Unknown Territory keeps `as`, Narrow Gauge keeps exhaustive `never`, and Shape Yard keeps unions of valid shapes
 - **2026-10-27** The last three cross-line near-duplicate pairs, all NestJS: Turnstile keeps authentication versus authorization and the @Public() route, Fault Line keeps APP_FILTER, and Fault Line, Dispatch Desk and Tool Shed get new questions on an un-awaited rejection crashing the server, a guard's 403 reaching the exception filter but never an interceptor, and an `APP_GUARD` covering every route
 - **2026-10-27** The three smaller cleanups from the near-duplicate review: Wiring Yard says its `forwardRef` is Nest's, not React's, Main Line's middleware rate limiter says when `ThrottlerGuard` is the better home, and the `@nestjs/throttler` claims on Dispatch Desk were run against the real package. They held up, but one question's `why` leaned on `@SkipThrottle()`, which an interceptor can read too, so that reason was dropped. The fact-checker also tightened Wiring Yard's missing `@Injectable()` sentence: Nest starts fine, and the first request that uses the dependency fails with a 500
+- **2026-10-27** Inventory stop after the near-duplicate work. Three fact-checkers ran every changed field since the last stop against TypeScript 5.9 to 7.0, React 19.3 and Nest 12.1.3. They found one overstated sentence: a `why` said React never attaches your click handler to the button, when it does keep it on the node, just never as a listener. Fixed, proven in `probes/react/render3.tsx`, and re-checked. All 23 stack quiz and flow lines were ridden twice on Local against the production build with no console errors

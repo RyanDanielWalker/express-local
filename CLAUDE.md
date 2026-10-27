@@ -92,12 +92,12 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 ## Known traps
 
 - **Quotes.** Run `npm run format` after editing; Prettier picks the quote that needs fewer escapes, so write `"don't"`, not `'don\'t'`. A script that writes `\\'` into a file still breaks it.
-- **A reformatting commit** goes in `.git-blame-ignore-revs`, and its branch is merged with a merge commit, never squashed or rebased, so the hash in that file survives.
+- **A reformatting commit** goes in `.git-blame-ignore-revs`. If it goes on a branch, merge that branch with a merge commit, never squashed or rebased, so the hash in that file survives.
 - **An answer lives in two places**, `opts` and `a`. Change both.
 - **Rewording a question resets its history.** A question's id is its line id plus a hash of its `q` and `code`, so moving it to another line resets it too.
 - **Rebalancing option lengths can make a wrong option true.** Re-prove after every rewording.
 - **jsdom details:** submit forms with `button.click()`; use jsdom's own `FormData` (the probes harness does). A Suspense boundary hides old content with `display: none` but leaves it in the DOM, so `textContent` still includes it.
-- **React facts that look wrong in the docs:** an effect loop only warns, it isn't stopped. StrictMode runs setup, cleanup, setup but keeps state (not a real remount). Error boundaries catch errors in rendering, effects and Actions like a form action, but not in plain event handlers or timers.
+- **React facts that look wrong in the docs:** an effect loop only warns, it isn't stopped. StrictMode runs setup, cleanup, setup but keeps state (not a real remount). Error boundaries catch errors in rendering, effects and Actions like a form action, but not in plain event handlers or timers. React never adds your `onClick` as a listener on the element (it listens once, on the createRoot container), but it does keep your function on the DOM node, and it sets the element's `onclick` to an empty function for Safari. So "React adds nothing to the button" is false.
 - **NestJS facts that look wrong in the docs:** `@HttpCode()` still applies alongside `@Res()`. A missing `@Injectable()` can boot with an undefined dependency instead of failing.
 - **Undo a planted bug by hand**, not with `git checkout -- <file>`, unless the real change is committed first. Checkout throws away every uncommitted edit in the file, not just the planted one.
 - **Don't run `tsc -b`.** It leaves a `tsconfig.tsbuildinfo` in the repo. Use the npm scripts.
