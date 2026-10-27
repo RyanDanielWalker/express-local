@@ -88,3 +88,11 @@ function Comp() {
 const mapped = [1, 2, 3].map(n => String(n)); const t16: Expect<typeof mapped, string[]> = true;
 const pr = Promise.resolve(42); const t17: Expect<typeof pr, Promise<number>> = true;
 export {};
+
+// Two type parameters: each argument fills its own, and literals widen inside the tuple.
+function pair<A, B>(a: A, b: B): [A, B] { return [a, b]; }
+const kv = pair('id', 42);
+const tp1: Expect<typeof kv, [string, number]> = true;
+const tp2: Expect<typeof kv, (string | number)[]> = false;
+const tp3: Expect<typeof kv, [unknown, unknown]> = false;
+const tp4: Expect<typeof kv[1], number> = true;
