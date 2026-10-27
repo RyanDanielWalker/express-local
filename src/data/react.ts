@@ -129,17 +129,18 @@ export const REACT_LINES: Line[] = [
       },
       {
         t: 2,
-        q: "A memoized child gets `style={{ margin: 8 }}` as a prop. Why does it still re-render every time?",
-        code: `const Child = React.memo(function Child({ style }) { ... });
-
-<Child style={{ margin: 8 }} />`,
+        q: "What happens when this component first renders?",
+        code: `function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={setCount(count + 1)}>{count}</button>;
+}`,
         opts: [
-          "The object is a new reference on every render",
-          "memo deep-compares props, so this is already fine",
-          "memo skips object props and checks primitives",
+          "React throws a Too many re-renders error",
+          "count goes up by one on every click",
+          "count goes up once, on the first render",
         ],
-        a: "The object is a new reference on every render",
-        why: "memo compares each prop with Object.is, which checks for the same object, not the same contents. `{ margin: 8 }` written inline is a new object on every render, so the check fails every time. memo never deep-compares, and it treats object props like any other prop. Move the object outside the component, or wrap it in useMemo.",
+        a: "React throws a Too many re-renders error",
+        why: '`setCount(count + 1)` has parentheses, so it runs right away, during render, not on a click. Setting state during render starts another render. That render calls setCount again, and so on. React stops the loop and throws "Too many re-renders". The button never reaches the page, so there is nothing to click, and the count never shows. Pass a function instead: `onClick={() => setCount(count + 1)}`.',
       },
       {
         t: 2,
@@ -202,14 +203,23 @@ export const REACT_LINES: Line[] = [
       },
       {
         t: 3,
-        q: "What does the React Compiler do?",
+        q: "UserProvider re-renders because tick changed. user did not. What happens to the components inside children that read UserContext?",
+        code: `function UserProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [tick, setTick] = useState(0);
+  return (
+    <UserContext value={{ user, setUser }}>
+      {children}
+    </UserContext>
+  );
+}`,
         opts: [
-          "Memoizes for you when the rules are followed",
-          "Replaces the virtual DOM with direct updates",
-          "Removes the need for keys in rendered lists",
+          "They re-render, since value is a new object",
+          "They skip, since user has the same value",
+          "They skip, since children came from above",
         ],
-        a: "Memoizes for you when the rules are followed",
-        why: "React Compiler 1.0 shipped in October 2025. At build time, it adds the memoization you would otherwise write by hand with memo, useMemo and useCallback. When it spots code breaking the Rules of React, it skips that component. It cannot spot every break, so following the rules is still your job. It does not replace the virtual DOM, and keys still matter.",
+        a: "They re-render, since value is a new object",
+        why: "`{ user, setUser }` is written inline, so every render of UserProvider makes a new object. React compares context values with Object.is, which checks for the same object, not the same contents. A new object counts as a change. So every component that reads UserContext re-renders, even one wrapped in memo. Components passed in as children that do not read UserContext still skip, because children is the same element as last time. Anything a reader renders re-renders with it, unless it is wrapped in memo. Wrap the value in useMemo, with `[user]` as its dependency array, and the readers skip too. (Rendering `<UserContext>` as the provider is new in React 19.)",
       },
       {
         t: 1,
@@ -268,14 +278,22 @@ export const REACT_LINES: Line[] = [
       },
       {
         t: 1,
-        q: "What does wrapping a component in memo do?",
+        q: "Input calls `onChange('a')`. Whose state changes?",
+        code: `function Input({ onChange }) {
+  return <input onChange={e => onChange(e.target.value)} />;
+}
+
+function Parent() {
+  const [text, setText] = useState('');
+  return <Input onChange={setText} />;
+}`,
         opts: [
-          "Skips its re-render when no prop has changed",
-          "Caches the DOM it produced between pages",
-          "Stops it re-rendering when its state changes",
+          "Parent's, since Parent called useState",
+          "Input's, since Input called the setter",
+          "Both, since the setter is shared by props",
         ],
-        a: "Skips its re-render when no prop has changed",
-        why: "memo compares each prop with the last render's, using Object.is. If none changed, React skips calling the component when its parent renders. Its own state changes and the contexts it reads still re-render it. memo caches nothing about the DOM.",
+        a: "Parent's, since Parent called useState",
+        why: "Parent called useState, so the text state belongs to Parent. Passing setText down as a prop lends Input a way to change it. It does not move the state. So when Input calls it, Parent's text changes, and React renders Parent again. Input has no state of its own here, and there is only one text, so nothing is shared or copied.",
       },
       {
         t: 2,
@@ -832,14 +850,18 @@ setUser(user);`,
       },
       {
         t: 3,
-        q: "You store filteredItems in state and update it in an effect whenever the query changes. What should you do instead?",
+        q: "Swatch first renders with color='red'. Then the parent re-renders and passes color='blue'. What does Swatch show?",
+        code: `function Swatch({ color }) {
+  const [shown, setShown] = useState(color);
+  return <p>{shown}</p>;
+}`,
         opts: [
-          "Compute it during render from items and query",
-          "Keep it in state but memoize the effect",
-          "Move both into context so they stay in sync",
+          "red. useState only reads its first value",
+          "blue. A new prop resets the state",
+          "blue, after one extra render",
         ],
-        a: "Compute it during render from items and query",
-        why: "Storing filteredItems in state means two sources of truth, and a render where they disagree. Compute it during render from items and query. Reach for useMemo only if the filtering turns out to be slow.",
+        a: "red. useState only reads its first value",
+        why: "The value you pass to useState is only the starting value. React uses it on the first render and ignores it after that. So Swatch does re-render with color='blue', but shown stays 'red'. Copying a prop into state like this is called mirroring a prop. If Swatch should always match the prop, drop the state and use color directly. If it should start over for a new item, give it a key.",
       },
       {
         t: 1,
@@ -1570,14 +1592,14 @@ setUser(user);`,
       },
       {
         t: 2,
-        q: "Two components both call useCounter(). Do they share the count?",
+        q: "Header calls useWindowWidth(), which calls setWidth on every resize. Header never shows the width. What re-renders on a resize?",
         opts: [
-          "No. Each call gets its own state",
-          "Yes. The hook holds one shared state",
-          "Only when both sit in the same tree",
+          "Header, since the hook's state is Header's",
+          "Only the hook, since the state lives in it",
+          "Nothing, since Header never shows width",
         ],
-        a: "No. Each call gets its own state",
-        why: "Custom hooks share logic, not state. Each component that calls useCounter() gets its own count, wherever it sits in the tree. To share one count, lift the state up to a parent, or use context or a store.",
+        a: "Header, since the hook's state is Header's",
+        why: "The useState inside useWindowWidth runs as part of Header, so width is Header's state. When setWidth changes it, React re-renders Header. A hook never renders on its own. React does not check whether Header uses the value. A state change re-renders the component that owns the state.",
       },
       {
         t: 2,
