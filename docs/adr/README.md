@@ -22,7 +22,7 @@ One short file per significant decision: the context, the options, what was deci
 | [0007](0007-readiness-over-xp.md)            | Readiness is the headline number, not XP                                     | Accepted                           |
 | [0008](0008-probes-in-the-repo.md)           | The fact-check sandboxes live in the repo                                    | Accepted                           |
 | [0009](0009-terminal-workflow.md)            | Day-to-day work happens in Claude Code, and the repo carries the context     | Accepted, amended by 0011          |
-| [0010](0010-a-portfolio-piece-with-a-1-0.md) | A portfolio piece with a written 1.0, and the backend is 2.0                 | Accepted, amended by 0014          |
+| [0010](0010-a-portfolio-piece-with-a-1-0.md) | A portfolio piece with a written 1.0, and the backend is 2.0                 | Accepted, amended by 0014 and 0018 |
 | [0011](0011-branches-for-features.md)        | Features go on a branch and through a pull request; small fixes stay on main | Accepted, amended by 0017          |
 | [0012](0012-disclose-ai-in-the-readme.md)    | AI use is disclosed in the README, not in commit trailers                    | Accepted                           |
 | [0013](0013-ci-on-github-actions.md)         | CI on GitHub Actions, one job, actions pinned to a commit                    | Accepted, amended by 0016          |
@@ -30,6 +30,7 @@ One short file per significant decision: the context, the options, what was deci
 | [0015](0015-repair-damaged-saves.md)         | A damaged save is repaired field by field, not rejected                      | Accepted                           |
 | [0016](0016-end-to-end-test-in-ci.md)        | One end-to-end test with Playwright, run in CI                               | Accepted                           |
 | [0017](0017-main-by-default.md)              | Work goes on main by default; Ryan decides when something gets a branch      | Accepted                           |
+| [0018](0018-learn-mode-after-1-0.md)         | Ryan's own piece of core code moves to after 1.0                             | Accepted                           |
 
 ## Template
 

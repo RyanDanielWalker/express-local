@@ -12,7 +12,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 4. NestJS, TypeScript and React have no near-duplicate questions.
 5. The interface a visitor notices first: play mode takes the screen, a Today band says what to do now, and a router makes Back work and gives every line a URL.
 6. A pasted save code is validated before it is trusted, and one end-to-end test rides a line against the production build.
-7. Ryan wrote at least one piece of core code with `/next learn`, passed an `/audit quiz`, wrote the case study in his own words, and tagged `v1.0`.
+7. Ryan passed an `/audit quiz`, wrote the case study in his own words, and tagged `v1.0`.
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
@@ -77,7 +77,7 @@ Smaller cleanups from the same review:
 What a visitor notices first. In this order:
 
 - [x] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page.
-- [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar. Run it with `/next learn`: picking what to do now is a pure function in `src/engine/` with tests, and 1.0 needs Ryan to write one piece of core code.
+- [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar. Picking what to do now is a pure function in `src/engine/` with tests. Built in normal mode: the learn-mode piece moved to after 1.0 ([ADR 0018](adr/0018-learn-mode-after-1-0.md)).
 - [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
 - [ ] **Accessibility checks as tests.** A test that fails when an input has no label or an icon-only button has no name, a contrast test against the color variables in `app.css` in light and dark, and a check at 375px wide (the smallest breakpoint today is 480px).
 - [ ] **README refresh.** A fresh GIF and screenshots (the current ones predate the TypeScript and React puzzles and the clarity rewrite), and a small architecture diagram.
@@ -156,6 +156,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 
 ## Parked for now
 
+- **A piece of core code written by Ryan with `/next learn`.** Moved out of 1.0 at Ryan's call ([ADR 0018](adr/0018-learn-mode-after-1-0.md)). First in line once `v1.0` is tagged.
 - **Algorithms question pools.** Eleven lines, no question pools, so they contribute almost nothing to cram and their readiness has no recall component. Worth fixing, explicitly not now.
 - **New divisions.** SQL and Postgres, GraphQL, Git as a train yard.
 - **Engineer's Cab.** After Rush Hour, write the algorithm yourself against in-browser tests.

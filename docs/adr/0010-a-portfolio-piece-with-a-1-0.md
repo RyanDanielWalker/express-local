@@ -1,6 +1,6 @@
 # 0010. A portfolio piece with a written 1.0, and the backend is 2.0
 
-Status: Accepted (2026-10-26). Amended by [0014](0014-deploy-last.md): the deploy moves to the end of 1.0.
+Status: Accepted (2026-10-26). Amended by [0014](0014-deploy-last.md): the deploy moves to the end of 1.0. Amended by [0018](0018-learn-mode-after-1-0.md): Ryan's learn-mode piece moves to after 1.0.
 
 ## Context
 
