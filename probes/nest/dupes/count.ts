@@ -12,6 +12,7 @@ const ok = (c: unknown, m: string) => { console.log(c ? 'PASS' : 'FAIL', m); if 
 const done = () => console.log('fails', fails);
 
 const counted = { filter: [] as string[], interceptor: [] as string[] };
+const caughtTypes: string[] = [];
 const url = (c: ArgumentsHost) => c.switchToHttp().getRequest().originalUrl;
 @Injectable() class Gate implements CanActivate {
   canActivate(c: ExecutionContext) { if (url(c).startsWith('/admin')) throw new ForbiddenException(); return true; }
@@ -22,7 +23,7 @@ const url = (c: ArgumentsHost) => c.switchToHttp().getRequest().originalUrl;
   }
 }
 @Catch() class CountF extends BaseExceptionFilter {
-  catch(e: unknown, host: ArgumentsHost) { counted.filter.push(url(host)); super.catch(e, host); }
+  catch(e: unknown, host: ArgumentsHost) { counted.filter.push(url(host)); caughtTypes.push((e as object).constructor.name); super.catch(e, host); }
 }
 @Controller() class C {
   @Get('admin') admin() { return 'secret'; }
@@ -51,6 +52,7 @@ console.log('interceptor saw the pipe rejection:', counted.interceptor.includes(
 // Dispatch Desk t1's why: an interceptor never runs for a URL no route matches; a global filter sees the 404.
 ok(d.status === 404 && counted.filter.includes('/no-such-page'), 'the global filter catches the 404 for an unmatched URL');
 ok(!counted.interceptor.includes('/no-such-page'), 'the interceptor never sees it');
+ok(caughtTypes.at(-1) === 'NotFoundException', 'Nest throws a NotFoundException itself for the unknown URL');
 ok(false, 'SANITY should fail');
 await app.close();
 done();

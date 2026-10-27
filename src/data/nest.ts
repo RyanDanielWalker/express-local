@@ -1417,7 +1417,7 @@ findOne(@Param('id') id: number) {}`,
           "Guard: is this request allowed?",
         ],
         a: "Filter: turn an error into a response",
-        why: "Filters catch what was thrown and decide the response. A global one gives the whole API one error shape, and it is the natural place to log. An interceptor only wraps a route's handler. So it never sees the 404 for a URL that matches no route, but a global filter does.",
+        why: "Filters catch what was thrown and decide the response. A global one gives the whole API one error shape, and it is the natural place to log. For a URL that matches no route, Nest throws a 404 itself. An interceptor only wraps a route's handler, so it never sees that error, but a global filter does.",
       },
       {
         t: 2,
