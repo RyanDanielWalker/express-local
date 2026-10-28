@@ -16,7 +16,7 @@
   --magenta: #c2378a;
   --teal: #0f8c8c;
   --slate: #4b5b7c;
-  --good: #1b8a4b;
+  --good: #157a40;
   --bad: #c8322a;
   --on-accent: #ffffff;
   --code: #f1f3f2;
@@ -46,6 +46,7 @@
     --slate: #8397c4;
     --good: #35b26a;
     --bad: #ee5646;
+    --on-accent: #15181c;
     --code: #12161a;
   }
 }
@@ -69,6 +70,7 @@
   --slate: #8397c4;
   --good: #35b26a;
   --bad: #ee5646;
+  --on-accent: #15181c;
   --code: #12161a;
 }
 * {
@@ -96,7 +98,8 @@ button {
   cursor: pointer;
 }
 button:focus-visible,
-.tile:focus-visible {
+.tile:focus-visible,
+pre.code:focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 2px;
 }
@@ -244,7 +247,7 @@ button:focus-visible,
 }
 .flag.due {
   background: var(--bad);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* readiness: a state, not a total */
@@ -336,7 +339,7 @@ button:focus-visible,
 .bullet.sm {
   width: 30px;
   height: 30px;
-  font-size: 18px;
+  font-size: 19px;
   border-width: 0;
 }
 .bullet.lg {
@@ -583,7 +586,8 @@ button:focus-visible,
 .log .ans {
   color: var(--good);
 }
-.log .qm {
+.log .qm,
+.sum .qm {
   background: var(--yellow);
   color: #15181c;
   padding: 0 6px;
@@ -750,8 +754,8 @@ svg.graph {
   text-transform: uppercase;
 }
 .target span {
-  background: var(--yellow);
-  color: #15181c;
+  background: var(--c);
+  color: var(--on-accent);
   padding: 0 10px;
   border-radius: 6px;
 }
@@ -873,7 +877,7 @@ pre.code {
   opacity: 0.4;
 }
 .clock.held {
-  opacity: 0.45;
+  color: var(--muted);
 }
 @media (max-width: 560px) {
   .kb {
@@ -909,7 +913,7 @@ pre.code {
   font-family: var(--mono);
   font-weight: 600;
   border: 3px solid var(--c);
-  color: var(--c);
+  color: var(--ink);
   padding: 4px 12px;
   border-radius: 6px;
   transform: rotate(-2deg);
@@ -1025,7 +1029,7 @@ pre.code {
 }
 .bucket .k.hit {
   background: var(--c);
-  color: #fff;
+  color: var(--on-accent);
 }
 /* merge */
 .runs {

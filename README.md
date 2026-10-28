@@ -115,7 +115,7 @@ A few choices that shape how the app teaches. [docs/ROADMAP.md](docs/ROADMAP.md)
 - **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, and render the results screen for every line. One Playwright test rides a line twice on Local against the production build, checks Back and Forward mid-ride, then opens the line by its URL in a fresh browser and moves the save code there.
 - **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes, a production build and the end-to-end test on each push and pull request.
 - **A small router of its own.** Every line has a URL, like `/nest/life`, and the browser's Back button leaves a ride for its line instead of leaving the app. It is about a hundred lines on the History API, with the path parsing as pure, tested functions, rather than a routing library for five URLs.
-- **Accessible.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced-motion support, and light and dark themes.
+- **Accessible, and tested for it.** Keyboard shortcuts, focusable graph nodes and code blocks, `aria-live` status updates, reduced-motion support, and light and dark themes. The end-to-end test runs axe on every screen it passes through, at phone width in light mode and at desktop width in dark mode. A unit test checks every text color in the stylesheet against WCAG AA contrast in both themes.
 
 ```
 src/

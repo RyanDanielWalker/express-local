@@ -90,7 +90,11 @@ export function QuizGame({ api, line, role, history }: GameProps) {
           <p className="q">
             <Rich text={q.q} />
           </p>
-          {q.code && <pre className="code">{q.code}</pre>}
+          {q.code && (
+            <pre className="code" tabIndex={0}>
+              {q.code}
+            </pre>
+          )}
           <div className="opts stack">
             {opts.map((o, k) => (
               <button

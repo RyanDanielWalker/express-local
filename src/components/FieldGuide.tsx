@@ -34,7 +34,9 @@ export function FieldGuide({ line }: { line: Line }) {
         </div>
         <div>
           <div className="eyebrow">Where you'll see it: {g.code.label}</div>
-          <pre className="code">{g.code.snippet}</pre>
+          <pre className="code" tabIndex={0}>
+            {g.code.snippet}
+          </pre>
           {g.code.note && (
             <p className="hint" style={{ margin: 0 }}>
               {g.code.note}

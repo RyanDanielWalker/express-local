@@ -15,7 +15,11 @@ export const Panel = ({
 
 export const CodePanel = ({ title, code }: { title: string; code: string }) => (
   <Panel title={title}>
-    <pre className="code" style={{ fontSize: 12.5, padding: "10px 12px" }}>
+    <pre
+      className="code"
+      tabIndex={0}
+      style={{ fontSize: 12.5, padding: "10px 12px" }}
+    >
       {code}
     </pre>
   </Panel>

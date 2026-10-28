@@ -32,6 +32,7 @@ One short file per significant decision: the context, the options, what was deci
 | [0017](0017-main-by-default.md)              | Work goes on main by default; Ryan decides when something gets a branch      | Accepted                           |
 | [0018](0018-learn-mode-after-1-0.md)         | Ryan's own piece of core code moves to after 1.0                             | Accepted                           |
 | [0019](0019-a-small-router-of-our-own.md)    | A small router of our own, with path URLs                                    | Accepted                           |
+| [0020](0020-accessibility-as-tests.md)       | Accessibility is checked by tests: axe end to end, contrast from the CSS     | Accepted                           |
 
 ## Template
 

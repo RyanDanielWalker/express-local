@@ -7,5 +7,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    // Vitest blanks CSS files unless told otherwise. The contrast test reads
+    // app.css as text, so let that one file through.
+    css: { include: [/app\.css/] },
   },
 });

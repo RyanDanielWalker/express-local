@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
-Status: 34 lines across 4 divisions, 131 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-27, after the near-duplicate work (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 141 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-27, after the near-duplicate work (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -79,7 +79,7 @@ What a visitor notices first. In this order:
 - [x] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page.
 - [x] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar. Picking what to do now is a pure function in `src/engine/` with tests. Built in normal mode: the learn-mode piece moved to after 1.0 ([ADR 0018](adr/0018-learn-mode-after-1-0.md)).
 - [x] **A router.** Every line has a URL (`/nest/life`), a ride has its own (`/nest/life/ride`), and Back mid-ride lands on the line instead of leaving the app. Hand-rolled on the History API, at Ryan's call ([ADR 0019](adr/0019-a-small-router-of-our-own.md)).
-- [ ] **Accessibility checks as tests.** A test that fails when an input has no label or an icon-only button has no name, a contrast test against the color variables in `app.css` in light and dark, and a check at 375px wide (the smallest breakpoint today is 480px).
+- [x] **Accessibility checks as tests.** axe runs on every screen the end-to-end test passes through, at 375px in light mode and at desktop width in dark mode, along with a check that nothing is wider than the screen. `src/styles/contrast.test.ts` checks every text and background pair in `app.css` against WCAG AA in both themes. The failures it found are fixed, keeping the line colors ([ADR 0020](adr/0020-accessibility-as-tests.md)).
 - [ ] **README refresh.** A fresh GIF and screenshots (the current ones predate the TypeScript and React puzzles and the clarity rewrite), and a small architecture diagram.
 
 ### 5. Inventory stop
@@ -165,6 +165,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **Upgrade the build to TypeScript 6.** The app builds with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
 - **Dependabot for the workflow and npm.** The CI actions are pinned to commit hashes, which never update themselves ([ADR 0013](adr/0013-ci-on-github-actions.md)). Dependabot would open a pull request for each new release. Bumping by hand is fine while there are two actions.
 - **Keep the trace from a red end-to-end run in CI.** Playwright saves a trace (a step-by-step recording) when the test fails, but CI throws it away with the machine. Uploading it as a workflow artifact would show what the page looked like at the failure. Until then, reproduce a red run with `npm run e2e`, which keeps the trace in `test-results/`.
+- **Accessibility the tests do not reach yet.** Contrast for non-text parts (meter bars, pips, borders, 3:1 under WCAG 1.4.11) is not tested. axe only runs on screens the end-to-end test visits, so the algorithm games, rehearsal and the cram drill are unchecked ([ADR 0020](adr/0020-accessibility-as-tests.md)).
 - **Split the bundle by division.** Every question ships in one chunk, over 700 kB (about 225 kB gzipped). `LINES` is a synchronous array used everywhere, so it is a real refactor.
 
 ## Later: engine ideas
@@ -254,3 +255,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-27** Deciding vs doing: a ride, drill or rehearsal hides the map, badges and save box, shrinks the header to a **Back to the map** button, and starts at the top of the screen
 - **2026-10-28** A Today band above the map: a due review, the shaky questions, the Daily Ride and the next new line, most urgent first, picked by `todayPlan()` in `src/engine/today.ts`. Each division on the map is now a header you open and close, with its readiness bar, and only the division in play starts open
 - **2026-10-28** A router: every line has a URL, a ride, rehearsal and drill have their own, the tab title names the line, and Back and Forward work mid-ride. Hand-rolled on the History API in `src/lib/route.ts` and `src/hooks/useUrl.ts`, with no new dependency
+- **2026-10-28** Accessibility checks as tests: axe in the end-to-end test at phone width and in dark mode, and a contrast test over every rule in `app.css`. Fixed what they found: white letters on bright line colors in dark mode, light mode's green text, the results stamp, the paused clock, small bullets, and code blocks a keyboard could not scroll

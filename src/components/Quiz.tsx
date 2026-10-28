@@ -45,7 +45,7 @@ export function Quiz({
       >
         What goes in the blank?
       </h2>
-      <pre className="code">
+      <pre className="code" tabIndex={0}>
         {before}
         <span className="blank">___</span>
         {after}

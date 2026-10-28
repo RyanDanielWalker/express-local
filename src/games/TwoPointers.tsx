@@ -115,10 +115,7 @@ export function TwoPointersGame({ api }: GameProps) {
     <>
       <div className="board">
         <div className="target">
-          Target{" "}
-          <span style={{ background: "var(--c)", color: "#fff" }}>
-            {s.target}
-          </span>
+          Target <span>{s.target}</span>
         </div>
         <div
           className="arr"
@@ -151,17 +148,7 @@ export function TwoPointersGame({ api }: GameProps) {
         </div>
         <div className="sum">
           a[lo] + a[hi] = {s.a[s.lo]} + {s.a[s.hi]} ={" "}
-          <span
-            className="qm"
-            style={{
-              background: "var(--yellow)",
-              color: "#15181C",
-              padding: "0 6px",
-              borderRadius: 4,
-            }}
-          >
-            ?
-          </span>
+          <span className="qm">?</span>
         </div>
         <div className="moves">
           <button className="btn" disabled={s.over} onClick={() => move("lo")}>

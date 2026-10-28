@@ -103,6 +103,7 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 - **Don't run `tsc -b`.** It leaves a `tsconfig.tsbuildinfo` in the repo. Use the npm scripts.
 - **Don't kill processes by a pattern** (`pkill -f "vite preview"`) in a shell whose own command line matches it. Kill by PID or port.
 - **The end-to-end test leans on Repaint Line.** It expects exactly one Local flow and one Local sort there, so two rides cover both puzzle kinds. It opens React's division header by its name, since a fresh save starts with only the first division open. It also clicks buttons by their labels ("Board: Local", "Back to the map", "Ride again", "Restore"), and checks the line's URL (`/react/render`) and Back and Forward mid-ride. Adding a Local puzzle to that line, or renaming those buttons, fails `npm run e2e` until the test is updated.
+- **Colors go in `app.css`, not inline styles.** `src/styles/contrast.test.ts` checks every text color in the stylesheet against WCAG AA in light and dark, and fails on an inline `color:` or `background:` it cannot check. A new rule in a line's color (`var(--c)`) is checked against every line's color; if only one game uses it, list it in `LINE_RULES`. Vitest blanks CSS files, so `vite.config.ts` lets `app.css` through for that test.
 - **The bundle is over 700 kB.** Vite's size warning on build is expected for now; splitting it is on the roadmap.
 
 ## Voice

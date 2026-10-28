@@ -180,16 +180,7 @@ export function StackQueueGame({ api }: GameProps) {
                 {last.before.map((v) => (
                   <span
                     key={v}
-                    className="chip"
-                    style={
-                      v === last.out
-                        ? {
-                            background: "var(--c)",
-                            color: "#fff",
-                            borderColor: "var(--c)",
-                          }
-                        : undefined
-                    }
+                    className={v === last.out ? "chip out" : "chip"}
                   >
                     {v}
                   </span>
