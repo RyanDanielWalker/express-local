@@ -2,7 +2,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { LINES } from "../data";
 import { DIVISIONS } from "../engine/questions";
 import { isDue, isUnlocked, readinessOf } from "../engine/progression";
-import type { SaveData } from "../engine/types";
+import type { Division, SaveData } from "../engine/types";
 import { Bullet } from "./Bullet";
 
 interface Props {
@@ -10,10 +10,20 @@ interface Props {
   current: number;
   dailyIdx: number | null;
   onSelect: (idx: number) => void;
+  /** Divisions showing their lines. The rest show only their header. */
+  open: Division[];
+  onToggle: (d: Division) => void;
 }
 
-/** The map, one scrollable row per division. */
-export function LineMap({ save, current, dailyIdx, onSelect }: Props) {
+/** The map, one row per division. A closed division shows its name and readiness. */
+export function LineMap({
+  save,
+  current,
+  dailyIdx,
+  onSelect,
+  open,
+  onToggle,
+}: Props) {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const cur = box.current?.querySelector<HTMLElement>(
@@ -22,7 +32,7 @@ export function LineMap({ save, current, dailyIdx, onSelect }: Props) {
     const row = cur?.closest<HTMLElement>(".mapbox");
     if (row && cur && row.scrollWidth > row.clientWidth)
       row.scrollLeft = cur.offsetLeft - (row.clientWidth - cur.offsetWidth) / 2;
-  }, [current]);
+  }, [current, open]);
 
   const groups = DIVISIONS.map((d) => ({
     division: d,
@@ -41,20 +51,33 @@ export function LineMap({ save, current, dailyIdx, onSelect }: Props) {
           lines.map((x) => x.line),
           save,
         );
+        const isOpen = open.includes(division.id);
         return (
           <section
             className="division"
             key={division.id}
             aria-label={`${division.name} lines`}
           >
-            <div className="dhead">
-              <h3>{division.name}</h3>
-              <span>{division.blurb}</span>
-              <span className="xp" title="How ready this division is right now">
-                {ready}% ready · {cleared}/{lines.length}
-              </span>
-            </div>
-            <nav className="mapbox">
+            <h3 className="dhead">
+              <button
+                aria-expanded={isOpen}
+                aria-controls={`map-${division.id}`}
+                onClick={() => onToggle(division.id)}
+              >
+                <span className="dname">{division.name}</span>
+                <span className="blurb">{division.blurb}</span>
+                <span
+                  className="xp"
+                  title="How ready this division is right now"
+                >
+                  {ready}% ready · {cleared}/{lines.length}
+                </span>
+                <span className="meter ok" aria-hidden="true">
+                  <i style={{ width: `${ready}%` }} />
+                </span>
+              </button>
+            </h3>
+            <nav className="mapbox" id={`map-${division.id}`} hidden={!isOpen}>
               <div
                 className="map"
                 style={{ "--n": lines.length } as CSSProperties}

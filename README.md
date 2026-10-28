@@ -82,6 +82,7 @@ Every claim is proven with the compiler, with `strict` on, under TypeScript 5.9,
 
 ## Staying sharp
 
+- **A Today band.** The top of the page says what to do right now, most urgent first: a review that is due, the shaky questions, the daily ride, then the next line not yet cleared. Below it, each division is a collapsed header with its readiness bar, and only the division in play is open.
 - **Readiness.** The headline number is a 0 to 100 score per division, built from what has been cleared, at which tier, how far along its review schedule, and how much of the question pool is solid. It falls on its own as reviews go overdue, so it reflects what would come back today rather than what was done once.
 - **Spaced repetition.** Clearing a line schedules a review at 1, 3, 7, 14, then 30 days, using a Leitner box. An on-time review with at most one mistake grows the gap; a rougher one shrinks it.
 - **Shaky questions come back.** Every question is tracked. Missed ones are flagged, weighted into cram drills, and drillable on their own.
@@ -121,7 +122,7 @@ src/
   engine/       save data, progression, scoring, readiness, question pools, and tests
   data/         content per division, the quality bar, and content tests
   games/        one component per algorithm line, plus QuizGame, FlowGame, SortGame and QuizRun
-  components/   screens: header, map, intro, play, results, rehearsal, cram band, badges
+  components/   screens: header, map, intro, play, results, rehearsal, Today band, cram band, badges
   hooks/        useKeys, useTimers
   lib/          small helpers
 e2e/            one Playwright test that rides a line against the production build

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { LINES } from "../src/data";
+import { DIVISIONS } from "../src/engine/questions";
 
 /**
  * Rides through the production build, the way a player does it: board a line
@@ -11,6 +12,7 @@ import { LINES } from "../src/data";
  */
 
 const line = LINES.find((l) => l.division === "react" && l.kind === "quiz")!;
+const division = DIVISIONS.find((d) => d.id === line.division)!.name;
 
 /** Copy as the page shows it: `code` and **bold** markers are formatting, not text. */
 const plain = (text: string) =>
@@ -25,6 +27,18 @@ function watchConsole(page: Page): string[] {
   page.on("pageerror", (e) => errors.push(e.message));
   return errors;
 }
+
+/**
+ * A fresh save opens only the first division on the map, so the line's own
+ * division has to be opened before its stop shows.
+ */
+const openDivision = (page: Page) =>
+  page
+    .getByRole("button", {
+      name: new RegExp(`^${division}\\b`),
+      expanded: false,
+    })
+    .click();
 
 const stop = (page: Page, cleared: number) =>
   page.getByRole("button", {
@@ -114,8 +128,13 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   await page.setViewportSize({ width: 375, height: 760 });
   await page.goto("/");
 
+  await expect(page.getByRole("region", { name: "Today" })).toBeVisible();
+  await expect(stop(page, 0)).toBeHidden();
+  await openDivision(page);
   await stop(page, 0).click();
-  await expect(page.getByRole("heading", { name: line.name })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: line.name }),
+  ).toBeVisible();
   const boardButton = page.getByRole("button", { name: "Board: Local" });
   await boardButton.scrollIntoViewIfNeeded();
   expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
@@ -154,6 +173,7 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   const other = await (await browser.newContext()).newPage();
   const otherErrors = watchConsole(other);
   await other.goto("/");
+  await openDivision(other);
   await expect(stop(other, 0)).toBeVisible();
 
   await other.getByRole("button", { name: "Restore progress" }).click();

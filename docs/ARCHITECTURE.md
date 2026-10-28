@@ -96,12 +96,14 @@ Copy everywhere supports `` `code` `` and `**bold**`, rendered by `<Rich />`. Lo
 
 `App.tsx` is a small screen state machine: map, intro, play, results (or derailed). It also runs the cram drill, the shaky drill and rehearsal, none of which change line progress.
 
-Each screen is either deciding or doing (`isDoing()` in `lib/modes.ts`). Deciding screens (the intro, results and derailed) show the full header, the map, the badges and the save box; the intro also shows the cram band. Doing screens (a ride, a drill, rehearsal, the code check) hide all of that, so the ride gets the page. The header shrinks to the name and a **Back to the map** button, which drops the ride at no cost, and the page scrolls to the top. A new screen kind has to be added to the table in `lib/modes.ts`, or the typecheck fails.
+Each screen is either deciding or doing (`isDoing()` in `lib/modes.ts`). Deciding screens (the intro, results and derailed) show the full header, the map, the badges and the save box; the intro also shows the Today band and the cram band. Doing screens (a ride, a drill, rehearsal, the code check) hide all of that, so the ride gets the page. The header shrinks to the name and a **Back to the map** button, which drops the ride at no cost, and the page scrolls to the top. A new screen kind has to be added to the table in `lib/modes.ts`, or the typecheck fails.
 
 1. **Pick.** `pickQuestions()` draws the tier's questions, putting unseen and shaky ones first. `pickPuzzle()` picks the last stop and rotates it from ride to ride.
 2. **Play.** `PlayScreen` owns hearts, XP and the clock. `QuizRun` plays the questions through `QuizGame`, then the puzzle through `SortGame` or `FlowGame`. Algorithm lines play their own component from `games/index.ts`. Every game gets a `GameApi` (`say`, `correct`, `wrong`, `record`, `hold`, `resume`, `finish`, `tier`, `assist`, `over`).
 3. **Score.** `finishTrip()` returns the new save: tier cleared, the next review date (Leitner boxes at 1, 3, 7, 14 and 30 days), XP, streak, badges and personal bests. `recordAnswers()` updates per-question history.
 4. **Show.** `Results` renders what `finishTrip()` returned.
+
+What to do right now comes from `todayPlan()` in `engine/today.ts`, and the Today band at the top of the intro renders it. It returns, most urgent first: the first review that is due (and how many more are), the shaky questions, the Daily Ride if it is unlocked and not done, and the next line not yet cleared, looking in the current line's division first. A line shows up once at most. On the map, each division is a header that opens and closes. Which ones are open lives in `App.tsx`, so it survives the map hiding during a ride, and selecting a line opens its division.
 
 Readiness (the headline number per division) comes from `readinessReport()`: what is cleared, at which tier, how far along its reviews, and how much of the question pool is solid. It decays as reviews go overdue.
 

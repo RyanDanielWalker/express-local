@@ -264,6 +264,9 @@ export function recordAnswers(
   return next;
 }
 
+/** The most questions a shaky drill asks. */
+export const SHAKY_DRILL = 10;
+
 export interface Shaky {
   lineId: string;
   question: Question;

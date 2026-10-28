@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
-Status: 34 lines across 4 divisions, 110 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-27, after the near-duplicate work (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 124 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-27, after the near-duplicate work (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -77,7 +77,7 @@ Smaller cleanups from the same review:
 What a visitor notices first. In this order:
 
 - [x] **Modes: deciding vs doing.** Boarding a line collapses the map, cram band and badges. The play screen gets the page.
-- [ ] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar. Picking what to do now is a pure function in `src/engine/` with tests. Built in normal mode: the learn-mode piece moved to after 1.0 ([ADR 0018](adr/0018-learn-mode-after-1-0.md)).
+- [x] **A Today band.** What should I do right now: reviews due, shaky questions waiting, the daily ride, next unlocked line. Divisions below it collapsed, each with its readiness bar. Picking what to do now is a pure function in `src/engine/` with tests. Built in normal mode: the learn-mode piece moved to after 1.0 ([ADR 0018](adr/0018-learn-mode-after-1-0.md)).
 - [ ] **A router.** Back button currently dumps you out of the app mid-ride, and `/nest/life` should be a URL.
 - [ ] **Accessibility checks as tests.** A test that fails when an input has no label or an icon-only button has no name, a contrast test against the color variables in `app.css` in light and dark, and a check at 375px wide (the smallest breakpoint today is 480px).
 - [ ] **README refresh.** A fresh GIF and screenshots (the current ones predate the TypeScript and React puzzles and the clarity rewrite), and a small architecture diagram.
@@ -252,3 +252,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-27** The three smaller cleanups from the near-duplicate review: Wiring Yard says its `forwardRef` is Nest's, not React's, Main Line's middleware rate limiter says when `ThrottlerGuard` is the better home, and the `@nestjs/throttler` claims on Dispatch Desk were run against the real package. They held up, but one question's `why` leaned on `@SkipThrottle()`, which an interceptor can read too, so that reason was dropped. The fact-checker also tightened Wiring Yard's missing `@Injectable()` sentence: Nest starts fine, and the first request that uses the dependency fails with a 500
 - **2026-10-27** Inventory stop after the near-duplicate work. Three fact-checkers ran every changed field since the last stop against TypeScript 5.9 to 7.0, React 19.3 and Nest 12.1.3. They found one overstated sentence: a `why` said React never attaches your click handler to the button, when it does keep it on the node, just never as a listener. Fixed, proven in `probes/react/render3.tsx`, and re-checked. All 23 stack quiz and flow lines were ridden twice on Local against the production build with no console errors
 - **2026-10-27** Deciding vs doing: a ride, drill or rehearsal hides the map, badges and save box, shrinks the header to a **Back to the map** button, and starts at the top of the screen
+- **2026-10-28** A Today band above the map: a due review, the shaky questions, the Daily Ride and the next new line, most urgent first, picked by `todayPlan()` in `src/engine/today.ts`. Each division on the map is now a header you open and close, with its readiness bar, and only the division in play starts open

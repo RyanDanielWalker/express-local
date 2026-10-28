@@ -20,8 +20,10 @@ import {
   heartsFor,
   recordAnswers,
   shakyQuestions,
+  SHAKY_DRILL,
 } from "./engine/questions";
 import { loadSave, persistSave } from "./engine/save";
+import { todayPlan } from "./engine/today";
 import type { Division, Line, Question, SaveData, Tier } from "./engine/types";
 import { Header } from "./components/Header";
 import { LineMap } from "./components/LineMap";
@@ -33,6 +35,7 @@ import { Derailed } from "./components/Derailed";
 import { Badges } from "./components/Badges";
 import { SaveTransfer } from "./components/SaveTransfer";
 import { CramBand } from "./components/CramBand";
+import { TodayBand } from "./components/TodayBand";
 import { Rehearse } from "./components/Rehearse";
 import { GUIDE } from "./data";
 import { isDoing } from "./lib/modes";
@@ -71,6 +74,11 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>({ kind: "intro" });
   const [picked, setPicked] = useState<Partial<Record<string, Tier>>>({});
   const [cramDivisions, setCramDivisions] = useState<Division[]>([]);
+  // Divisions start closed, except the one you are on. Kept here, not in the
+  // map, so it survives the map hiding during a ride.
+  const [openDivisions, setOpenDivisions] = useState<Division[]>(() => [
+    LINES[current].division,
+  ]);
 
   useEffect(() => persistSave(save), [save]);
 
@@ -105,6 +113,8 @@ export default function App() {
   const select = (i: number) => {
     setCurrent(i);
     setScreen({ kind: "intro" });
+    const d = LINES[i].division;
+    setOpenDivisions((ds) => (ds.includes(d) ? ds : [...ds, d]));
   };
 
   /** Score the run, bank the new save, show the results screen. */
@@ -186,7 +196,7 @@ export default function App() {
 
   const startShaky = (lineId?: string) => {
     const questions = shakyQuestions(save, LINES, lineId)
-      .slice(0, 10)
+      .slice(0, SHAKY_DRILL)
       .map((s) => s.question);
     if (!questions.length) return;
     setScreen({
@@ -343,12 +353,25 @@ export default function App() {
   return (
     <div className="wrap">
       <Header save={save} onLeave={doing ? toIntro : undefined} />
+      {screen.kind === "intro" && (
+        <TodayBand
+          items={todayPlan(save, current)}
+          onLine={select}
+          onShaky={() => startShaky()}
+        />
+      )}
       {!doing && (
         <LineMap
           save={save}
           current={current}
           dailyIdx={dailyIdx}
           onSelect={select}
+          open={openDivisions}
+          onToggle={(d) =>
+            setOpenDivisions((ds) =>
+              ds.includes(d) ? ds.filter((x) => x !== d) : [...ds, d],
+            )
+          }
         />
       )}
       {screen.kind === "intro" && (
@@ -356,7 +379,6 @@ export default function App() {
           divisions={cramDivisions}
           poolSize={pool.length}
           shakyCount={shaky.length}
-          onShaky={() => startShaky()}
           onToggle={(d) =>
             setCramDivisions((ds) =>
               ds.includes(d) ? ds.filter((x) => x !== d) : [...ds, d],

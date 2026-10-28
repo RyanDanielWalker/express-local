@@ -131,7 +131,7 @@ The data files are large TypeScript files of strings.
 
 ## Checking the app
 
-`npm run e2e` checks one path through the production build in a real browser. It boards Repaint Line (React's first quiz line) on Local at phone width, checks the map and badges collapse and the ride starts at the top, and goes back to the map. Then it boards again and answers every question right. It solves the last stop, reaches the results screen, then rides again so the other puzzle kind comes up. Then it copies the save code into a fresh browser and checks the progress arrived. It fails on any error in the browser console. It looks up the right answers in `src/data`, so it works whichever questions a ride picks. Run it after changing a screen, the save code, or anything else on that path.
+`npm run e2e` checks one path through the production build in a real browser. It opens the React division on the map (a fresh save opens only the first division), boards Repaint Line (React's first quiz line) on Local at phone width, checks the map and badges collapse and the ride starts at the top, and goes back to the map. Then it boards again and answers every question right. It solves the last stop, reaches the results screen, then rides again so the other puzzle kind comes up. Then it copies the save code into a fresh browser and checks the progress arrived. It fails on any error in the browser console. It looks up the right answers in `src/data`, so it works whichever questions a ride picks. Run it after changing a screen, the save code, or anything else on that path.
 
 It is one path, not a substitute for looking. For any change a player would see, run it and look:
 

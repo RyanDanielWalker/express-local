@@ -5,7 +5,6 @@ interface Props {
   divisions: Division[];
   onToggle: (d: Division) => void;
   onStart: () => void;
-  onShaky: () => void;
   poolSize: number;
   shakyCount: number;
 }
@@ -15,7 +14,6 @@ export function CramBand({
   divisions,
   onToggle,
   onStart,
-  onShaky,
   poolSize,
   shakyCount,
 }: Props) {
@@ -51,16 +49,9 @@ export function CramBand({
           ))}
         </div>
       </div>
-      <div className="row">
-        {shakyCount > 0 && (
-          <button className="btn ghost" onClick={onShaky}>
-            Drill {Math.min(shakyCount, 10)} shaky
-          </button>
-        )}
-        <button className="btn" onClick={onStart} disabled={poolSize === 0}>
-          Start drill
-        </button>
-      </div>
+      <button className="btn" onClick={onStart} disabled={poolSize === 0}>
+        Start drill
+      </button>
     </section>
   );
 }
