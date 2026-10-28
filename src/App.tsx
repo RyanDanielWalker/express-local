@@ -39,6 +39,8 @@ import { TodayBand } from "./components/TodayBand";
 import { Rehearse } from "./components/Rehearse";
 import { GUIDE } from "./data";
 import { isDoing } from "./lib/modes";
+import { parsePath, pathFor, screenRoute } from "./lib/route";
+import { currentPath, useUrl } from "./hooks/useUrl";
 
 type Screen =
   | { kind: "intro" }
@@ -52,7 +54,9 @@ type Screen =
       result: TripResult;
       mode?: "line" | "cram" | "rehearsal";
     }
-  | { kind: "derailed"; ride?: RideStats; cost: number };
+  | { kind: "derailed"; ride?: RideStats; cost: number; mode?: "cram" };
+
+const indexOf = (id: string) => LINES.findIndex((l) => l.id === id);
 
 /** Open on whatever needs attention: a due review, then the next new line. */
 function startingLine(save: SaveData): number {
@@ -70,7 +74,15 @@ export default function App() {
     ensureDailyPick(s);
     return s;
   });
-  const [current, setCurrent] = useState(() => startingLine(save));
+  // The URL opened says which line to show. A ride or rehearsal URL shows
+  // its line, since what was on screen did not survive the reload.
+  const [opened] = useState(() => parsePath(currentPath()));
+  const [current, setCurrent] = useState(() => {
+    const i = opened && "id" in opened ? indexOf(opened.id) : -1;
+    return i > -1 ? i : startingLine(save);
+  });
+  // True until the player picks a line, so the bare / stays bare.
+  const [home, setHome] = useState(!opened || !("id" in opened));
   const [screen, setScreen] = useState<Screen>({ kind: "intro" });
   const [picked, setPicked] = useState<Partial<Record<string, Tier>>>({});
   const [cramDivisions, setCramDivisions] = useState<Division[]>([]);
@@ -112,6 +124,7 @@ export default function App() {
   const toIntro = () => setScreen({ kind: "intro" });
   const select = (i: number) => {
     setCurrent(i);
+    setHome(false);
     setScreen({ kind: "intro" });
     const d = LINES[i].division;
     setOpenDivisions((ds) => (ds.includes(d) ? ds : [...ds, d]));
@@ -160,7 +173,12 @@ export default function App() {
       );
       const { save: next, cost } = finishDerail(withStats, { drill });
       setSave(next);
-      setScreen({ kind: "derailed", ride, cost });
+      setScreen({
+        kind: "derailed",
+        ride,
+        cost,
+        mode: drill ? "cram" : undefined,
+      });
     },
     [current, save],
   );
@@ -252,6 +270,24 @@ export default function App() {
     setSave(result.save);
     setScreen({ kind: "result", ride, result, mode: "cram" });
   };
+
+  // Back and Forward land on a line's intro, or on the map with the same line
+  // still picked. A ride or drill left behind in history is gone, so its URL
+  // shows the page it started from.
+  const onPop = (path: string) => {
+    const route = parsePath(path);
+    const i = route && "id" in route ? indexOf(route.id) : -1;
+    if (i > -1) select(i);
+    else {
+      if (route?.kind !== "drill") setHome(true);
+      setScreen({ kind: "intro" });
+    }
+  };
+  const route = screenRoute(screen, line.id, home);
+  const where =
+    route.kind === "drill" ? "Drill" : "id" in route ? line.name : "";
+  const title = where ? `${where} · Express & Local` : "Express & Local";
+  useUrl(pathFor(route), title, onPop);
 
   let stage;
   switch (screen.kind) {

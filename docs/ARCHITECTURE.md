@@ -13,8 +13,8 @@ src/
   data/         all the content, one file per division, plus the quality bar and content tests
   games/        one component per algorithm line, plus QuizRun, QuizGame, FlowGame and SortGame
   components/   screens and shared UI: header, map, intro, play screen, results, rehearsal, badges
-  hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount)
-  lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals, which screens are a ride)
+  hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount), useUrl (the address bar and Back)
+  lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals, which screens are a ride, URLs)
   styles/       one stylesheet, app.css
 e2e/            one Playwright test that rides a line against the production build
 probes/         sandboxes that prove the content against real code (not part of the app)
@@ -104,6 +104,8 @@ Each screen is either deciding or doing (`isDoing()` in `lib/modes.ts`). Decidin
 4. **Show.** `Results` renders what `finishTrip()` returned.
 
 What to do right now comes from `todayPlan()` in `engine/today.ts`, and the Today band at the top of the intro renders it. It returns, most urgent first: the first review that is due (and how many more are), the shaky questions, the Daily Ride if it is unlocked and not done, and the next line not yet cleared, looking in the current line's division first. A line shows up once at most. On the map, each division is a header that opens and closes. Which ones are open lives in `App.tsx`, so it survives the map hiding during a ride, and selecting a line opens its division.
+
+Every screen has a URL. `lib/route.ts` turns a path into a route and back: `/` is the map, `/nest/life` a line, `/nest/life/ride` riding it (through to results or derailed), `/nest/life/rehearse` rehearsing it, and `/drill` a cram or shaky drill. The screen state in `App.tsx` stays the source of truth: it works out the route for what is on screen with `screenRoute()`, and `useUrl()` in `hooks/useUrl.ts` keeps the address bar on it with `pushState`. Back and Forward fire `popstate`, and `App.tsx` shows the line or the map that URL names. A ride lives only in memory, so a ride URL opened fresh, or reached with Forward, shows its line. Each history entry remembers the page it was opened from, and leaving a page for that one steps back instead of pushing, so "Back to the map" does not leave the ride behind in history. A path that names nothing is replaced with `/`. See [ADR 0019](adr/0019-a-small-router-of-our-own.md).
 
 Readiness (the headline number per division) comes from `readinessReport()`: what is cleared, at which tier, how far along its reviews, and how much of the question pool is solid. It decays as reviews go overdue.
 

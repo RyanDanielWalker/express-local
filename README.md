@@ -112,8 +112,9 @@ A few choices that shape how the app teaches. [docs/ROADMAP.md](docs/ROADMAP.md)
 - **Content is data.** Quiz lines, flows and sorts are entries in `src/data/`, so adding a topic means writing questions, not components.
 - **Scoring is pure.** `finishTrip()`, `finishCram()`, `finishRehearsal()` and `finishDerail()` take a save and a run and return a new save plus everything the results screen shows. Readiness is computed from the save, never stored.
 - **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier with room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha in its field guide, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS, TypeScript and React) fail the tests if any line slips.
-- **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, and render the results screen for every line. One Playwright test rides a line twice on Local against the production build, then moves the save code into a fresh browser.
+- **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, and render the results screen for every line. One Playwright test rides a line twice on Local against the production build, checks Back and Forward mid-ride, then opens the line by its URL in a fresh browser and moves the save code there.
 - **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes, a production build and the end-to-end test on each push and pull request.
+- **A small router of its own.** Every line has a URL, like `/nest/life`, and the browser's Back button leaves a ride for its line instead of leaving the app. It is about a hundred lines on the History API, with the path parsing as pure, tested functions, rather than a routing library for five URLs.
 - **Accessible.** Keyboard shortcuts, focusable graph nodes, `aria-live` status updates, reduced-motion support, and light and dark themes.
 
 ```
@@ -123,7 +124,7 @@ src/
   data/         content per division, the quality bar, and content tests
   games/        one component per algorithm line, plus QuizGame, FlowGame, SortGame and QuizRun
   components/   screens: header, map, intro, play, results, rehearsal, Today band, cram band, badges
-  hooks/        useKeys, useTimers
+  hooks/        useKeys, useTimers, useUrl
   lib/          small helpers
 e2e/            one Playwright test that rides a line against the production build
 probes/         sandboxes that prove the content against real React, NestJS and TypeScript

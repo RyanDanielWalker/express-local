@@ -102,7 +102,7 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 - **Undo a planted bug by hand**, not with `git checkout -- <file>`, unless the real change is committed first. Checkout throws away every uncommitted edit in the file, not just the planted one.
 - **Don't run `tsc -b`.** It leaves a `tsconfig.tsbuildinfo` in the repo. Use the npm scripts.
 - **Don't kill processes by a pattern** (`pkill -f "vite preview"`) in a shell whose own command line matches it. Kill by PID or port.
-- **The end-to-end test leans on Repaint Line.** It expects exactly one Local flow and one Local sort there, so two rides cover both puzzle kinds. It opens React's division header by its name, since a fresh save starts with only the first division open. It also clicks buttons by their labels ("Board: Local", "Back to the map", "Ride again", "Restore"). Adding a Local puzzle to that line, or renaming those buttons, fails `npm run e2e` until the test is updated.
+- **The end-to-end test leans on Repaint Line.** It expects exactly one Local flow and one Local sort there, so two rides cover both puzzle kinds. It opens React's division header by its name, since a fresh save starts with only the first division open. It also clicks buttons by their labels ("Board: Local", "Back to the map", "Ride again", "Restore"), and checks the line's URL (`/react/render`) and Back and Forward mid-ride. Adding a Local puzzle to that line, or renaming those buttons, fails `npm run e2e` until the test is updated.
 - **The bundle is over 700 kB.** Vite's size warning on build is expected for now; splitting it is on the roadmap.
 
 ## Voice

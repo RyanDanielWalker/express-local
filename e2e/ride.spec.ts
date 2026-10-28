@@ -13,6 +13,7 @@ import { DIVISIONS } from "../src/engine/questions";
 
 const line = LINES.find((l) => l.division === "react" && l.kind === "quiz")!;
 const division = DIVISIONS.find((d) => d.id === line.division)!.name;
+const linePath = `/${line.division}/${line.id}`;
 
 /** Copy as the page shows it: `code` and **bold** markers are formatting, not text. */
 const plain = (text: string) =>
@@ -135,6 +136,7 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   await expect(
     page.getByRole("heading", { level: 2, name: line.name }),
   ).toBeVisible();
+  await expect(page).toHaveURL(linePath);
   const boardButton = page.getByRole("button", { name: "Board: Local" });
   await boardButton.scrollIntoViewIfNeeded();
   expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
@@ -144,12 +146,28 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   // starts at the top of the screen, and one button leads back. Leaving a
   // ride costs nothing, so board again after.
   await expect(page.locator(".qcard")).toBeVisible();
+  await expect(page).toHaveURL(`${linePath}/ride`);
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(stop(page, 0)).toBeHidden();
   await expect(page.getByRole("region", { name: "Badges" })).toBeHidden();
   await page.getByRole("button", { name: "Back to the map" }).click();
   await expect(stop(page, 0)).toBeVisible();
   await expect(page.getByRole("region", { name: "Badges" })).toBeVisible();
+  await expect(page).toHaveURL(linePath);
+
+  // The browser's Back leaves a ride for its line, not the app. The ride
+  // left behind is gone, so Forward shows the line too.
+  await boardButton.click();
+  await expect(page.locator(".qcard")).toBeVisible();
+  await page.goBack();
+  await expect(page.locator(".qcard")).toBeHidden();
+  await expect(boardButton).toBeVisible();
+  await expect(page).toHaveURL(linePath);
+  await page.goForward();
+  await expect(page).toHaveURL(linePath);
+  await expect(boardButton).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL("/");
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.getByRole("button", { name: "Board: Local" }).click();
 
@@ -172,8 +190,11 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   // A new context is a separate browser profile, with its own localStorage.
   const other = await (await browser.newContext()).newPage();
   const otherErrors = watchConsole(other);
-  await other.goto("/");
-  await openDivision(other);
+  // A line's URL opens that line, even in a browser that has never seen it.
+  await other.goto(linePath);
+  await expect(
+    other.getByRole("heading", { level: 2, name: line.name }),
+  ).toBeVisible();
   await expect(stop(other, 0)).toBeVisible();
 
   await other.getByRole("button", { name: "Restore progress" }).click();
