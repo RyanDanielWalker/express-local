@@ -84,8 +84,8 @@ What a visitor notices first. In this order:
 
 ### 5. Inventory stop
 
-- [ ] Sanity pass after the interface work: everything in step 3's sanity pass, plus the app on a phone-width screen in light and dark, and keyboard-only play.
-- [ ] `/audit`, and its findings sorted into 1.0 (only if they meet the freeze rule) or Parked.
+- [x] Sanity pass after the interface work: everything in step 3's sanity pass, plus the app on a phone-width screen in light and dark, and keyboard-only play. No content changed since the last stop, so there was nothing new to fact-check. Every check passed, and keyboard-only play worked end to end. Sixteen stale spots in the docs were fixed. One finding went to Parked (focus after a screen changes).
+- [ ] `/audit`, and its findings sorted into 1.0 (only if they meet the freeze rule) or Parked. Ryan runs it in a fresh session; the skill can't be started by Claude. The `docs: inventory stop` commit that closes this stop comes after it.
 
 ### 6. Ship 1.0
 
@@ -166,6 +166,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **Dependabot for the workflow and npm.** The CI actions are pinned to commit hashes, which never update themselves ([ADR 0013](adr/0013-ci-on-github-actions.md)). Dependabot would open a pull request for each new release. Bumping by hand is fine while there are two actions.
 - **Keep the trace from a red end-to-end run in CI.** Playwright saves a trace (a step-by-step recording) when the test fails, but CI throws it away with the machine. Uploading it as a workflow artifact would show what the page looked like at the failure. Until then, reproduce a red run with `npm run e2e`, which keeps the trace in `test-results/`.
 - **Accessibility the tests do not reach yet.** Contrast for non-text parts (meter bars, pips, borders, 3:1 under WCAG 1.4.11) is not tested. axe only runs on screens the end-to-end test visits, so the algorithm games, rehearsal and the cram drill are unchecked ([ADR 0020](adr/0020-accessibility-as-tests.md)).
+- **Focus after a screen changes.** Boarding a ride, moving to the next question, starting the last stop and reaching the results all leave keyboard focus on the page itself, not the new content. Number keys and Enter still play a whole ride. But a flow puzzle takes up to nine Tab presses per step, because the step you picked leaves the tray and takes focus with it. A screen reader is not told a new question appeared either. Found in the step 5 sanity pass. Parked, not 1.0: it slows a keyboard player down but does not stop them. The fix is moving focus to the new question's heading on each change, and to the next tray step after a flow pick, with a check in the end-to-end test.
 - **Split the bundle by division.** Every question ships in one chunk, over 700 kB (about 225 kB gzipped). `LINES` is a synchronous array used everywhere, so it is a real refactor.
 
 ## Later: engine ideas
@@ -257,3 +258,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-28** A router: every line has a URL, a ride, rehearsal and drill have their own, the tab title names the line, and Back and Forward work mid-ride. Hand-rolled on the History API in `src/lib/route.ts` and `src/hooks/useUrl.ts`, with no new dependency
 - **2026-10-28** Accessibility checks as tests: axe in the end-to-end test at phone width and in dark mode, and a contrast test over every rule in `app.css`. Fixed what they found: white letters on bright line colors in dark mode, light mode's green text, the results stamp, the paused clock, small bullets, and code blocks a keyboard could not scroll
 - **2026-10-29** README refresh: a GIF of a ride opens it, five fresh screenshots (the Today band, an answered question, a flow, a sort in dark mode, BFS in dark mode) replace four stale ones, and a Mermaid diagram shows how data, engine, screens, save and probes fit. `npm run screenshots` retakes them all from the production build
+- **2026-10-29** Sanity pass after the interface work: every check green, both puzzle kinds played by keyboard alone at phone width in light and dark and on a desktop screen, and 16 stale spots in the docs fixed. Focus after a screen changes went to Parked
