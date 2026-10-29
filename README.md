@@ -143,7 +143,7 @@ src/
   styles/       one stylesheet, and its contrast test
 e2e/            one Playwright test that rides a line against the production build, and the README's screenshots
 probes/         sandboxes that prove the content against real React, NestJS and TypeScript
-docs/           roadmap, architecture, development guide, and decision records
+docs/           roadmap, architecture, development guide, decision records and audits
 ```
 
 ## Running locally
