@@ -20,6 +20,7 @@ import {
   cramPool,
   cramQuestions,
   CRAM_SIZE,
+  ownerOf,
   qid,
   recordAnswers,
   shakyQuestions,
@@ -429,21 +430,44 @@ describe("weak spots", () => {
     expect(qid("a", q("same text"))).not.toBe(qid("b", q("same text")));
   });
 
-  it("counts misses and forgives two right answers in a row", () => {
-    let save = emptySave();
-    save = recordAnswers(
-      save,
-      [{ lineId: line.id, question: first, correct: false }],
-      NOW,
-    );
+  it("counts misses, and each right answer cancels one", () => {
+    const answer = (correct: boolean) => ({
+      lineId: line.id,
+      question: first,
+      correct,
+    });
+    let save = recordAnswers(emptySave(), [answer(false)], NOW);
     expect(shakyQuestions(save, LINES).map((s) => s.question)).toEqual([first]);
-    save = recordAnswers(
-      save,
-      [{ lineId: line.id, question: first, correct: true }],
-      NOW,
-    );
+    save = recordAnswers(save, [answer(true)], NOW);
     expect(shakyQuestions(save, LINES)).toHaveLength(0);
     expect(save.questions[qid(line.id, first)].seen).toBe(2);
+
+    // Two misses take two right answers, in a row or not.
+    save = recordAnswers(save, [answer(false), answer(false)], NOW);
+    save = recordAnswers(save, [answer(true)], NOW);
+    expect(shakyQuestions(save, LINES)).toHaveLength(1);
+    save = recordAnswers(save, [answer(true)], NOW);
+    expect(shakyQuestions(save, LINES)).toHaveLength(0);
+  });
+
+  it("finds the line a drill question came from", () => {
+    // A line's own questions carry no `from`. A drill that saved them under
+    // the selected line would never show them as shaky.
+    const other = LINES.find((l) => l.questions?.length && l !== line)!;
+    const asked = other.questions![2];
+    expect(asked.from).toBeUndefined();
+    expect(ownerOf(asked, LINES)).toBe(other.id);
+
+    const blank = cramPool(LINES, () => true).find((x) => x.from)!;
+    expect(ownerOf(blank, LINES)).toBe(blank.from);
+    expect(ownerOf(q("not in any line"), LINES)).toBeUndefined();
+
+    const save = recordAnswers(
+      emptySave(),
+      [{ lineId: ownerOf(asked, LINES)!, question: asked, correct: false }],
+      NOW,
+    );
+    expect(shakyQuestions(save, LINES, other.id)).toHaveLength(1);
   });
 
   it("sorts the shaky list worst first and can filter to one line", () => {

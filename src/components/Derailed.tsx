@@ -30,15 +30,22 @@ export function Derailed({
           several times over.
         </p>
       )}
-      <p>
-        Mistakes are the fastest teacher. Here's the idea to lock in before you
-        ride again:
-      </p>
-      {GUIDE[line.id] && (
-        <div className="hook">
-          <b>In plain English</b>
-          <Prose text={GUIDE[line.id].plain} />
-        </div>
+      {GUIDE[line.id] ? (
+        <>
+          <p>
+            Mistakes are the fastest teacher. Here's the idea to lock in before
+            you ride again:
+          </p>
+          <div className="hook">
+            <b>In plain English</b>
+            <Prose text={GUIDE[line.id].plain} />
+          </div>
+        </>
+      ) : (
+        <p>
+          Mistakes are the fastest teacher. Read what you missed, then try
+          again.
+        </p>
       )}
       {missed.length > 0 && (
         <div>

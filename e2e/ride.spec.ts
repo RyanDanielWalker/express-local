@@ -1,7 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { LINES } from "../src/data";
-import { DIVISIONS } from "../src/engine/questions";
+import { cramPool, DIVISIONS } from "../src/engine/questions";
+import { isUnlocked } from "../src/engine/progression";
+import { emptySave } from "../src/engine/save";
+import type { Question } from "../src/engine/types";
 
 /**
  * Rides through the production build, the way a player does it: board a line
@@ -35,6 +38,9 @@ function watchConsole(page: Page): string[] {
  * and checked once at the end, so one run lists them all.
  */
 const findings: string[] = [];
+test.beforeEach(() => {
+  findings.length = 0;
+});
 
 /**
  * Run axe on the page as it stands: labels, button names, color contrast and
@@ -251,5 +257,97 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
 
   expect(errors).toEqual([]);
   expect(otherErrors).toEqual([]);
+  expect(findings).toEqual([]);
+});
+
+/**
+ * Answer every question a drill asks, right or wrong, by finding it in the
+ * pool the drill draws from. Wrong answers stop at the last heart, since the
+ * drill ends there.
+ */
+async function answerDrill(page: Page, pool: Question[], right: boolean) {
+  for (let i = 0; ; i++) {
+    const card = page.locator(".qcard");
+    const asked = await card.locator(".q").textContent();
+    const code = (await card.locator("pre.code").count())
+      ? await card.locator("pre.code").textContent()
+      : undefined;
+    const q = pool.find((x) => plain(x.q) === asked && x.code === code);
+    expect(q, `drill question not found in the pool`).toBeDefined();
+    if (i === 0) await audit(page, `Drill, a question`);
+    const pick = right ? q!.a : q!.opts.find((o) => o !== q!.a)!;
+    await card
+      .locator(".opts")
+      .getByRole("button", { name: plain(pick), exact: true })
+      .click();
+    if (!right && i === 4) return;
+    const next = card.locator(".decide button");
+    const label = await next.textContent();
+    await next.click();
+    if (label !== "Continue") return;
+  }
+}
+
+test("a drill's ending runs the drill again, not the selected line", async ({
+  page,
+}) => {
+  const errors = watchConsole(page);
+  // A locked line opened by its URL is selected, but nothing may ride it.
+  const fresh = emptySave();
+  const locked = LINES.find(
+    (l, i) => l.division === "react" && !isUnlocked(fresh, i),
+  )!;
+  const react = DIVISIONS.find((d) => d.id === "react")!.name;
+  const pool = cramPool(LINES, (_, i) => isUnlocked(fresh, i), ["react"]);
+  const drillHeading = page.getByRole("heading", {
+    level: 2,
+    name: "Cram Drill",
+  });
+
+  await page.goto(`/${locked.division}/${locked.id}`);
+  await expect(
+    page.getByRole("heading", { level: 2, name: locked.name }),
+  ).toBeVisible();
+  const cram = page.getByRole("region", { name: "Cram drill" });
+  await cram.getByRole("button", { name: react, exact: true }).click();
+  await cram.getByRole("button", { name: "Start drill" }).click();
+  await expect(drillHeading).toBeVisible();
+  await expect(page).toHaveURL("/drill");
+
+  // Out of hearts: the ending is about the drill, so no line's field guide,
+  // and Try again starts another drill.
+  await answerDrill(page, pool, false);
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Service suspended" }),
+  ).toBeVisible();
+  await expect(page).toHaveURL("/drill");
+  await expect(page.getByText("In plain English")).toBeHidden();
+  await audit(page, "Drill, out of hearts");
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect(drillHeading).toBeVisible();
+  await expect(page).toHaveURL("/drill");
+
+  // The five misses were saved under the line each question came from, so
+  // they come back as shaky questions.
+  await page.getByRole("button", { name: "Back to the map" }).click();
+  await expect(
+    page
+      .getByRole("region", { name: "Today" })
+      .getByRole("button", { name: "Drill 5 shaky" }),
+  ).toBeVisible();
+
+  // A finished drill offers the drill again, not a ride.
+  await cram.getByRole("button", { name: "Start drill" }).click();
+  await answerDrill(page, pool, true);
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Drill done" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ride again" })).toBeHidden();
+  await audit(page, "Drill, done");
+  await page.getByRole("button", { name: "Drill again" }).click();
+  await expect(drillHeading).toBeVisible();
+  await expect(page).toHaveURL("/drill");
+
+  expect(errors).toEqual([]);
   expect(findings).toEqual([]);
 });

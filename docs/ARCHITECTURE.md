@@ -16,7 +16,7 @@ src/
   hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount), useUrl (the address bar and Back)
   lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals, which screens are a ride, URLs, contrast ratios)
   styles/       one stylesheet, app.css, and its contrast test
-e2e/            one Playwright test that rides a line against the production build, and the script that takes the README's screenshots
+e2e/            two Playwright tests against the production build (a ride and a drill), and the script that takes the README's screenshots
 probes/         sandboxes that prove the content against real code (not part of the app)
 ```
 
@@ -94,7 +94,7 @@ Copy everywhere supports `` `code` `` and `**bold**`, rendered by `<Rich />`. Lo
 
 ## How a ride works in the code
 
-`App.tsx` is a small screen state machine: intro (with the map beside it), play, the code check, results (or derailed). It also runs the cram drill, the shaky drill and rehearsal, none of which change line progress.
+`App.tsx` is a small screen state machine: intro (with the map beside it), play, the code check, results (or derailed). It also runs the cram drill, the shaky drill and rehearsal, none of which change line progress. A drill's screen remembers which drill it is, so its results and derailed screens show the drill rather than the selected line, and their again button starts the same drill. Every answer is saved under the line its question came from (`ownerOf()` in `engine/questions.ts`), so a drill's misses show up as shaky on their own lines.
 
 Each screen is either deciding or doing (`isDoing()` in `lib/modes.ts`). Deciding screens (the intro, results and derailed) show the full header, the map, the badges and the save box; the intro also shows the Today band and the cram band. Doing screens (a ride, a drill, rehearsal, the code check) hide all of that, so the ride gets the page. The header shrinks to the name and a **Back to the map** button, which drops the ride at no cost, and the page scrolls to the top. A new screen kind has to be added to the table in `lib/modes.ts`, or the typecheck fails.
 
@@ -125,7 +125,7 @@ All of it runs on every `npm test`:
 - **`components/results.test.tsx`** renders the results screen for every line.
 - **`styles/contrast.test.ts`** reads `app.css` and checks every rule that puts text on a background against WCAG AA (4.5:1, or 3:1 for large text) in light and dark, using the color variables. A rule drawn in a line's color (`var(--c)`) is checked for every line, unless `LINE_RULES` narrows it. It also keeps the two copies of the dark theme identical, and fails if a component sets a color inline, where it cannot see it. See [ADR 0020](adr/0020-accessibility-as-tests.md).
 
-One more check runs outside `npm test`. `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). Before the first ride it boards at phone width, checks the map and badges collapse and the ride starts at the top of the screen, and leaves by **Back to the map**. It checks the URL at each step, presses Back and Forward mid-ride, and at the end opens the line by its URL in the fresh browser. Along the way it runs axe (labels, button names, contrast and the rest of WCAG 2.2 AA) and checks nothing is wider than the screen: the first ride at 375px in light mode, the second at desktop width in dark mode. It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle.
+The end-to-end tests run outside `npm test`. The first in `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). Before the first ride it boards at phone width, checks the map and badges collapse and the ride starts at the top of the screen, and leaves by **Back to the map**. It checks the URL at each step, presses Back and Forward mid-ride, and at the end opens the line by its URL in the fresh browser. Along the way it runs axe (labels, button names, contrast and the rest of WCAG 2.2 AA) and checks nothing is wider than the screen: the first ride at 375px in light mode, the second at desktop width in dark mode. It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle. A second test opens a locked React line by its URL, runs a React-only cram drill out of hearts, and checks the ending is about the drill: no field guide, and **Try again** starts another drill. It checks the misses come back as shaky questions, then finishes a drill and checks **Drill again** starts another. It runs axe on a drill question and both endings.
 
 What the tests cannot check is whether a claim is true. That is what `probes/` and the fact-check pass are for. See [DEVELOPMENT.md](DEVELOPMENT.md#checking-content).
 

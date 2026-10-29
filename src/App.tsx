@@ -18,6 +18,7 @@ import {
   cramQuestions,
   CRAM_SIZE,
   heartsFor,
+  ownerOf,
   recordAnswers,
   shakyQuestions,
   SHAKY_DRILL,
@@ -42,9 +43,17 @@ import { isDoing } from "./lib/modes";
 import { parsePath, pathFor, screenRoute } from "./lib/route";
 import { currentPath, useUrl } from "./hooks/useUrl";
 
+/** Which drill: a cram drill, or the shaky questions (one line's, or all). */
+type DrillPick = { kind: "cram" } | { kind: "shaky"; lineId?: string };
+/**
+ * A drill on screen: which one it is, so its ending can start it again, and
+ * its questions dressed as a line for the play screen.
+ */
+type Drill = { pick: DrillPick; line: Line };
+
 type Screen =
   | { kind: "intro" }
-  | { kind: "cram"; line: Line; run: number }
+  | { kind: "cram"; drill: Drill; run: number }
   | { kind: "rehearse"; run: number }
   | { kind: "play"; tier: Tier; run: number }
   | { kind: "quiz"; ride: RideStats }
@@ -53,8 +62,15 @@ type Screen =
       ride: RideStats;
       result: TripResult;
       mode?: "line" | "cram" | "rehearsal";
+      drill?: Drill;
     }
-  | { kind: "derailed"; ride?: RideStats; cost: number; mode?: "cram" };
+  | {
+      kind: "derailed";
+      ride?: RideStats;
+      cost: number;
+      mode?: "cram";
+      drill?: Drill;
+    };
 
 const indexOf = (id: string) => LINES.findIndex((l) => l.id === id);
 
@@ -114,6 +130,9 @@ export default function App() {
   const dailyIdx = dailyDone(save) ? null : dailyIndex(save);
 
   const board = (t: Tier = tier) => {
+    // The intro disables Board on a locked line, but a line opened by URL is
+    // selected whether it is open or not. Nothing else may ride it either.
+    if (!isUnlocked(save, current)) return;
     setPicked((p) => ({ ...p, [line.id]: t }));
     setScreen((s) => ({
       kind: "play",
@@ -161,23 +180,25 @@ export default function App() {
     [current, finish],
   );
   const onDerail = useCallback(
-    (ride: RideStats, drill = false) => {
-      // A run can end out of hearts and still teach: keep the misses.
+    (ride: RideStats, drill?: Drill) => {
+      // A run can end out of hearts and still teach: keep the misses, each
+      // under the line it came from, so a drill's misses show up as shaky.
       const withStats = recordAnswers(
         save,
         ride.answers.map((a) => ({
-          lineId: a.question.from ?? LINES[current].id,
+          lineId: ownerOf(a.question, LINES) ?? LINES[current].id,
           question: a.question,
           correct: a.correct,
         })),
       );
-      const { save: next, cost } = finishDerail(withStats, { drill });
+      const { save: next, cost } = finishDerail(withStats, { drill: !!drill });
       setSave(next);
       setScreen({
         kind: "derailed",
         ride,
         cost,
         mode: drill ? "cram" : undefined,
+        drill,
       });
     },
     [current, save],
@@ -186,10 +207,6 @@ export default function App() {
   /* ---------- cram drill: mixed questions, no line progress ---------- */
   const pool = cramPool(LINES, (_, i) => isUnlocked(save, i), cramDivisions);
   const shaky = shakyQuestions(save, LINES);
-  const drillOwner = new Map<Question, string>();
-  LINES.forEach((l) =>
-    (l.questions ?? []).forEach((q) => drillOwner.set(q, l.id)),
-  );
 
   const drillLine = (
     name: string,
@@ -212,20 +229,38 @@ export default function App() {
     preset: true,
   });
 
-  const startShaky = (lineId?: string) => {
-    const questions = shakyQuestions(save, LINES, lineId)
-      .slice(0, SHAKY_DRILL)
-      .map((s) => s.question);
+  const drillQuestions = (pick: DrillPick) =>
+    pick.kind === "cram"
+      ? cramQuestions(
+          pool,
+          CRAM_SIZE,
+          shaky.map((s) => s.question),
+        )
+      : shakyQuestions(save, LINES, pick.lineId)
+          .slice(0, SHAKY_DRILL)
+          .map((s) => s.question);
+  /** False once a shaky drill has nothing left to ask. */
+  const canDrill = (pick: DrillPick) =>
+    pick.kind === "cram"
+      ? pool.length > 0
+      : shakyQuestions(save, LINES, pick.lineId).length > 0;
+
+  const startDrill = (pick: DrillPick) => {
+    const questions = drillQuestions(pick);
     if (!questions.length) return;
-    setScreen({
-      kind: "cram",
-      line: drillLine(
-        "Shaky Questions",
-        `${questions.length} you have missed before`,
-        questions,
-      ),
-      run: Date.now(),
-    });
+    const line =
+      pick.kind === "cram"
+        ? drillLine(
+            "Cram Drill",
+            `${questions.length} mixed questions`,
+            questions,
+          )
+        : drillLine(
+            "Shaky Questions",
+            `${questions.length} you have missed before`,
+            questions,
+          );
+    setScreen({ kind: "cram", drill: { pick, line }, run: Date.now() });
   };
 
   const startRehearsal = () => setScreen({ kind: "rehearse", run: Date.now() });
@@ -240,35 +275,20 @@ export default function App() {
     });
   };
 
-  const startCram = () => {
-    const questions = cramQuestions(
-      pool,
-      CRAM_SIZE,
-      shaky.map((s) => s.question),
-    );
-    setScreen({
-      kind: "cram",
-      line: drillLine(
-        "Cram Drill",
-        `${questions.length} mixed questions`,
-        questions,
-      ),
-      run: Date.now(),
-    });
-  };
-  const onCramDone = (ride: RideStats, asked: number) => {
+  const onCramDone = (ride: RideStats, drill: Drill) => {
+    const asked = drill.line.questions?.length ?? CRAM_SIZE;
     const right = Math.max(0, asked - ride.mistakes);
     const withStats = recordAnswers(
       save,
       ride.answers.map((a) => ({
-        lineId: a.question.from ?? drillOwner.get(a.question) ?? "cram",
+        lineId: ownerOf(a.question, LINES) ?? "cram",
         question: a.question,
         correct: a.correct,
       })),
     );
     const result = finishCram(withStats, { right, asked, time: ride.time });
     setSave(result.save);
-    setScreen({ kind: "result", ride, result, mode: "cram" });
+    setScreen({ kind: "result", ride, result, mode: "cram", drill });
   };
 
   // Back and Forward land on a line's intro, or on the map with the same line
@@ -301,7 +321,7 @@ export default function App() {
           onPickTier={(t) => setPicked((p) => ({ ...p, [line.id]: t }))}
           onBoard={() => board()}
           shakyCount={shakyQuestions(save, LINES, line.id).length}
-          onDrillShaky={() => startShaky(line.id)}
+          onDrillShaky={() => startDrill({ kind: "shaky", lineId: line.id })}
           rehearseCount={GUIDE[line.id]?.rehearse?.length ?? 0}
           lastRehearsed={save.rehearsal[line.id]?.last}
           onRehearse={startRehearsal}
@@ -312,14 +332,12 @@ export default function App() {
       stage = (
         <PlayScreen
           key={screen.run}
-          line={screen.line}
+          line={screen.drill.line}
           tier={1}
           hearts={5}
           firstTime={false}
-          onArrive={(ride) =>
-            onCramDone(ride, screen.line.questions?.length ?? CRAM_SIZE)
-          }
-          onDerail={(ride) => onDerail(ride, true)}
+          onArrive={(ride) => onCramDone(ride, screen.drill)}
+          onDerail={(ride) => onDerail(ride, screen.drill)}
         />
       );
       break;
@@ -352,38 +370,52 @@ export default function App() {
     case "quiz":
       stage = <Quiz line={line} onDone={(ok) => finish(screen.ride, ok)} />;
       break;
-    case "result":
+    case "result": {
+      // A drill's ending is about the drill: its own line, and Again runs it
+      // again. Anything else ends a ride or rehearsal on the selected line.
+      const { drill } = screen;
       stage = (
         <Results
           mode={screen.mode}
           line={
-            screen.mode && screen.mode !== "line"
-              ? { ...line, bigO: undefined }
-              : line
+            drill
+              ? drill.line
+              : screen.mode === "rehearsal"
+                ? { ...line, bigO: undefined }
+                : line
           }
           ride={screen.ride}
           result={screen.result}
           nextName={LINES[current + 1]?.name ?? null}
-          onAgain={() => board(screen.ride.tier)}
+          onAgain={
+            !drill
+              ? () => board(screen.ride.tier)
+              : canDrill(drill.pick)
+                ? () => startDrill(drill.pick)
+                : undefined
+          }
           onNext={() => select(current + 1)}
           onTier={(t) => board(t)}
           onMap={toIntro}
         />
       );
       break;
-    case "derailed":
+    }
+    case "derailed": {
+      const { drill } = screen;
       stage = (
         <Derailed
-          line={line}
+          line={drill ? drill.line : line}
           cost={screen.cost}
           missed={(screen.ride?.answers ?? [])
             .filter((a) => !a.correct)
             .map((a) => a.question)}
-          onAgain={() => board()}
+          onAgain={drill ? () => startDrill(drill.pick) : () => board()}
           onMap={toIntro}
         />
       );
       break;
+    }
   }
 
   return (
@@ -393,7 +425,7 @@ export default function App() {
         <TodayBand
           items={todayPlan(save, current)}
           onLine={select}
-          onShaky={() => startShaky()}
+          onShaky={() => startDrill({ kind: "shaky" })}
         />
       )}
       {!doing && (
@@ -420,7 +452,7 @@ export default function App() {
               ds.includes(d) ? ds.filter((x) => x !== d) : [...ds, d],
             )
           }
-          onStart={startCram}
+          onStart={() => startDrill({ kind: "cram" })}
         />
       )}
       <main className="stage" ref={stageRef}>

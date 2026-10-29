@@ -11,7 +11,7 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-The end-to-end test needs a Chromium that Playwright downloads once:
+The end-to-end tests need a Chromium that Playwright downloads once:
 
 ```bash
 npx playwright install chromium
@@ -27,18 +27,18 @@ The app is not deployed. It runs locally.
 
 ## Scripts
 
-| Command               | What it does                                                                                                     |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`         | Dev server with hot reload                                                                                       |
-| `npm test`            | Every test: algorithms, engine, content, the bar, screens, routes, contrast. Run before every commit.            |
-| `npm run typecheck`   | `tsc --noEmit` over `src`, `e2e` and the three configs                                                           |
-| `npm run build`       | Typecheck, then a production build into `dist/`                                                                  |
-| `npm run preview`     | Serve the production build locally                                                                               |
-| `npm run bar`         | Where every line stands against the quality bar, division by division                                            |
-| `npm run e2e`         | Builds, then rides a line in Chromium against the production build (`e2e/ride.spec.ts`). Not part of `npm test`. |
-| `npm run screenshots` | Builds, then retakes the README's screenshots and GIF (`e2e/readme.shots.ts`). Needs ffmpeg. See below.          |
-| `npm run lint`        | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.         |
-| `npm run format`      | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit.        |
+| Command               | What it does                                                                                                                      |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`         | Dev server with hot reload                                                                                                        |
+| `npm test`            | Every test: algorithms, engine, content, the bar, screens, routes, contrast. Run before every commit.                             |
+| `npm run typecheck`   | `tsc --noEmit` over `src`, `e2e` and the three configs                                                                            |
+| `npm run build`       | Typecheck, then a production build into `dist/`                                                                                   |
+| `npm run preview`     | Serve the production build locally                                                                                                |
+| `npm run bar`         | Where every line stands against the quality bar, division by division                                                             |
+| `npm run e2e`         | Builds, then rides a line and runs a drill in Chromium against the production build (`e2e/ride.spec.ts`). Not part of `npm test`. |
+| `npm run screenshots` | Builds, then retakes the README's screenshots and GIF (`e2e/readme.shots.ts`). Needs ffmpeg. See below.                           |
+| `npm run lint`        | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.                          |
+| `npm run format`      | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit.                         |
 
 Lint and format both skip `probes/`. Those are sandboxes with their own packages, and some depend on exact line placement, like a `@ts-expect-error` on the line above an error.
 
@@ -63,7 +63,7 @@ Every push and pull request runs `.github/workflows/ci.yml` on GitHub Actions, o
 5. `npm test`, which includes the bar
 6. `npm run check` in `probes/ts`
 7. `npm run build`
-8. Download Chromium, then run the end-to-end test against that build (`npx playwright test`, see "Checking the app")
+8. Download Chromium, then run the end-to-end tests against that build (`npx playwright test`, see "Checking the app")
 9. `npm audit --omit=dev`, which reports but never fails the run
 
 To reproduce a red run, run the same step locally. The React and Nest probes are not in CI. Run them by hand when content changes.
@@ -132,7 +132,7 @@ The data files are large TypeScript files of strings.
 
 ## Checking the app
 
-`npm run e2e` checks one path through the production build in a real browser. It opens the React division on the map (a fresh save opens only the first division), boards Repaint Line (React's first quiz line) on Local at phone width, checks the map and badges collapse and the ride starts at the top, and goes back to the map. It checks the URL at each step, then boards again and presses the browser's Back and Forward: Back lands on the line, and Forward does not bring a dead ride back. Then it boards again and answers every question right. It solves the last stop, reaches the results screen, then rides again so the other puzzle kind comes up. Then it opens the line by its URL in a fresh browser, copies the save code there and checks the progress arrived. At each screen it runs axe and checks nothing is wider than the screen: the first ride at 375px in light mode, the second at desktop width in dark mode. Accessibility findings are gathered and listed together at the end. It fails on any error in the browser console. It looks up the right answers in `src/data`, so it works whichever questions a ride picks. Run it after changing a screen, the save code, or anything else on that path.
+`npm run e2e` checks one path through the production build in a real browser. It opens the React division on the map (a fresh save opens only the first division), boards Repaint Line (React's first quiz line) on Local at phone width, checks the map and badges collapse and the ride starts at the top, and goes back to the map. It checks the URL at each step, then boards again and presses the browser's Back and Forward: Back lands on the line, and Forward does not bring a dead ride back. Then it boards again and answers every question right. It solves the last stop, reaches the results screen, then rides again so the other puzzle kind comes up. Then it opens the line by its URL in a fresh browser, copies the save code there and checks the progress arrived. At each screen it runs axe and checks nothing is wider than the screen: the first ride at 375px in light mode, the second at desktop width in dark mode. Accessibility findings are gathered and listed together at the end. It fails on any error in the browser console. It looks up the right answers in `src/data`, so it works whichever questions a ride picks. A second test in the same file opens a locked React line by its URL and runs a React-only cram drill. It answers wrong until the hearts run out, checks the ending shows the drill and not that line, and that **Try again** starts a drill, not a ride. Back on the map, the five misses show as shaky in the Today band. Then it finishes a drill and checks **Drill again** starts another. Run them after changing a screen, the save code, a drill, or anything else on those paths.
 
 It is one path, not a substitute for looking. For any change a player would see, run it and look:
 
@@ -148,7 +148,7 @@ If the session has a browser tool, Claude plays it. If not, Claude lists the exa
 
 `npm run screenshots` retakes every image in the README from the production build, so they can be refreshed after a screen changes instead of going stale. It builds, then runs `e2e/readme.shots.ts` with its own Playwright config (`playwright.shots.config.ts`), which only picks up `*.shots.ts` files, so `npm run e2e` never runs it. It writes the PNGs into `docs/` and records a short ride as a video, then ffmpeg turns that into `docs/ride.gif`. ffmpeg is not an npm package: install it once (`brew install ffmpeg` on a Mac). CI does not run it.
 
-It loads a made-up save a few weeks in (React, NestJS and TypeScript lines cleared, a review overdue, three shaky questions), so the Today band has something to show. It reads right answers from `src/data`, like the end-to-end test, and rides Repaint Line. The BFS shot loads a second save with only Push & Pop Shuttle cleared, so The Local is open. The questions in the GIF and `question.png` change from run to run. Look at every image before committing: a screenshot can pass and still show the wrong thing.
+It loads a made-up save a few weeks in (React, NestJS and TypeScript lines cleared, a review overdue, three shaky questions), so the Today band has something to show. It reads right answers from `src/data`, like the end-to-end tests, and rides Repaint Line. The BFS shot loads a second save with only Push & Pop Shuttle cleared, so The Local is open. The questions in the GIF and `question.png` change from run to run. Look at every image before committing: a screenshot can pass and still show the wrong thing.
 
 ## Inventory stops
 

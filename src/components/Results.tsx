@@ -13,7 +13,8 @@ interface Props {
   ride: RideStats;
   result: TripResult;
   nextName: string | null;
-  onAgain: () => void;
+  /** Rides the line again, or runs the drill again. Absent when a drill has nothing left to ask. */
+  onAgain?: () => void;
   onNext: () => void;
   onTier: (t: Tier) => void;
   onMap: () => void;
@@ -127,8 +128,8 @@ export function Results({
             ))}
           </ol>
           <p className="hint" style={{ margin: 0 }}>
-            These come back in your next cram drill until you get them twice in
-            a row.
+            These come back in your cram drills. A right answer cancels one
+            miss.
           </p>
         </div>
       )}
@@ -171,9 +172,11 @@ export function Results({
             Next line: {nextName}
           </button>
         )}
-        <button className="btn ghost" onClick={onAgain}>
-          Ride again
-        </button>
+        {onAgain && (
+          <button className="btn ghost" onClick={onAgain}>
+            {mode === "cram" ? "Drill again" : "Ride again"}
+          </button>
+        )}
         {nextName && unlockedTier && !cram && (
           <button className="btn ghost" onClick={onNext}>
             Next line

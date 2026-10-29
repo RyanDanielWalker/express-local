@@ -237,6 +237,17 @@ export function qid(lineId: string, question: Question): string {
   return `${question.from ?? lineId}:${h.toString(36)}`;
 }
 
+/**
+ * The line a question comes from. A code-check blank names it in `from`; any
+ * other question is found in its line's list. A drill mixes lines, so its
+ * answers are saved under this, never under whichever line is selected.
+ */
+export function ownerOf(question: Question, lines: Line[]): string | undefined {
+  return (
+    question.from ?? lines.find((l) => l.questions?.includes(question))?.id
+  );
+}
+
 export interface AnswerRecord {
   lineId: string;
   question: Question;
@@ -256,7 +267,7 @@ export function recordAnswers(
     const prev = next.questions[id] ?? { seen: 0, missed: 0, last: 0 };
     next.questions[id] = {
       seen: prev.seen + 1,
-      // getting it right twice in a row clears it off the shaky list
+      // each right answer cancels one miss; at zero it leaves the shaky list
       missed: correct ? Math.max(0, prev.missed - 1) : prev.missed + 1,
       last: correct ? prev.last : now,
     };

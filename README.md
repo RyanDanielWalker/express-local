@@ -127,9 +127,9 @@ flowchart LR
 - **Scoring is pure.** `finishTrip()`, `finishCram()`, `finishRehearsal()` and `finishDerail()` take a save and a run and return a new save plus everything the results screen shows. Readiness is computed from the save, never stored.
 - **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier with room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha in its field guide, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS, TypeScript and React) fail the tests if any line slips.
 - **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, render the results screen for every line, and check the Today plan, the URL parsing and every text color's contrast. One Playwright test rides a line twice on Local against the production build, checks Back and Forward mid-ride, then opens the line by its URL in a fresh browser and moves the save code there.
-- **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes, a production build and the end-to-end test on each push and pull request.
+- **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes, a production build and the end-to-end tests on each push and pull request.
 - **A small router of its own.** Every line has a URL, like `/nest/life`, and the browser's Back button leaves a ride for its line instead of leaving the app. It is about a hundred lines on the History API, with the path parsing as pure, tested functions, rather than a routing library for five URLs.
-- **Accessible, and tested for it.** Keyboard shortcuts, focusable graph nodes and code blocks, `aria-live` status updates, reduced-motion support, and light and dark themes. The end-to-end test runs axe on every screen it passes through, at phone width in light mode and at desktop width in dark mode. A unit test checks every text color in the stylesheet against WCAG AA contrast in both themes.
+- **Accessible, and tested for it.** Keyboard shortcuts, focusable graph nodes and code blocks, `aria-live` status updates, reduced-motion support, and light and dark themes. The end-to-end tests run axe on every screen they pass through, at phone width in light mode and at desktop width in dark mode. A unit test checks every text color in the stylesheet against WCAG AA contrast in both themes.
 
 ```
 src/
@@ -141,7 +141,7 @@ src/
   hooks/        useKeys, useTimers, useUrl
   lib/          small helpers
   styles/       one stylesheet, and its contrast test
-e2e/            one Playwright test that rides a line against the production build, and the README's screenshots
+e2e/            two Playwright tests against the production build (a ride and a drill), and the README's screenshots
 probes/         sandboxes that prove the content against real React, NestJS and TypeScript
 docs/           roadmap, architecture, development guide, decision records and audits
 ```

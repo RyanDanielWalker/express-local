@@ -10,10 +10,10 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 - `docs/ARCHITECTURE.md`: how the app and its content are structured, and how to add a question, puzzle, line or division.
 - `docs/DEVELOPMENT.md`: setup, scripts, the working agreement, and the full procedure for checking content.
 - `docs/adr/`: why things are the way they are. Append-only.
-- `e2e/`: one Playwright test that rides a line against the production build (`npm run e2e`, not part of `npm test`), and `readme.shots.ts`, which retakes the README's screenshots and GIF (`npm run screenshots`, needs ffmpeg).
+- `e2e/`: two Playwright tests against the production build, one riding a line and one ending a drill (`npm run e2e`, not part of `npm test`), and `readme.shots.ts`, which retakes the README's screenshots and GIF (`npm run screenshots`, needs ffmpeg).
 - `probes/`: sandboxes that prove content against real React, NestJS and TypeScript. Not part of the app.
 - `.claude/skills/next/`: the `/next` command. `.claude/skills/audit/`: the `/audit` command, an outsider's review at the end of each phase, saved in `docs/audits/` (`/audit quiz` to rehearse the interview questions). `.claude/agents/fact-checker.md`: the independent content reviewer.
-- `.github/workflows/ci.yml`: CI on every push and pull request. It runs the format check, lint, typecheck, tests, the TypeScript probes, the build and the end-to-end test (see `docs/DEVELOPMENT.md`, "CI").
+- `.github/workflows/ci.yml`: CI on every push and pull request. It runs the format check, lint, typecheck, tests, the TypeScript probes, the build and the end-to-end tests (see `docs/DEVELOPMENT.md`, "CI").
 
 ## How we work
 
@@ -37,7 +37,7 @@ React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5, Playwright 1.64 (Chromiu
 - `npm run build`: typecheck and production build
 - `npm run preview`: serve the production build
 - `npm run bar`: where every line stands against the quality bar
-- `npm run e2e`: build, then ride Repaint Line twice on Local in Chromium and move the save code to a fresh browser. Needs `npx playwright install chromium` once.
+- `npm run e2e`: build, then ride Repaint Line twice on Local in Chromium and move the save code to a fresh browser, and run a drill out of hearts and to the end. Needs `npx playwright install chromium` once.
 - `npm run screenshots`: build, then retake the README's images into `docs/`. Needs ffmpeg. Look at every image before committing.
 
 ## Code rules
@@ -103,7 +103,7 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 - **Undo a planted bug by hand**, not with `git checkout -- <file>`, unless the real change is committed first. Checkout throws away every uncommitted edit in the file, not just the planted one.
 - **Don't run `tsc -b`.** It leaves a `tsconfig.tsbuildinfo` in the repo. Use the npm scripts.
 - **Don't kill processes by a pattern** (`pkill -f "vite preview"`) in a shell whose own command line matches it. Kill by PID or port.
-- **The end-to-end test leans on Repaint Line.** It expects exactly one Local flow and one Local sort there, so two rides cover both puzzle kinds. It opens React's division header by its name, since a fresh save starts with only the first division open. It finds the stop by its name ("Repaint Line, 0 of 3 tiers cleared"), needs the Today region, and clicks buttons by their labels ("Board: Local", "Back to the map", "See how you did", "Ride again", "Back up progress", "Restore progress", "Restore"). It checks the line's URL (`/react/render`) and Back and Forward mid-ride. Adding a Local puzzle to that line, or renaming any of those, fails `npm run e2e` until the test is updated. `npm run screenshots` leans on the same line, stop name and Today region, plus the "Local", "See how you did" and "Map" buttons. Its BFS shot expects The Local to be the second algorithm line, and uses its "Neighbors of each station" panel and "Station X" buttons.
+- **The end-to-end test leans on Repaint Line.** It expects exactly one Local flow and one Local sort there, so two rides cover both puzzle kinds. It opens React's division header by its name, since a fresh save starts with only the first division open. It finds the stop by its name ("Repaint Line, 0 of 3 tiers cleared"), needs the Today region, and clicks buttons by their labels ("Board: Local", "Back to the map", "See how you did", "Ride again", "Back up progress", "Restore progress", "Restore"). It checks the line's URL (`/react/render`) and Back and Forward mid-ride. Adding a Local puzzle to that line, or renaming any of those, fails `npm run e2e` until the test is updated. The drill test opens React's second line by its URL, which a fresh save keeps locked, picks the "React" chip in the "Cram drill" region, and needs React's first line to hold at least 12 questions. It clicks "Start drill", "Try again", "Back to the map" and "Drill again", expects the headings "Cram Drill", "Service suspended" and "Drill done", and the Today band's "Drill 5 shaky". `npm run screenshots` leans on the same line, stop name and Today region, plus the "Local", "See how you did" and "Map" buttons. Its BFS shot expects The Local to be the second algorithm line, and uses its "Neighbors of each station" panel and "Station X" buttons.
 - **Colors go in `app.css`, not inline styles.** `src/styles/contrast.test.ts` checks every text color in the stylesheet against WCAG AA in light and dark, and fails on an inline `color:` or `background:` it cannot check. A new rule in a line's color (`var(--c)`) is checked against every line's color; if only one game uses it, list it in `LINE_RULES`. Vitest blanks CSS files, so `vite.config.ts` lets `app.css` through for that test.
 - **The bundle is over 700 kB.** Vite's size warning on build is expected for now; splitting it is on the roadmap.
 
