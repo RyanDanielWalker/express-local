@@ -2,7 +2,7 @@
 
 **Learn it by doing it.** A subway-themed practice app for technical interviews, covering algorithms, NestJS, React and TypeScript. The algorithm lines are interactive: you play BFS by clicking stations in order while the queue fills up beside you. The stack lines drill the way an interview does: a question, a committed answer and the reasoning behind it, a puzzle that has to be worked out rather than recognized, and an out-loud round so the answer has been spoken before anyone asks for it.
 
-![The map: four divisions, a Readiness score per division, and the cram drill](docs/map.png)
+![A ride on Repaint Line: the Today band, then one question answered right and one missed, each followed by its explanation](docs/ride.gif)
 
 ## What it covers
 
@@ -78,9 +78,14 @@ Every claim is proven with the compiler, with `strict` on, under TypeScript 5.9,
 - **A miss says it was a miss, nothing more.** The explanation comes after the answer is committed, and in puzzles at the end of the run. On Local, a second miss on the same step reveals it, so nobody gets stuck.
 - **You advance, not a timer.** Explanations stay on screen until you continue, and the clock holds while you read. Number keys pick an option or a box, and space continues.
 
-![A sort puzzle at the end of a run: jobs dropped into the building block that does them](docs/sort.png)
+![A question on Repaint Line, answered, with the explanation of why that answer is right](docs/question.png)
+
+![A flow puzzle at the end of a run, half solved: the steps after a click on a counter, in order, with decoy steps still in the pile](docs/flow-light.png)
+![A sort puzzle in dark mode, half solved: what makes a component render again, dropped into the right box](docs/sort-dark.png)
 
 ## Staying sharp
+
+![The Today band: a review due, three shaky questions, the daily ride and the next new line, above the divisions with their readiness bars](docs/today.png)
 
 - **A Today band.** The top of the page says what to do right now, most urgent first: a review that is due, the shaky questions, the daily ride, then the next line not yet cleared. Below it, each division is a collapsed header with its readiness bar, and only the division in play is open.
 - **Readiness.** The headline number is a 0 to 100 score per division, built from what has been cleared, at which tier, how far along its review schedule, and how much of the question pool is solid. It falls on its own as reviews go overdue, so it reflects what would come back today rather than what was done once.
@@ -91,8 +96,7 @@ Every claim is proven with the compiler, with `strict` on, under TypeScript 5.9,
 - **Field guide on every line.** Plain-English explanation, vocabulary, real code, talking points, and the common mistake.
 - **XP, ranks, streaks, a daily ride, badges and personal bests.** XP is a lifetime total with ten ranks. Derailing costs 50 XP but never drops a rank, and work on a weak line pays a bonus.
 
-![Mid-ride on the BFS line](docs/bfs.png)
-![Dijkstra in dark mode](docs/dijkstra-dark.png)
+![Mid-ride on the BFS line in dark mode: four stations visited, the queue beside the graph](docs/bfs-dark.png)
 
 ## Design decisions
 
@@ -106,6 +110,16 @@ A few choices that shape how the app teaches. [docs/ROADMAP.md](docs/ROADMAP.md)
 - **Clear beats clever.** One idea per sentence, the example before the name for it, and every term defined the first time it matters. Every explanation says why the right answer is right and why the tempting wrong one is wrong. All three stack divisions are written to it.
 
 ## Engineering
+
+```mermaid
+flowchart LR
+  data["src/data<br/>lines, questions, puzzles"] --> engine
+  save[("localStorage<br/>the save")] <--> engine
+  engine["src/engine and src/algorithms<br/>pure functions: pick questions,<br/>check moves, score, readiness, Today"] --> ui["components and games<br/>render the state"]
+  ui -- "the player's move" --> engine
+  probes["probes/<br/>real React, NestJS and tsc"] -. "prove the claims" .-> data
+  bar["Vitest<br/>the bar and content tests"] -. "check every line" .-> data
+```
 
 - **React 19, TypeScript and Vite.** No backend. Progress is saved in `localStorage`, with a copy-and-paste save code for moving between browsers.
 - **Game logic is pure.** Algorithms are small state machines in `src/algorithms/`: the UI asks for the right move, sends the player's move, and renders the state that comes back. Components never decide what is correct.
@@ -126,7 +140,7 @@ src/
   components/   screens: header, map, intro, play, results, rehearsal, Today band, cram band, badges
   hooks/        useKeys, useTimers, useUrl
   lib/          small helpers
-e2e/            one Playwright test that rides a line against the production build
+e2e/            one Playwright test that rides a line against the production build, and the README's screenshots
 probes/         sandboxes that prove the content against real React, NestJS and TypeScript
 docs/           roadmap, architecture, development guide, and decision records
 ```
@@ -144,6 +158,7 @@ npm run format     # Prettier
 npm run bar        # where each line stands against the quality bar
 npm run build      # typecheck and production build into dist/
 npm run e2e        # build, then ride a line in Chromium (run `npx playwright install chromium` once)
+npm run screenshots  # retake the README's screenshots and GIF (needs ffmpeg)
 ```
 
 ## Adding a line
@@ -161,15 +176,16 @@ A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md): a live deploy behind CI, no repeated questions, a reorganized page, and a case study. A NestJS and Postgres backend is 2.0.
+NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md). What is left is a live deploy behind CI and a case study. A NestJS and Postgres backend is 2.0.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
 - [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and independently reviewed
 - [x] **React:** eight lines clearing the bar, every claim run against React 19.3, and independently reviewed
 - [x] **Foundation:** formatting and lint, CI on every push, and an end-to-end test
-- [ ] **No repeats:** rework questions that test the same fact as another question
-- [ ] **Reorganize the page:** a Today band, a play mode that takes over the screen, and real URLs
+- [x] **No repeats:** questions that tested the same fact as another were given new angles
+- [x] **Reorganize the page:** a Today band, a play mode that takes over the screen, real URLs, and accessibility checks as tests
+- [x] **README:** a fresh GIF and screenshots, retaken by a script, and an architecture diagram
 - [ ] **Ship 1.0:** a live deploy, a case study, and a `v1.0` tag
 
 ## How this was built
