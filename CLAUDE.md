@@ -1,6 +1,6 @@
 # Express & Local
 
-A subway-themed practice app for technical interviews. Ryan, a junior web developer, built it to drill computer science and his stack until he can explain it out loud: NestJS, TypeScript and React, plus algorithms. He is the player, the owner, and the only user.
+A subway-themed practice app for technical interviews. Ryan built it to drill computer science and his stack until he can explain it out loud: NestJS, TypeScript and React, plus algorithms. He is the player, the owner, and the only user.
 
 Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line clears the quality bar, every claim was proven against real code and independently reviewed. Algorithms are parked. Not deployed; it runs locally.
 
@@ -50,7 +50,7 @@ React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5, Playwright 1.64 (Chromiu
 
 ## Content rules
 
-Ryan is still learning this material, so he can't catch a wrong claim in review. The content has to be right before it's committed.
+A wrong claim in the app gets learned, then repeated in an interview. So review is not the safety net. Every claim is proven right before it's committed.
 
 ### Prove every claim
 
@@ -67,7 +67,7 @@ Full procedure: `docs/DEVELOPMENT.md`, "Checking content".
 
 ### Clarity comes first
 
-The point of every line is that the idea clicks and can then be explained out loud in an interview. If a sentence needs reading twice, the sentence failed, not the reader. Ryan understands the concepts; dense wording is what slows him down. Every piece of copy (questions, options, explanations, field guides, puzzle notes, rehearsal answers) follows these:
+The point of every line is that the idea clicks and can then be explained out loud in an interview. If a sentence needs reading twice, the sentence failed, not the reader. The concepts are rarely the hard part. Dense wording is. Every piece of copy (questions, options, explanations, field guides, puzzle notes, rehearsal answers) follows these:
 
 1. **One idea per sentence.** Split anything held together by a colon or three commas.
 2. **Example first, then the name.** Show `if (!user) return;`, then say "that is narrowing." Not the other way around.

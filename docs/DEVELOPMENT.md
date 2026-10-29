@@ -101,7 +101,7 @@ option works but warns, checked does nothing).
 
 ## Checking content
 
-Ryan is still learning this material, so he cannot catch a wrong claim in review. Every claim has to be right before it is committed. The docs are where a claim starts. Running code is where it gets proven. See [ADR 0006](adr/0006-prove-claims-by-running-them.md) for why.
+A wrong claim in the app gets learned, then repeated in an interview. So review is not the safety net. Every claim has to be proven right before it is committed. The docs are where a claim starts. Running code is where it gets proven. See [ADR 0006](adr/0006-prove-claims-by-running-them.md) for why.
 
 For every new or changed question, option, explanation, puzzle card, flow step, note and field guide example:
 
