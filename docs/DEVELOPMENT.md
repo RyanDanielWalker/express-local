@@ -27,17 +27,18 @@ The app is not deployed. It runs locally.
 
 ## Scripts
 
-| Command             | What it does                                                                                                     |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`       | Dev server with hot reload                                                                                       |
-| `npm test`          | Every test: algorithms, engine, content, the bar, the results screen. Run before every commit.                   |
-| `npm run typecheck` | `tsc --noEmit` over `src`, `e2e` and the two configs                                                             |
-| `npm run build`     | Typecheck, then a production build into `dist/`                                                                  |
-| `npm run preview`   | Serve the production build locally                                                                               |
-| `npm run bar`       | Where every line stands against the quality bar, division by division                                            |
-| `npm run e2e`       | Builds, then rides a line in Chromium against the production build (`e2e/ride.spec.ts`). Not part of `npm test`. |
-| `npm run lint`      | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.         |
-| `npm run format`    | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit.        |
+| Command               | What it does                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`         | Dev server with hot reload                                                                                       |
+| `npm test`            | Every test: algorithms, engine, content, the bar, the results screen. Run before every commit.                   |
+| `npm run typecheck`   | `tsc --noEmit` over `src`, `e2e` and the two configs                                                             |
+| `npm run build`       | Typecheck, then a production build into `dist/`                                                                  |
+| `npm run preview`     | Serve the production build locally                                                                               |
+| `npm run bar`         | Where every line stands against the quality bar, division by division                                            |
+| `npm run e2e`         | Builds, then rides a line in Chromium against the production build (`e2e/ride.spec.ts`). Not part of `npm test`. |
+| `npm run screenshots` | Builds, then retakes the README's screenshots and GIF (`e2e/readme.shots.ts`). Needs ffmpeg. See below.          |
+| `npm run lint`        | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.         |
+| `npm run format`      | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit.        |
 
 Lint and format both skip `probes/`. Those are sandboxes with their own packages, and some depend on exact line placement, like a `@ts-expect-error` on the line above an error.
 
@@ -141,7 +142,13 @@ npm run build && npm run preview
 
 Play the changed line on Local at least twice (the last-stop puzzle rotates), check the field guide, and watch the browser console for errors or warnings. For layout changes, check a phone-width window in light and dark.
 
-If the session has a browser tool, Claude plays it. If not, Claude lists the exact steps for Ryan (which line, which tier, what to look for), and the report marks it as not yet checked in a browser.
+If the session has a browser tool, Claude plays it.
+
+### The README's screenshots
+
+`npm run screenshots` retakes every image in the README from the production build, so they can be refreshed after a screen changes instead of going stale. It builds, then runs `e2e/readme.shots.ts` with its own Playwright config (`playwright.shots.config.ts`), which only picks up `*.shots.ts` files, so `npm run e2e` never runs it. It writes the PNGs into `docs/` and records a short ride as a video, then ffmpeg turns that into `docs/ride.gif`. ffmpeg is not an npm package: install it once (`brew install ffmpeg` on a Mac). CI does not run it.
+
+It loads a made-up save a few weeks in (React and NestJS lines cleared, a review overdue, three shaky questions), so the Today band has something to show. It reads right answers from `src/data`, like the end-to-end test, and rides Repaint Line. The questions in the GIF and `question.png` change from run to run. Look at every image before committing: a screenshot can pass and still show the wrong thing. If not, Claude lists the exact steps for Ryan (which line, which tier, what to look for), and the report marks it as not yet checked in a browser.
 
 ## Inventory stops
 

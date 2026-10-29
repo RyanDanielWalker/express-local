@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "e2e": "npm run build && playwright test"
+    "e2e": "npm run build && playwright test",
+    "screenshots": "npm run build && playwright test --config playwright.shots.config.ts && ffmpeg -loglevel error -y -i test-results/ride.webm -vf \"fps=10,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4\" docs/ride.gif"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.3.0",

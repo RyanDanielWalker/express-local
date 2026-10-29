@@ -16,7 +16,7 @@ src/
   hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount), useUrl (the address bar and Back)
   lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals, which screens are a ride, URLs)
   styles/       one stylesheet, app.css
-e2e/            one Playwright test that rides a line against the production build
+e2e/            one Playwright test that rides a line against the production build, and the script that takes the README's screenshots
 probes/         sandboxes that prove the content against real code (not part of the app)
 ```
 
