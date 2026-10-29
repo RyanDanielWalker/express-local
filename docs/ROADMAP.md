@@ -161,7 +161,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **New divisions.** SQL and Postgres, GraphQL, Git as a train yard.
 - **Engineer's Cab.** After Rush Hour, write the algorithm yourself against in-browser tests.
 - **Scenario mode.** Read a real situation, pick the right tool. Still the best idea in this file, and it needs the content above to draw from.
-- **Interface extras.** Badges become a count that opens a panel. Tabs on the intro screen (Ride / Field guide / Say it out loud). Split `App.tsx` into `useRun` and `useDrills` (pick this up with the router if `App.tsx` gets in the way).
+- **Interface extras.** Badges become a count that opens a panel. Tabs on the intro screen (Ride / Field guide / Say it out loud). Split `App.tsx` into `useRun` and `useDrills`. The router went in without it, and `App.tsx` is about 440 lines.
 - **Upgrade the build to TypeScript 6.** The app builds with 5.9 while its content teaches 6.0 behavior, like `strict` on by default. The probes already pass on 6.0 and 7.0, so this is about the build, not the lessons.
 - **Dependabot for the workflow and npm.** The CI actions are pinned to commit hashes, which never update themselves ([ADR 0013](adr/0013-ci-on-github-actions.md)). Dependabot would open a pull request for each new release. Bumping by hand is fine while there are two actions.
 - **Keep the trace from a red end-to-end run in CI.** Playwright saves a trace (a step-by-step recording) when the test fails, but CI throws it away with the machine. Uploading it as a workflow artifact would show what the page looked like at the failure. Until then, reproduce a red run with `npm run e2e`, which keeps the trace in `test-results/`.

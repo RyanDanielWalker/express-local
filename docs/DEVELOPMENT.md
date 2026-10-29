@@ -4,7 +4,7 @@ Setup, scripts, how we work together, and how content gets checked.
 
 ## Setup
 
-Requires Node.js 22.12+ for the app (Vitest 5 needs it) and 22.22.2+ or 24.15+ for the React probes (jsdom needs it). `.nvmrc` pins 22, so `nvm use` picks it up.
+Requires Node.js 22.12+ or 24+ for the app (Vitest 5 needs it, and skips 23 and 25) and 22.22.2+ or 24.15+ for the React probes (jsdom needs it). `.nvmrc` pins 22, so `nvm use` picks it up.
 
 ```bash
 npm install
@@ -30,8 +30,8 @@ The app is not deployed. It runs locally.
 | Command               | What it does                                                                                                     |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `npm run dev`         | Dev server with hot reload                                                                                       |
-| `npm test`            | Every test: algorithms, engine, content, the bar, the results screen. Run before every commit.                   |
-| `npm run typecheck`   | `tsc --noEmit` over `src`, `e2e` and the two configs                                                             |
+| `npm test`            | Every test: algorithms, engine, content, the bar, screens, routes, contrast. Run before every commit.            |
+| `npm run typecheck`   | `tsc --noEmit` over `src`, `e2e` and the three configs                                                           |
 | `npm run build`       | Typecheck, then a production build into `dist/`                                                                  |
 | `npm run preview`     | Serve the production build locally                                                                               |
 | `npm run bar`         | Where every line stands against the quality bar, division by division                                            |
@@ -142,13 +142,13 @@ npm run build && npm run preview
 
 Play the changed line on Local at least twice (the last-stop puzzle rotates), check the field guide, and watch the browser console for errors or warnings. For layout changes, check a phone-width window in light and dark.
 
-If the session has a browser tool, Claude plays it.
+If the session has a browser tool, Claude plays it. If not, Claude lists the exact steps for Ryan (which line, which tier, what to look for), and the report marks it as not yet checked in a browser.
 
 ### The README's screenshots
 
 `npm run screenshots` retakes every image in the README from the production build, so they can be refreshed after a screen changes instead of going stale. It builds, then runs `e2e/readme.shots.ts` with its own Playwright config (`playwright.shots.config.ts`), which only picks up `*.shots.ts` files, so `npm run e2e` never runs it. It writes the PNGs into `docs/` and records a short ride as a video, then ffmpeg turns that into `docs/ride.gif`. ffmpeg is not an npm package: install it once (`brew install ffmpeg` on a Mac). CI does not run it.
 
-It loads a made-up save a few weeks in (React and NestJS lines cleared, a review overdue, three shaky questions), so the Today band has something to show. It reads right answers from `src/data`, like the end-to-end test, and rides Repaint Line. The questions in the GIF and `question.png` change from run to run. Look at every image before committing: a screenshot can pass and still show the wrong thing. If not, Claude lists the exact steps for Ryan (which line, which tier, what to look for), and the report marks it as not yet checked in a browser.
+It loads a made-up save a few weeks in (React, NestJS and TypeScript lines cleared, a review overdue, three shaky questions), so the Today band has something to show. It reads right answers from `src/data`, like the end-to-end test, and rides Repaint Line. The BFS shot loads a second save with only Push & Pop Shuttle cleared, so The Local is open. The questions in the GIF and `question.png` change from run to run. Look at every image before committing: a screenshot can pass and still show the wrong thing.
 
 ## Inventory stops
 
@@ -159,7 +159,7 @@ git log -1 --format=%h --grep '^docs: inventory stop'      # the last stop
 git diff <that sha>..HEAD -- src/data/                     # what changed since
 ```
 
-The roadmap's status line names the last stop's commit until the first one made this way exists. At each stop:
+At each stop:
 
 1. The fact-check pass above, over everything changed since the last stop.
 2. `npm test`, `npm run lint`, `npm run format:check`, `npm run bar`, `npm run build`, and the probes (see "What counts as passing" in [probes/README.md](../probes/README.md)): `npm run check` in `probes/ts`, and every React and Nest probe that backs changed content.

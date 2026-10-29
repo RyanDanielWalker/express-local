@@ -1,6 +1,6 @@
 # 0011. Features go on a branch and through a pull request; small fixes stay on main
 
-Status: Accepted (2026-10-26). Amends [0009](0009-terminal-workflow.md), which had every commit on local `main`.
+Status: Accepted (2026-10-26). Amends [0009](0009-terminal-workflow.md), which had every commit on local `main`. Amended by [0017](0017-main-by-default.md): work goes on `main` by default.
 
 ## Context
 

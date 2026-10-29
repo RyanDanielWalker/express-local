@@ -27,7 +27,7 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 
 ## Stack and commands
 
-React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5, Playwright 1.64 (Chromium only). No backend; progress lives in `localStorage`. Node 22.12+ for the app (Vitest needs it), 22.22.2+ or 24.15+ for the React probes. `.nvmrc` says 22.
+React 19, TypeScript (`strict`, 5.9), Vite 8, Vitest 5, Playwright 1.64 (Chromium only). No backend; progress lives in `localStorage`. Node 22.12+ or 24+ for the app (Vitest needs it), 22.22.2+ or 24.15+ for the React probes. `.nvmrc` says 22.
 
 - `npm run dev`: dev server at http://localhost:5173
 - `npm test`: every test (run before every commit, with `lint` and `format:check`)
@@ -103,7 +103,7 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 - **Undo a planted bug by hand**, not with `git checkout -- <file>`, unless the real change is committed first. Checkout throws away every uncommitted edit in the file, not just the planted one.
 - **Don't run `tsc -b`.** It leaves a `tsconfig.tsbuildinfo` in the repo. Use the npm scripts.
 - **Don't kill processes by a pattern** (`pkill -f "vite preview"`) in a shell whose own command line matches it. Kill by PID or port.
-- **The end-to-end test leans on Repaint Line.** It expects exactly one Local flow and one Local sort there, so two rides cover both puzzle kinds. It opens React's division header by its name, since a fresh save starts with only the first division open. It also clicks buttons by their labels ("Board: Local", "Back to the map", "Ride again", "Restore"), and checks the line's URL (`/react/render`) and Back and Forward mid-ride. Adding a Local puzzle to that line, or renaming those buttons, fails `npm run e2e` until the test is updated. `npm run screenshots` leans on the same line and buttons (plus "Map" on the results screen), and expects The Local to be the second algorithm line.
+- **The end-to-end test leans on Repaint Line.** It expects exactly one Local flow and one Local sort there, so two rides cover both puzzle kinds. It opens React's division header by its name, since a fresh save starts with only the first division open. It finds the stop by its name ("Repaint Line, 0 of 3 tiers cleared"), needs the Today region, and clicks buttons by their labels ("Board: Local", "Back to the map", "See how you did", "Ride again", "Back up progress", "Restore progress", "Restore"). It checks the line's URL (`/react/render`) and Back and Forward mid-ride. Adding a Local puzzle to that line, or renaming any of those, fails `npm run e2e` until the test is updated. `npm run screenshots` leans on the same line, stop name and Today region, plus the "Local", "See how you did" and "Map" buttons. Its BFS shot expects The Local to be the second algorithm line, and uses its "Neighbors of each station" panel and "Station X" buttons.
 - **Colors go in `app.css`, not inline styles.** `src/styles/contrast.test.ts` checks every text color in the stylesheet against WCAG AA in light and dark, and fails on an inline `color:` or `background:` it cannot check. A new rule in a line's color (`var(--c)`) is checked against every line's color; if only one game uses it, list it in `LINE_RULES`. Vitest blanks CSS files, so `vite.config.ts` lets `app.css` through for that test.
 - **The bundle is over 700 kB.** Vite's size warning on build is expected for now; splitting it is on the roadmap.
 

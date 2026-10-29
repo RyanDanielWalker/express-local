@@ -21,7 +21,7 @@ Versions are pinned to what the content claims to cover. When the content moves 
 | Folder | A healthy result |
 |---|---|
 | `react/` | Every check prints `PASS` except exactly one: `FAIL SANITY should fail`. So the last line reads `fails 1`. |
-| `nest/` | The same, for probes that use `ok()` (the `example/` template, `auth/jwt-clarity.ts`, `gaps/p1.ts`, `dupes/`). |
+| `nest/` | The same, for probes that use `ok()`: the `example/` template, `gaps/p1.ts`, `dupes/`, `route/r2.ts`, `life/l2.ts`, `test/t2.ts`, `cleanup/fwd.ts` and `cleanup/throttle.ts`. `auth/jwt-clarity.ts` counts its own checks instead and ends `ok=N bad=1`, the one bad being its DELIBERATE FAIL. |
 | `ts/` | `npm run check` ends with `all as expected`. CI runs it on every push. |
 
 Some older probes are **observation probes**: they print what happened (statuses, render counts, effect logs) without `ok()` checks, and the content was checked by reading that output. They are kept as evidence. Re-run one and compare its output with the claim it backs. Every new probe uses `ok()` and a SANITY line.

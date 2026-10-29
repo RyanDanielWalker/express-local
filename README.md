@@ -87,7 +87,7 @@ Every claim is proven with the compiler, with `strict` on, under TypeScript 5.9,
 
 ![The Today band: a review due, three shaky questions, the daily ride and the next new line, above the divisions with their readiness bars](docs/today.png)
 
-- **A Today band.** The top of the page says what to do right now, most urgent first: a review that is due, the shaky questions, the daily ride, then the next line not yet cleared. Below it, each division is a collapsed header with its readiness bar, and only the division in play is open.
+- **A Today band.** The top of the page says what to do right now, most urgent first: a review that is due, the shaky questions, the daily ride, then the next line not yet cleared. Below it, each division is a collapsed header with its readiness bar, and only the division in play starts open.
 - **Readiness.** The headline number is a 0 to 100 score per division, built from what has been cleared, at which tier, how far along its review schedule, and how much of the question pool is solid. It falls on its own as reviews go overdue, so it reflects what would come back today rather than what was done once.
 - **Spaced repetition.** Clearing a line schedules a review at 1, 3, 7, 14, then 30 days, using a Leitner box. An on-time review with at most one mistake grows the gap; a rougher one shrinks it.
 - **Shaky questions come back.** Every question is tracked. Missed ones are flagged, weighted into cram drills, and drillable on their own.
@@ -126,7 +126,7 @@ flowchart LR
 - **Content is data.** Quiz lines, flows and sorts are entries in `src/data/`, so adding a topic means writing questions, not components.
 - **Scoring is pure.** `finishTrip()`, `finishCram()`, `finishRehearsal()` and `finishDerail()` take a save and a run and return a new save plus everything the results screen shows. Readiness is computed from the save, never stored.
 - **A quality bar the test suite enforces.** `src/data/bar.ts` checks every line: a full run at every tier with room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha in its field guide, and answers that are not guessable by length. `npm run bar` prints where each division stands. Divisions listed as finished (NestJS, TypeScript and React) fail the tests if any line slips.
-- **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, and render the results screen for every line. One Playwright test rides a line twice on Local against the production build, checks Back and Forward mid-ride, then opens the line by its URL in a fresh browser and moves the save code there.
+- **Tested with Vitest.** The tests play each algorithm perfectly and compare against a reference, cover progression (readiness, review scheduling, streaks, tiers, badges, derail costs, save migration and repair of damaged saves), validate every piece of content, render the results screen for every line, and check the Today plan, the URL parsing and every text color's contrast. One Playwright test rides a line twice on Local against the production build, checks Back and Forward mid-ride, then opens the line by its URL in a fresh browser and moves the save code there.
 - **Checked on every push.** GitHub Actions runs the format check, lint, typecheck, every test, the TypeScript probes, a production build and the end-to-end test on each push and pull request.
 - **A small router of its own.** Every line has a URL, like `/nest/life`, and the browser's Back button leaves a ride for its line instead of leaving the app. It is about a hundred lines on the History API, with the path parsing as pure, tested functions, rather than a routing library for five URLs.
 - **Accessible, and tested for it.** Keyboard shortcuts, focusable graph nodes and code blocks, `aria-live` status updates, reduced-motion support, and light and dark themes. The end-to-end test runs axe on every screen it passes through, at phone width in light mode and at desktop width in dark mode. A unit test checks every text color in the stylesheet against WCAG AA contrast in both themes.
@@ -140,6 +140,7 @@ src/
   components/   screens: header, map, intro, play, results, rehearsal, Today band, cram band, badges
   hooks/        useKeys, useTimers, useUrl
   lib/          small helpers
+  styles/       one stylesheet, and its contrast test
 e2e/            one Playwright test that rides a line against the production build, and the README's screenshots
 probes/         sandboxes that prove the content against real React, NestJS and TypeScript
 docs/           roadmap, architecture, development guide, and decision records
@@ -147,7 +148,7 @@ docs/           roadmap, architecture, development guide, and decision records
 
 ## Running locally
 
-Requires Node.js 22.12+.
+Requires Node.js 22.12+ or 24+.
 
 ```bash
 npm install
