@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
-Status: 34 lines across 4 divisions, 141 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-27, after the near-duplicate work (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 141 tests plus one end-to-end test, no backend, not deployed. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-29, after the interface work (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -85,7 +85,7 @@ What a visitor notices first. In this order:
 ### 5. Inventory stop
 
 - [x] Sanity pass after the interface work: everything in step 3's sanity pass, plus the app on a phone-width screen in light and dark, and keyboard-only play. No content changed since the last stop, so there was nothing new to fact-check. Every check passed, and keyboard-only play worked end to end. Sixteen stale spots in the docs were fixed. One finding went to Parked (focus after a screen changes).
-- [x] `/audit`, and its findings sorted into 1.0 (only if they meet the freeze rule) or Parked. Run on 2026-10-29 and saved in [audits/2026-10-29.md](audits/2026-10-29.md). Every check passed. One finding met the freeze rule and went into step 6 (the drill ending screens); the rest went to Parked. The `docs: inventory stop` commit that closes this stop is still to come.
+- [x] `/audit`, and its findings sorted into 1.0 (only if they meet the freeze rule) or Parked. Run on 2026-10-29 and saved in [audits/2026-10-29.md](audits/2026-10-29.md). Every check passed. One finding met the freeze rule and went into step 6 (the drill ending screens); the rest went to Parked. Closed on 2026-10-29: no content changed since the last stop, and every check still passed.
 
 ### 6. Ship 1.0
 
