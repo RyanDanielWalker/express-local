@@ -23,7 +23,7 @@ To check content against real code, also install the probes once (see [probes/RE
 (cd probes/react && npm install) && (cd probes/nest && npm install) && (cd probes/ts && npm install)
 ```
 
-The app is not deployed. It runs locally.
+The app is live at https://express-local.ryandanielwalker.workers.dev. CI deploys it on every push to `main` that passes every check (see "CI").
 
 ## Scripts
 

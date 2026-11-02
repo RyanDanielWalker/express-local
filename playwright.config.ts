@@ -1,8 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // The end-to-end test runs against the production build, served the way
-// `npm run preview` serves it. Until the app is deployed, this is the only
-// check that the built app works (ADR 0014). `npm run e2e` builds first.
+// `npm run preview` serves it, with the deploy's security headers. CI
+// deploys that same build only if this passes (ADR 0021). `npm run e2e`
+// builds first.
 const port = 4173;
 
 export default defineConfig({

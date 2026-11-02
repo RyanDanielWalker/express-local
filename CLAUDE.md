@@ -2,7 +2,7 @@
 
 A subway-themed practice app for technical interviews. Ryan built it to drill computer science and his stack until he can explain it out loud: NestJS, TypeScript and React, plus algorithms. He is the player, the owner, and the only user.
 
-Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line clears the quality bar, every claim was proven against real code and independently reviewed. Algorithms are parked. Not deployed; it runs locally.
+Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line clears the quality bar, every claim was proven against real code and independently reviewed. Algorithms are parked. Live at https://express-local.ryandanielwalker.workers.dev, deployed by CI on every green push to `main`.
 
 ## Where things are
 

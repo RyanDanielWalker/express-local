@@ -2,6 +2,8 @@
 
 **Learn it by doing it.** A subway-themed practice app for technical interviews, covering algorithms, NestJS, React and TypeScript. The algorithm lines are interactive: you play BFS by clicking stations in order while the queue fills up beside you. The stack lines drill the way an interview does: a question, a committed answer and the reasoning behind it, a puzzle that has to be worked out rather than recognized, and an out-loud round so the answer has been spoken before anyone asks for it.
 
+**Play it at [express-local.ryandanielwalker.workers.dev](https://express-local.ryandanielwalker.workers.dev).** Progress stays in the browser, with no account.
+
 ![A ride on Repaint Line: the Today band, then one question answered right and one missed, each followed by its explanation](docs/ride.gif)
 
 ## What it covers
@@ -177,7 +179,7 @@ A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md). What is left is a live deploy behind CI and a case study. A NestJS and Postgres backend is 2.0.
+NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md). What is left is a case study and a `v1.0` tag. A NestJS and Postgres backend is 2.0.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
@@ -187,7 +189,8 @@ NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at
 - [x] **No repeats:** questions that tested the same fact as another were given new angles
 - [x] **Reorganize the page:** a Today band, a play mode that takes over the screen, real URLs, and accessibility checks as tests
 - [x] **README:** a fresh GIF and screenshots, retaken by a script, and an architecture diagram
-- [ ] **Ship 1.0:** a live deploy, a case study, and a `v1.0` tag
+- [x] **Live:** deployed to Cloudflare from CI, only after every check passes, with strict security headers
+- [ ] **Ship 1.0:** a case study and a `v1.0` tag
 
 ## How this was built
 
