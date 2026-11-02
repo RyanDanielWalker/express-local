@@ -1,6 +1,6 @@
 # 0013. CI on GitHub Actions, one job, actions pinned to a commit
 
-Status: Accepted (2026-10-26). Amended by [0016](0016-end-to-end-test-in-ci.md): the end-to-end test runs after the build.
+Status: Accepted (2026-10-26). Amended by [0016](0016-end-to-end-test-in-ci.md): the end-to-end test runs after the build. Amended by [0021](0021-deploy-to-cloudflare-from-ci.md): a push to `main` deploys as the last step.
 
 ## Context
 

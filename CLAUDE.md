@@ -13,7 +13,8 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 - `e2e/`: two Playwright tests against the production build, one riding a line and one ending a drill (`npm run e2e`, not part of `npm test`), and `readme.shots.ts`, which retakes the README's screenshots and GIF (`npm run screenshots`, needs ffmpeg).
 - `probes/`: sandboxes that prove content against real React, NestJS and TypeScript. Not part of the app.
 - `.claude/skills/next/`: the `/next` command. `.claude/skills/audit/`: the `/audit` command, an outsider's review at the end of each phase, saved in `docs/audits/` (`/audit quiz` to rehearse the interview questions). `.claude/agents/fact-checker.md`: the independent content reviewer.
-- `.github/workflows/ci.yml`: CI on every push and pull request. It runs the format check, lint, typecheck, tests, the TypeScript probes, the build and the end-to-end tests (see `docs/DEVELOPMENT.md`, "CI").
+- `.github/workflows/ci.yml`: CI on every push and pull request. It runs the format check, lint, typecheck, tests, the TypeScript probes, the build and the end-to-end tests (see `docs/DEVELOPMENT.md`, "CI"). On a push to `main` that passes them all, its last step deploys to Cloudflare.
+- `wrangler.jsonc` and `src/lib/securityHeaders.ts`: what Cloudflare serves, and the security headers it sends ([ADR 0021](docs/adr/0021-deploy-to-cloudflare-from-ci.md)).
 
 ## How we work
 
