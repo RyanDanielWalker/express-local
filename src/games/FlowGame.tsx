@@ -12,6 +12,8 @@ import { shuffle } from "../lib/random";
 import { Panel } from "./parts";
 import type { GameProps } from "./types";
 
+const PROMPT = "Click the stages in the order they actually run.";
+
 /** Steps already on the board when a puzzle opens (`start`), so it begins mid-flight. */
 const given = (flow?: Flow): string[] =>
   flow?.steps.slice(0, flow.start ?? 0) ?? [];
@@ -32,10 +34,7 @@ export function FlowGame({ api, line, role }: GameProps) {
   const [done, setDone] = useState(false);
   /** Wrong picks per slot, keyed by the step that was wanted. Drives the hint and the recap. */
   const [misses, setMisses] = useState<Record<string, string[]>>({});
-  useEffect(
-    () => api.say("Click the stages in the order they actually run."),
-    [api],
-  );
+  useEffect(() => api.say(PROMPT), [api]);
 
   const flow = flows[i];
   useKeys((e) => {
@@ -93,6 +92,7 @@ export function FlowGame({ api, line, role }: GameProps) {
     setTray(trayFor(n));
     setMisses({});
     setDone(false);
+    api.say(PROMPT);
   }
 
   return (

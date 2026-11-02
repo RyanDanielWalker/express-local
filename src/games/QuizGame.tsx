@@ -7,6 +7,8 @@ import { shuffle } from "../lib/random";
 import { Panel } from "./parts";
 import type { GameProps } from "./types";
 
+const PROMPT = "Pick the answer you would give out loud in an interview.";
+
 /**
  * Multiple choice drill. Wrong costs a heart, and every answer shows why.
  *
@@ -31,10 +33,7 @@ export function QuizGame({ api, line, role, history }: GameProps) {
   );
   const [picked, setPicked] = useState<string | null>(null);
   const [marks, setMarks] = useState<("ok" | "no")[]>([]);
-  useEffect(
-    () => api.say("Pick the answer you would give out loud in an interview."),
-    [api],
-  );
+  useEffect(() => api.say(PROMPT), [api]);
 
   const q = items[i];
   const last = i + 1 >= items.length;
@@ -57,6 +56,8 @@ export function QuizGame({ api, line, role, history }: GameProps) {
     setI(i + 1);
     setOpts(shuffle([...items[i + 1].opts]));
     setPicked(null);
+    // Clear the last verdict, or "Not quite" sits over a question not yet answered.
+    api.say(PROMPT);
   }
 
   // Number keys pick, space or enter moves on, so a fast run never needs the mouse.

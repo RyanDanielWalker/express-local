@@ -102,6 +102,8 @@ async function answerQuestions(page: Page, where: string) {
     const label = await next.textContent();
     await next.click();
     if (label !== "Continue") return;
+    // The last answer's verdict must not hang over the next question.
+    await expect(page.locator(".status")).not.toHaveClass(/\b(good|bad)\b/);
   }
 }
 
@@ -286,6 +288,8 @@ async function answerDrill(page: Page, pool: Question[], right: boolean) {
     const label = await next.textContent();
     await next.click();
     if (label !== "Continue") return;
+    // The last answer's verdict must not hang over the next question.
+    await expect(page.locator(".status")).not.toHaveClass(/\b(good|bad)\b/);
   }
 }
 
