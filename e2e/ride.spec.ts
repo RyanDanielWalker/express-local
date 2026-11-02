@@ -5,6 +5,7 @@ import { cramPool, DIVISIONS } from "../src/engine/questions";
 import { isUnlocked } from "../src/engine/progression";
 import { emptySave } from "../src/engine/save";
 import type { Question } from "../src/engine/types";
+import { SECURITY_HEADERS } from "../src/lib/securityHeaders";
 
 /**
  * Rides through the production build, the way a player does it: board a line
@@ -304,7 +305,12 @@ test("a drill's ending runs the drill again, not the selected line", async ({
     name: "Cram Drill",
   });
 
-  await page.goto(`/${locked.division}/${locked.id}`);
+  // A deep link is served index.html, with the same headers as the deploy.
+  const res = await page.goto(`/${locked.division}/${locked.id}`);
+  expect(res?.status()).toBe(200);
+  expect(res?.headers()["content-security-policy"]).toBe(
+    SECURITY_HEADERS["Content-Security-Policy"],
+  );
   await expect(
     page.getByRole("heading", { level: 2, name: locked.name }),
   ).toBeVisible();

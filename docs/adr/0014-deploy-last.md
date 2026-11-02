@@ -1,6 +1,6 @@
 # 0014. The deploy moves to the end of 1.0, and the repo stays private until then
 
-Status: Accepted (2026-10-26). Amends [0010](0010-a-portfolio-piece-with-a-1-0.md).
+Status: Accepted (2026-10-26). Amends [0010](0010-a-portfolio-piece-with-a-1-0.md). Amended by [0021](0021-deploy-to-cloudflare-from-ci.md): the repo is public, and the app deploys to Cloudflare from CI.
 
 ## Context
 

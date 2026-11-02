@@ -14,7 +14,7 @@ src/
   games/        one component per algorithm line, plus QuizRun, QuizGame, FlowGame and SortGame
   components/   screens and shared UI: header, map, Today band, intro, play screen, results, rehearsal, badges
   hooks/        useKeys (keyboard shortcuts), useTimers (timers cleaned up on unmount), useUrl (the address bar and Back)
-  lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals, which screens are a ride, URLs, contrast ratios)
+  lib/          small helpers (random picks and shuffles, station labels, a line's color style, plurals, which screens are a ride, URLs, contrast ratios, the security headers)
   styles/       one stylesheet, app.css, and its contrast test
 e2e/            two Playwright tests against the production build (a ride and a drill), and the script that takes the README's screenshots
 probes/         sandboxes that prove the content against real code (not part of the app)
@@ -125,9 +125,18 @@ All of it runs on every `npm test`:
 - **`components/results.test.tsx`** renders the results screen for every line.
 - **`styles/contrast.test.ts`** reads `app.css` and checks every rule that puts text on a background against WCAG AA (4.5:1, or 3:1 for large text) in light and dark, using the color variables. A rule drawn in a line's color (`var(--c)`) is checked for every line, unless `LINE_RULES` narrows it. It also keeps the two copies of the dark theme identical, and fails if a component sets a color inline, where it cannot see it. See [ADR 0020](adr/0020-accessibility-as-tests.md).
 
-The end-to-end tests run outside `npm test`. The first in `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). Before the first ride it boards at phone width, checks the map and badges collapse and the ride starts at the top of the screen, and leaves by **Back to the map**. It checks the URL at each step, presses Back and Forward mid-ride, and at the end opens the line by its URL in the fresh browser. Along the way it runs axe (labels, button names, contrast and the rest of WCAG 2.2 AA) and checks nothing is wider than the screen: the first ride at 375px in light mode, the second at desktop width in dark mode. It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle. A second test opens a locked React line by its URL, runs a React-only cram drill out of hearts, and checks the ending is about the drill: no field guide, and **Try again** starts another drill. It checks the misses come back as shaky questions, then finishes a drill and checks **Drill again** starts another. It runs axe on a drill question and both endings.
+The end-to-end tests run outside `npm test`. The first in `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). Before the first ride it boards at phone width, checks the map and badges collapse and the ride starts at the top of the screen, and leaves by **Back to the map**. It checks the URL at each step, presses Back and Forward mid-ride, and at the end opens the line by its URL in the fresh browser. Along the way it runs axe (labels, button names, contrast and the rest of WCAG 2.2 AA) and checks nothing is wider than the screen: the first ride at 375px in light mode, the second at desktop width in dark mode. It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle. A second test opens a locked React line by its URL, runs a React-only cram drill out of hearts, and checks the ending is about the drill: no field guide, and **Try again** starts another drill. It checks the misses come back as shaky questions, then finishes a drill and checks **Drill again** starts another. It runs axe on a drill question and both endings. It opens that locked line with the same headers as the deploy (see "Deploy" below), so a file the Content-Security-Policy blocks shows up as a console error and fails both tests.
 
 What the tests cannot check is whether a claim is true. That is what `probes/` and the fact-check pass are for. See [DEVELOPMENT.md](DEVELOPMENT.md#checking-content).
+
+## Deploy
+
+The app is static files: `npm run build` writes `dist/`, and Cloudflare serves it ([ADR 0021](adr/0021-deploy-to-cloudflare-from-ci.md)). `wrangler.jsonc` says what to deploy. The last step of CI runs `wrangler deploy`, only on a push to `main` and only after every check has passed.
+
+Two things a plain file server would get wrong:
+
+- **Every path serves the app.** `/nest/life` is not a file. `not_found_handling: "single-page-application"` answers any path that is not a file with `index.html` and a 200, and the router shows the line ([ADR 0019](adr/0019-a-small-router-of-our-own.md)).
+- **Security headers.** `lib/securityHeaders.ts` lists them, with a comment on what each one stops. A small plugin in `vite.config.ts` writes them into `dist/_headers`, the file Cloudflare reads, and `vite preview` sends the same list. The Content-Security-Policy allows only the app's own files: no inline script, no `eval()`, nothing from another site. A feature that loads something from elsewhere has to add it there first.
 
 ## Adding content
 

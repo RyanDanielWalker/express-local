@@ -65,10 +65,13 @@ Every push and pull request runs `.github/workflows/ci.yml` on GitHub Actions, o
 7. `npm run build`
 8. Download Chromium, then run the end-to-end tests against that build (`npx playwright test`, see "Checking the app")
 9. `npm audit --omit=dev`, which reports but never fails the run
+10. On a push to `main` only: `wrangler deploy` puts `dist/` live on Cloudflare ([ADR 0021](adr/0021-deploy-to-cloudflare-from-ci.md)). It needs two repository secrets, `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
 To reproduce a red run, run the same step locally. The React and Nest probes are not in CI. Run them by hand when content changes.
 
 The actions are pinned to a commit hash, with the release beside it in a comment. To bump one, find the new release's commit (`gh api repos/actions/checkout/commits/<tag> --jq .sha`) and change the hash and the comment together.
+
+Wrangler is pinned the same way, by an exact version in the deploy step, and is not in `package.json`. Bump it together with `compatibility_date` in `wrangler.jsonc`: a date newer than the pinned Wrangler knows fails with "the newest date supported by this server binary is ...". To serve the build exactly as Cloudflare would, with its headers and its fallback to `index.html`, run `npm run build && npx wrangler@<that version> dev`. It writes a `.wrangler/` folder, which git ignores.
 
 ## Working agreement
 

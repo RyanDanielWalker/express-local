@@ -1,0 +1,13 @@
+// Cloudflare's config for the deploy. The app is static files only: no
+// Worker script runs. CI deploys `dist/` with `wrangler deploy` once every
+// check has passed (see .github/workflows/ci.yml, ADR 0021).
+{
+  "name": "express-local",
+  "compatibility_date": "2026-10-20",
+  "assets": {
+    "directory": "./dist",
+    // A path that is not a file, like /nest/life, gets index.html with a
+    // 200, and the app's router shows the line (ADR 0019).
+    "not_found_handling": "single-page-application",
+  },
+}

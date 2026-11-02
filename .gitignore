@@ -9,3 +9,4 @@ probes/*/_review/
 .claude/settings.local.json
 test-results/
 playwright-report/
+.wrangler/
