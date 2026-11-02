@@ -1,10 +1,14 @@
 import { Fragment } from "react";
 
-/** Renders copy with `inline code` and **bold** markers. */
+/**
+ * Renders copy with `inline code` and **bold** markers. One span holds it all,
+ * so a flex parent (a numbered option button) lays it out as one run of text
+ * instead of spacing each piece apart, and the button's name stays one phrase.
+ */
 export function Rich({ text }: { text: string }) {
   const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
   return (
-    <>
+    <span>
       {parts.map((p, i) => (
         <Fragment key={i}>
           {p.startsWith("`") && p.endsWith("`") && p.length > 1 ? (
@@ -16,7 +20,7 @@ export function Rich({ text }: { text: string }) {
           )}
         </Fragment>
       ))}
-    </>
+    </span>
   );
 }
 
