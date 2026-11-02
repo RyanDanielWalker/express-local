@@ -84,6 +84,7 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 - Every question has its answer among its options (three parallel claims), and a `why` that teaches rather than restates.
 - Tier 1 is what a junior should get. Tier 3 is the deep cut.
 - Version-specific behavior says which version ("since React 19.2", "on the default Express adapter", "with `strict` on").
+- Code goes in backticks: names from the code (`useState`, `ValidationPipe`, `@Body()`, `req.user`), keywords and types used as code (`typeof`, `null`, `unknown`), files and packages. Concepts stay plain English (state, a ref, a guard). `data.test.ts` fails on unmarked hook names, decorators, calls and dotted names, and on backticks in fields shown as plain text (flow steps, sort cards and boxes, words terms).
 - No answer gives itself away by length. `data.test.ts` fails an answer 1.35x its distractors; the bar fails a line where the answer holds the same length position (longest, middle or shortest) on more than half its questions. Rewrite options as parallel claims; don't pad the wrong ones.
 - The bar (`src/data/bar.ts`): 9 / 12 / 15 questions available on Local / Express / Rush Hour, two Local puzzles, three rehearsal prompts, talking points and a gotcha. Divisions in `FINISHED` fail the tests if a line slips.
 - No two questions anywhere test the same fact with the same answer. Search before adding.

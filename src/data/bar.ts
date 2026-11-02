@@ -28,6 +28,12 @@ const TIERS: Tier[] = [1, 2, 3];
  */
 export const MAX_POSITION_SHARE = 0.5;
 
+/**
+ * How long an option looks on screen. Backticks and ** markers only format
+ * the text, so marking a word as code never makes an option look longer.
+ */
+export const shownLength = (text: string) => text.replace(/`|\*\*/g, "").length;
+
 export type LengthPosition = "longest" | "middle" | "shortest";
 
 /**
@@ -35,8 +41,8 @@ export type LengthPosition = "longest" | "middle" | "shortest";
  * tie means no length rule could pick it out.
  */
 export function lengthPosition(q: Question): LengthPosition | null {
-  const lens = q.opts.map((o) => o.length);
-  const a = q.a.length;
+  const lens = q.opts.map(shownLength);
+  const a = shownLength(q.a);
   const only = (n: number) => lens.filter((x) => x === n).length === 1;
   const hi = Math.max(...lens);
   const lo = Math.min(...lens);

@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
-Status: 34 lines across 4 divisions, 145 tests plus two end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-29, after the interface work (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 146 tests plus two end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-29, after the interface work (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -173,7 +173,6 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **Six algorithm games ignore Rush Hour's no-helpers rule.** BubbleSort, HashTable, MergeSort, QuickSort, StackQueue and TwoPointers never read `api.assist`, so their side panels (BubbleSort's shows the line's hook) stay on at Rush Hour, and the README's "Rush Hour turns the helper panels off" is not true for them. Found by the first audit. Parked with the algorithms.
 - **Three games find their own line by position.** `LINES[0]`, `LINES[3]` and `LINES[4]` in `StackQueue.tsx`, `BinarySearch.tsx` and `BubbleSort.tsx`. Adding an algorithm line earlier in the list would show the wrong hook. Use the `line` prop they already get. Found by the first audit.
 - **The algorithm code check moves on by itself after 2.2 seconds, with no number keys** (`Quiz.tsx:31`), unlike every other screen and the README's "You advance, not a timer". Found by the first audit. Parked with the algorithms.
-- **Some code in the copy is not marked as code.** Inline code now shows as a tinted chip, so a keyword without backticks stands out next to one with them. Narrow Gauge's hook marks `in` and `kind` but not `typeof`, `null` or `instanceof`. Adding backticks changes no claim and no question id (hooks are not hashed), but a sweep should still be read line by line. Found on 2026-11-02 while adding the chip.
 
 ## Later: engine ideas
 
@@ -267,3 +266,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-29** Sanity pass after the interface work: every check green, both puzzle kinds played by keyboard alone at phone width in light and dark and on a desktop screen, and 16 stale spots in the docs fixed. Focus after a screen changes went to Parked
 - **2026-10-29** Drill endings fixed: out of hearts or done, a drill offers the same drill again instead of a ride on the selected line, and a drill's misses are saved under their own lines so they show as shaky. A second end-to-end test covers it
 - **2026-11-02** Live at https://express-local.ryandanielwalker.workers.dev: deployed to Cloudflare by the last CI step, only after every check passes, with a strict Content-Security-Policy and the other security headers. The end-to-end tests run under the same headers
+- **2026-11-02** Inline code shows as a tinted chip, and code in the copy is marked throughout: about 1,700 strings got backticks and nothing else, checked by comparing every string with its backticks stripped. A test now fails on unmarked hook names, decorators, calls and dotted names, and on backticks in copy shown as plain text. Rehearsal prompts render code too. The quiz and flow games clear the last verdict when the next question opens

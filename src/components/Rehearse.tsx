@@ -84,7 +84,9 @@ export function Rehearse({ line, save, onDone, onQuit }: Props) {
         {repeat && (
           <div className="eyebrow">You called this one shaky last time</div>
         )}
-        <p className="prompt">{item.prompt}</p>
+        <p className="prompt">
+          <Rich text={item.prompt} />
+        </p>
         {!revealed ? (
           <>
             <p className="hint">

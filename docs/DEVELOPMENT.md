@@ -131,6 +131,8 @@ The data files are large TypeScript files of strings.
 - A question's answer appears twice: once in `opts` and again in `a`. Change both, or the test that checks the answer is an option fails.
 - Rewording a question's `q` or `code` resets the player's history for that question (see [ARCHITECTURE.md](ARCHITECTURE.md#a-question)). That's fine, just know it.
 - Sort card names cannot contain the first word of their own box, and cannot contain backticks.
+- Put code in backticks: names from the code, keywords and types used as code, files and packages. Concepts stay plain. Fields shown as plain text (flow steps, sort boxes and cards, `words` terms) never get backticks. `data.test.ts` checks both.
+- A rehearsal prompt is a save key, like a question's `q`. Changing it, even to add backticks, drops it from the shaky list until the next rehearsal.
 - No em dashes anywhere in player-facing copy. A test enforces it.
 
 ## Checking the app

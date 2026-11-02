@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GUIDE, LINES } from "./index";
 import { DIVISIONS, qid } from "../engine/questions";
+import { shownLength } from "./bar";
 
 /** Content is data, and data goes stale quietly. These catch the typos. */
 describe("line data", () => {
@@ -90,16 +91,19 @@ describe("line data", () => {
     const questions = LINES.flatMap((l) => l.questions ?? []);
     let longest = 0;
     for (const q of questions) {
-      const others = q.opts.filter((o) => o !== q.a).map((o) => o.length);
+      const others = q.opts.filter((o) => o !== q.a).map(shownLength);
       const avgOther = others.reduce((a, b) => a + b, 0) / others.length;
-      const ratio = q.a.length / avgOther;
+      const ratio = shownLength(q.a) / avgOther;
       expect(
         ratio,
         `answer is ${ratio.toFixed(2)}x the distractors: ${q.q.slice(0, 60)}`,
       ).toBeLessThan(1.35);
-      const lens = q.opts.map((o) => o.length);
+      const lens = q.opts.map(shownLength);
       const max = Math.max(...lens);
-      if (q.a.length === max && lens.filter((x) => x === max).length === 1)
+      if (
+        shownLength(q.a) === max &&
+        lens.filter((x) => x === max).length === 1
+      )
         longest++;
     }
     // With three options, chance alone would be about a third.
@@ -218,5 +222,58 @@ describe("line data", () => {
     ]);
     copy.push(...guides);
     expect(copy.filter((t) => t.includes("—"))).toEqual([]);
+  });
+
+  it("puts code in backticks wherever backticks show as code", () => {
+    // Copy rendered by <Rich />, where `code` becomes a chip.
+    const rich = LINES.flatMap((l) => {
+      const g = GUIDE[l.id];
+      return [
+        l.pitch,
+        l.hook,
+        l.drill ?? "",
+        ...l.rules,
+        ...(l.questions ?? []).flatMap((q) => [q.q, q.why, ...q.opts]),
+        ...(l.flows ?? []).flatMap((f) => [f.title, f.note]),
+        ...(l.sorts ?? []).flatMap((s) => [
+          s.title,
+          s.note,
+          ...s.items.map((i) => i.why),
+        ]),
+        g.plain,
+        g.gotcha ?? "",
+        ...g.words.map(([, d]) => d),
+        ...(g.say ?? []),
+        ...(g.rehearse ?? []).flatMap((r) => [r.prompt, r.answer]),
+      ];
+    });
+    // Only patterns that are never English: hooks and handlers (useMemo,
+    // setCount, onClick), decorators, calls and dotted names (req.user).
+    const code =
+      /\b(use|set|on)[A-Z]\w*|@[A-Za-z]\w*|\b[\w.]+\(\)|\b[a-z]\w*\.[a-z]\w*\b/;
+    const unmarked = rich.filter((t) => code.test(t.replace(/`[^`]+`/g, "")));
+    expect(unmarked).toEqual([]);
+
+    // Copy rendered as plain text, where a backtick would show as itself.
+    const plain = LINES.flatMap((l) => {
+      const g = GUIDE[l.id];
+      return [
+        l.name,
+        l.short,
+        l.topic,
+        ...(l.flows ?? []).flatMap((f) => [...f.steps, ...(f.decoys ?? [])]),
+        ...(l.sorts ?? []).flatMap((s) => [
+          ...s.buckets,
+          ...s.items.map((i) => i.name),
+        ]),
+        g.code.label,
+        g.code.note ?? "",
+        g.lore ?? "",
+        ...g.words.map(([t]) => t),
+        ...(g.when ?? []),
+        ...(g.famous ?? []),
+      ];
+    });
+    expect(plain.filter((t) => t.includes("`"))).toEqual([]);
   });
 });
