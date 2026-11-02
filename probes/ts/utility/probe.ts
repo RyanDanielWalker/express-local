@@ -57,6 +57,13 @@ type O5 = Pick<User, ['id', 'email']>;
 type O6 = Pick<User, 'emial'>;
 type O7 = Omit<User, 'pasword'>; // compiles
 const t17: Expect<O7, User> = true;
+// The question's own User, shown in its code
+{
+  type User = { id: string; email: string };
+  // @ts-expect-error 'emial' is not a key of User
+  type Contact = Pick<User, 'emial'>;
+  const t21: Expect<Omit<User, 'emial'>, User> = true;
+}
 
 // Readonly, shallow
 type Settings = { theme: string; nested: { size: number } };

@@ -833,7 +833,8 @@ const kv = pair('id', 42);`,
       },
       {
         t: 1,
-        q: "What happens with `Pick<User, 'emial'>`?",
+        q: "What happens with this `Pick`?",
+        code: `type User = { id: string; email: string };\ntype Contact = Pick<User, 'emial'>;`,
         opts: [
           "A compile error: `'emial'` is not a key",
           "You get an empty type, with no error",
