@@ -9,7 +9,7 @@ A single-page React 19 app built with Vite. There is no backend. Everything the 
 ```
 src/
   algorithms/   pure game logic for the algorithm lines, as small state machines, with tests
-  engine/       types, save data, progression and scoring, question picking, readiness, what to do today, with tests
+  engine/       types, save data, progression and scoring, question picking, readiness, what to do today, the ride clock, with tests
   data/         all the content, one file per division, plus the quality bar and content tests
   games/        one component per algorithm line, plus QuizRun, QuizGame, FlowGame and SortGame
   components/   screens and shared UI: header, map, Today band, intro, play screen, results, rehearsal, badges
@@ -99,7 +99,7 @@ Copy supports `` `code` `` and `**bold**`, rendered by `<Rich />`, which wraps i
 Each screen is either deciding or doing (`isDoing()` in `lib/modes.ts`). Deciding screens (the intro, results and derailed) show the full header, the map, the badges and the save box; the intro also shows the Today band and the cram band. Doing screens (a ride, a drill, rehearsal, the code check) hide all of that, so the ride gets the page. The header shrinks to the name and a **Back to the map** button, which drops the ride at no cost, and the page scrolls to the top. A new screen kind has to be added to the table in `lib/modes.ts`, or the typecheck fails.
 
 1. **Pick.** `pickQuestions()` draws the tier's questions, putting unseen and shaky ones first. `pickPuzzle()` picks the last stop and rotates it from ride to ride.
-2. **Play.** `PlayScreen` owns hearts, XP and the clock. `QuizRun` plays the questions through `QuizGame`, then the puzzle through `SortGame` or `FlowGame`. Algorithm lines play their own component from `games/index.ts`. Every game gets a `GameApi` (`say`, `correct`, `wrong`, `record`, `hold`, `resume`, `finish`, `tier`, `assist`, `over`).
+2. **Play.** `PlayScreen` owns hearts, XP and the clock. `QuizRun` plays the questions through `QuizGame`, then the puzzle through `SortGame` or `FlowGame`. Algorithm lines play their own component from `games/index.ts`. Every game gets a `GameApi` (`say`, `correct`, `wrong`, `record`, `hold`, `resume`, `finish`, `tier`, `assist`, `over`). The clock is `engine/clock.ts`. It pauses while a game holds it for reading and while the tab is hidden. Each reason is held and released on its own, so coming back to the tab does not restart a clock paused for reading. A window that only loses focus still shows the question, so the clock keeps running then.
 3. **Score.** `finishTrip()` returns the new save: tier cleared, the next review date (Leitner boxes at 1, 3, 7, 14 and 30 days), XP, streak, badges and personal bests. `recordAnswers()` updates per-question history.
 4. **Show.** `Results` renders what `finishTrip()` returned.
 

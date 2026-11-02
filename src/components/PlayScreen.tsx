@@ -4,6 +4,12 @@ import { GAMES } from "../games";
 import { QuizRun } from "../games/QuizRun";
 import { FlowGame } from "../games/FlowGame";
 import type { GameApi, Tone } from "../games/types";
+import {
+  clockSeconds,
+  holdClock,
+  releaseClock,
+  startClock,
+} from "../engine/clock";
 import { fmtTime, TIERS } from "../engine/progression";
 import type {
   AlgoLineId,
@@ -62,37 +68,46 @@ export function PlayScreen({
   const [xp, setXp] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [held, setHeld] = useState(false);
-  // The ride's start time, read once. Render must stay pure.
-  const [startedAt] = useState(() => Date.now());
+  // The ride's clock starts once, on the first render. Render must stay pure.
+  const [clock] = useState(() => startClock());
   const run = useRef({
     over: false,
     xp: 0,
     mistakes: 0,
     hearts: maxHearts,
-    t0: startedAt,
-    heldAt: 0,
+    clock,
     answers: [] as RideStats["answers"],
   });
 
   useEffect(() => {
     const id = window.setInterval(() => {
       const r = run.current;
-      if (!r.over && !r.heldAt) setElapsed((Date.now() - r.t0) / 1000);
+      if (!r.over) setElapsed(clockSeconds(r.clock));
     }, 1000);
     return () => clearInterval(id);
+  }, []);
+
+  // Time on another tab does not count. A window that only loses focus still
+  // shows the question, so the clock keeps running then.
+  useEffect(() => {
+    const r = run.current;
+    const sync = () => {
+      if (r.over) return;
+      if (document.hidden) holdClock(r.clock, "hidden");
+      else releaseClock(r.clock, "hidden");
+    };
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
   }, []);
 
   // Stable for the whole ride, so games can safely list it as an effect dependency.
   const api = useMemo<GameApi>(() => {
     const r = run.current;
-    /** Elapsed seconds, releasing the clock first if it was held. */
+    /** Elapsed seconds, leaving out any pause still running. */
     const stop = () => {
-      if (r.heldAt) {
-        r.t0 += Date.now() - r.heldAt;
-        r.heldAt = 0;
-        setHeld(false);
-      }
-      return (Date.now() - r.t0) / 1000;
+      setHeld(false);
+      return clockSeconds(r.clock);
     };
     return {
       tier,
@@ -102,14 +117,12 @@ export function PlayScreen({
       },
       say: (msg, tone = "") => setStatus({ msg, tone }),
       hold() {
-        if (r.over || r.heldAt) return;
-        r.heldAt = Date.now();
+        if (r.over) return;
+        holdClock(r.clock, "reading");
         setHeld(true);
       },
       resume() {
-        if (!r.heldAt) return;
-        r.t0 += Date.now() - r.heldAt;
-        r.heldAt = 0;
+        releaseClock(r.clock, "reading");
         setHeld(false);
       },
       record(question, correct) {
