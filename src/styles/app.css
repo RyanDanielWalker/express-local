@@ -1462,6 +1462,11 @@ code {
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
+/* Copy that is only code: nothing to set it apart from, so no chip. */
+code.solo {
+  background: none;
+  padding: 0;
+}
 /* Show === as three characters. Ligatures merge it into one glyph, which is hard to read while learning. */
 code,
 pre {
