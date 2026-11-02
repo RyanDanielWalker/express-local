@@ -51,6 +51,24 @@ ok(renders.memoObj === 1, 'memo child with inline object re-renders');
 { let click!: () => void; function C() { let count = 0; click = () => { count = count + 1; }; return <p>{count}</p>; }
   const { host } = await mount(<C />); await act(async () => click()); ok(host.textContent === '0', 'plain variable: screen still shows 0'); }
 
+// 6b. the question's own Counter: a real click, then a parent render
+{ let seen = -1; let bumpParent!: () => void;
+  function Counter() {
+    let count = 0;
+    function handleClick() {
+      count = count + 1;
+      seen = count;
+    }
+    return <button onClick={handleClick}>{count}</button>;
+  }
+  function CounterHost() { const [n, setN] = useState(0); bumpParent = () => setN(x => x + 1); return <><Counter /><i>{n}</i></>; }
+  const { host } = await mount(<CounterHost />); const button = host.querySelector('button')!;
+  await act(async () => button.click());
+  ok(seen === 1, 'the click does set count to 1');
+  ok(button.textContent === '0', 'Counter: button still shows 0 after the click');
+  await act(async () => bumpParent());
+  ok(host.querySelector('i')!.textContent === '1' && button.textContent === '0', 'Counter: still 0 after the parent renders again'); }
+
 // 7. useState kept across re-render; ref change no re-render
 { let set!: (n: number) => void; let setRef!: () => void; let r = 0;
   function C() { const [a] = useState(() => Math.random()); const [n, s] = useState(0); const ref = useRef(''); set = s; setRef = () => { ref.current = 'x'; }; r++; (globalThis as any).a = a; return <p>{n}</p>; }

@@ -245,14 +245,15 @@ export const REACT_LINES: Line[] = [
       },
       {
         t: 1,
-        q: "A handler runs `count = count + 1` on a plain `let count = 0` declared inside the component. What does the screen show?",
+        q: "You click the button. What does it show?",
+        code: `function Counter() {\n  let count = 0;\n  function handleClick() {\n    count = count + 1;\n  }\n  return <button onClick={handleClick}>{count}</button>;\n}`,
         opts: [
           "Still 0. React never saw a change",
           "1, as soon as the handler finishes",
           "1, once the parent re-renders",
         ],
         a: "Still 0. React never saw a change",
-        why: "React only re-renders for state, props from a re-rendering parent, or context. A plain variable is none of those, so nothing renders. And if something else did cause a render, `let count = 0` would run again and start from 0. Use `useState` for a value the screen should show.",
+        why: "The click does set `count` to 1. But React only renders again for state, a parent rendering, or a context. A plain variable is none of those, so the button still shows 0. If the parent did render again, `let count = 0` would run again, so it would still show 0. Use `useState` for a value the screen should show.",
       },
       {
         t: 1,
