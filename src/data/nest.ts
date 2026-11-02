@@ -307,11 +307,11 @@ export class OrdersModule {}`,
       },
       {
         t: 1,
-        q: "Same two services, but now `UsersModule` exports `UsersService` and `OrdersModule` has no imports. What happens?",
+        q: "`OrdersService` injects `UsersService`. `UsersModule` exports it, but `OrdersModule` imports nothing. What happens?",
         code: `@Module({ providers: [UsersService], exports: [UsersService] })
 export class UsersModule {}
 
-@Module({ providers: [OrdersService] })   // imports: ???
+@Module({ providers: [OrdersService] })   // no imports
 export class OrdersModule {}`,
         opts: [
           "It fails. `OrdersModule` still has to import `UsersModule`",
@@ -989,7 +989,8 @@ export class FilesController {
       },
       {
         t: 1,
-        q: 'A DTO has `@IsInt() age: number`. The JSON body sends `"age": "30"`. With a plain `new ValidationPipe()`, what happens?',
+        q: "With a plain `new ValidationPipe()`, what happens to this body?",
+        code: `export class CreateUserDto {\n  @IsInt() age: number;\n}\n\n// body: { "age": "30" }`,
         opts: [
           '400, because `"30"` is a string',
           "It passes, and `age` is the number `30`",
@@ -1048,7 +1049,8 @@ export class FilesController {
       },
       {
         t: 2,
-        q: "`ValidationPipe` is configured with `whitelist: true`. The body includes an extra `isAdmin: true`. What happens?",
+        q: "`ValidationPipe` has `whitelist: true`. What happens to `isAdmin`?",
+        code: `export class CreateUserDto {\n  @IsEmail() email: string;\n}\n\n// body: { "email": "ada@example.com", "isAdmin": true }`,
         opts: [
           "`isAdmin` is stripped before the handler sees it",
           "`isAdmin` triggers a 400 before the handler runs",
@@ -1059,14 +1061,15 @@ export class FilesController {
       },
       {
         t: 2,
-        q: "Now `whitelist` and `forbidNonWhitelisted` are both `true`, and the body still has `isAdmin: true`.",
+        q: "`ValidationPipe` has `whitelist` and `forbidNonWhitelisted` both `true`. What happens?",
+        code: `export class CreateUserDto {\n  @IsEmail() email: string;\n}\n\n// body: { "email": "ada@example.com", "isAdmin": true }`,
         opts: [
           '400 with "property isAdmin should not exist"',
           "The field is stripped and the request continues",
           "500, because the DTO shape no longer matches",
         ],
         a: '400 with "property isAdmin should not exist"',
-        why: "Same check, but now an unknown field is an error instead of being dropped. The 400 names the field. Use it when you would rather fail than quietly ignore a field the client thinks it is sending.",
+        why: "`isAdmin` has no decorator on the DTO, so `whitelist` flags it. `forbidNonWhitelisted` makes that an error instead of dropping the field. The 400 names the field. Use it when you would rather fail than quietly ignore a field the client thinks it is sending.",
       },
       {
         t: 2,
@@ -1698,14 +1701,15 @@ findOne(@Param('id') id: number) {}`,
       },
       {
         t: 2,
-        q: "`POST /signup` calls `this.mailer.send(user)` without `await`, then returns. A moment later, the promise from `send()` fails (it rejects). What happens?",
+        q: "A moment after `signup` returns, the promise from `send()` fails (it rejects). What happens?",
+        code: `@Post('signup')\nasync signup(@Body() dto: SignupDto) {\n  const user = await this.users.create(dto);\n  this.mailer.send(user); // no await\n  return user;\n}`,
         opts: [
           "The client gets its 201, then the whole server crashes",
           "The exception filter catches it and sends back a 500",
           "Nest logs the error, and the server keeps running",
         ],
         a: "The client gets its 201, then the whole server crashes",
-        why: "Without `await`, the handler returns right away, so the 201 is already sent. Nothing is waiting on that promise anymore, so no exception filter ever sees its error. Since Node 15, a rejection that nothing handles crashes the process. Every user loses the server, not just this one, and Nest does not step in. Write `await`, or add `.catch()` if the email should send in the background.",
+        why: "Nothing waits for `send()`, so the handler returns `user` and the 201 goes out. When `send()` fails later, no exception filter sees it, because nothing is waiting on that promise. Since Node 15, a rejection that nothing handles crashes the process. Every user loses the server, not just this one, and Nest does not step in. Write `await`, or add `.catch()` if the email should send in the background.",
       },
       {
         t: 2,
@@ -2613,7 +2617,8 @@ remove() {}`,
       },
       {
         t: 2,
-        q: "`main.ts` calls `app.useGlobalPipes(new ValidationPipe())`. Your e2e test builds the app from `AppModule` and posts a bad body. It gets a 201. Why?",
+        q: "This e2e test posts a bad body and gets a 201. Why?",
+        code: `// main.ts\napp.useGlobalPipes(new ValidationPipe());\n\n// users.e2e-spec.ts\nconst moduleRef = await Test.createTestingModule({\n  imports: [AppModule],\n}).compile();\napp = moduleRef.createNestApplication();\nawait app.init();`,
         opts: [
           "`main.ts` never runs in the test, so no pipe is set",
           "`ValidationPipe` turns itself off when `NODE_ENV` is `test`",

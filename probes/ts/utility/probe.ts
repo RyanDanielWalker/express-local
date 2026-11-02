@@ -64,6 +64,13 @@ const t17: Expect<O7, User> = true;
   type Contact = Pick<User, 'emial'>;
   const t21: Expect<Omit<User, 'emial'>, User> = true;
 }
+// The Omit question's own User and typo, shown in its code
+{
+  type User = { id: string; passwordHash: string };
+  type SafeUser = Omit<User, 'paswordHash'>;
+  const t22: Expect<SafeUser, User> = true;
+  const t23: Expect<'passwordHash' extends keyof SafeUser ? true : false, true> = true;
+}
 
 // Readonly, shallow
 type Settings = { theme: string; nested: { size: number } };

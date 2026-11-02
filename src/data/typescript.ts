@@ -909,14 +909,15 @@ const kv = pair('id', 42);`,
       },
       {
         t: 2,
-        q: "What happens with `Omit<User, 'pasword'>`, a typo?",
+        q: "What happens with this `Omit`?",
+        code: `type User = { id: string; passwordHash: string };\ntype SafeUser = Omit<User, 'paswordHash'>;`,
         opts: [
           "It compiles and removes nothing",
-          "A compile error: `'pasword'` is not a key",
+          "A compile error: `'paswordHash'` is not a key",
           "It removes every field that holds a string",
         ],
         a: "It compiles and removes nothing",
-        why: "`Omit` accepts any key, even one `User` does not have, so the typo compiles and nothing is removed. `passwordHash` is still in the type. `Pick` would have caught it, because `Pick` only accepts real keys. This trap belongs to the built-in `Omit`. NestJS's `OmitType` does check its keys.",
+        why: "`Omit` accepts any key, even one `User` does not have, so the typo compiles and nothing is removed. `passwordHash` is still in `SafeUser`. `Pick` would have caught it, because `Pick` only accepts real keys. This trap belongs to the built-in `Omit`. NestJS's `OmitType` does check its keys.",
       },
       {
         t: 3,
