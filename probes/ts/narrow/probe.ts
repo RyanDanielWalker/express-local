@@ -37,6 +37,7 @@ function e(obj: { user?: { name: string } }) {
 function f(value: string | number) {
   if (typeof value === 'boolean') { const t: Expect<typeof value, never> = true; }
   if (typeof value !== 'string') { const t: Expect<typeof value, number> = true; }
+  if (typeof value === 'string') {} else { const t: Expect<typeof value, number> = true; }
 }
 // Sort: in narrowing Admin / Guest
 type Admin = { name: string; permissions: string[] }; type Guest = { name: string };

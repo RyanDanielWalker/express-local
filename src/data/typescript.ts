@@ -91,7 +91,7 @@ export const TS_LINES: Line[] = [
             why: "The check passed, so `value` is a string.",
           },
           {
-            name: "In the else of that same if",
+            name: "In the else of if (typeof value === 'string')",
             bucket: "Just number",
             why: "The check failed, so `string` is ruled out. Only `number` is left.",
           },
