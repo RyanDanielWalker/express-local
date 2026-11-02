@@ -173,6 +173,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **Six algorithm games ignore Rush Hour's no-helpers rule.** BubbleSort, HashTable, MergeSort, QuickSort, StackQueue and TwoPointers never read `api.assist`, so their side panels (BubbleSort's shows the line's hook) stay on at Rush Hour, and the README's "Rush Hour turns the helper panels off" is not true for them. Found by the first audit. Parked with the algorithms.
 - **Three games find their own line by position.** `LINES[0]`, `LINES[3]` and `LINES[4]` in `StackQueue.tsx`, `BinarySearch.tsx` and `BubbleSort.tsx`. Adding an algorithm line earlier in the list would show the wrong hook. Use the `line` prop they already get. Found by the first audit.
 - **The algorithm code check moves on by itself after 2.2 seconds, with no number keys** (`Quiz.tsx:31`), unlike every other screen and the README's "You advance, not a timer". Found by the first audit. Parked with the algorithms.
+- **Some code in the copy is not marked as code.** Inline code now shows as a tinted chip, so a keyword without backticks stands out next to one with them. Narrow Gauge's hook marks `in` and `kind` but not `typeof`, `null` or `instanceof`. Adding backticks changes no claim and no question id (hooks are not hashed), but a sweep should still be read line by line. Found on 2026-11-02 while adding the chip.
 
 ## Later: engine ideas
 
