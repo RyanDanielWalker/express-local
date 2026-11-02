@@ -78,3 +78,17 @@ function asg() {
   lit = 42;
   const s3: Expect<typeof lit, 42> = true; // with a literal in the declared type, it narrows to the literal
 }
+// The `in` question's own Account, shown in its code
+{
+  type Account = { role: string } | { plan: string };
+  function check(account: Account) {
+    if ('role' in account) { const t: Expect<typeof account, { role: string }> = true; }
+    else { const t: Expect<typeof account, { plan: string }> = true; }
+  }
+  // An optional role stays on both sides
+  type Loose = { role?: string } | { plan: string };
+  function loose(a: Loose) {
+    if ('role' in a) { const t: Expect<typeof a, { role?: string }> = true; }
+    else { const t: Expect<typeof a, { role?: string } | { plan: string }> = true; }
+  }
+}

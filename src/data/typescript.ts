@@ -160,7 +160,7 @@ export const TS_LINES: Line[] = [
       {
         t: 2,
         q: "What does the `in` operator do here?",
-        code: `if ('role' in account) { ... }`,
+        code: `type Account = { role: string } | { plan: string };\n\nfunction check(account: Account) {\n  if ('role' in account) { ... }\n}`,
         opts: [
           "Narrows to the member with that key",
           "Checks that the value is not `null`",
