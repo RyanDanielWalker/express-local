@@ -35,6 +35,7 @@ One short file per significant decision: the context, the options, what was deci
 | [0020](0020-accessibility-as-tests.md)                  | Accessibility is checked by tests: axe in the end-to-end test, and contrast from the stylesheet | Accepted                                 |
 | [0021](0021-deploy-to-cloudflare-from-ci.md)            | Deploy to Cloudflare from CI, from a public repo                                                | Accepted                                 |
 | [0022](0022-nothing-waits-on-ryan-learning-the-code.md) | Nothing waits on Ryan learning the code or writing it himself                                   | Accepted                                 |
+| [0023](0023-predict-first-questions-after-1-0.md)       | After 1.0, predict-first questions come first                                                   | Accepted                                 |
 
 ## Template
 

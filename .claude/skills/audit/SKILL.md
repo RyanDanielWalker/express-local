@@ -66,7 +66,7 @@ Then read `src/` (skim the big content files in `src/data/`; read everything els
 ## 5. Judge the direction
 
 - Is the item `/next` would pick up next the most valuable thing right now? If not, say what is and why.
-- 1.0 is frozen. A new finding goes into 1.0 only if it is a security hole, a bug a visitor would hit, or embarrassing on the first screen. Everything else is Parked. Say which, and why.
+- 1.0 is tagged, so the freeze is over ([ADR 0023](../../../docs/adr/0023-predict-first-questions-after-1-0.md)). A security hole, a bug a visitor would hit, or something embarrassing on the first screen goes into the current block. Everything else is Parked, and the inventory stop picks the next block from there. Say which, and why.
 - Weigh what a visitor sees first (the live site, the README, a green check on the repo) against what only the author sees.
 
 ## 6. Can Ryan answer for it?

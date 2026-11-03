@@ -179,7 +179,7 @@ A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md). The [case study](docs/CASE-STUDY.md) tells how it was built. What is left is a last fact-check and a `v1.0` tag. A NestJS and Postgres backend is 2.0.
+NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md), and it was tagged `v1.0` on 2026-11-03. The [case study](docs/CASE-STUDY.md) tells how it was built. Next are predict-first questions: the player sees a snippet, guesses its type or output before any options appear, then sees the proven answer. A NestJS and Postgres backend is 2.0.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
@@ -191,7 +191,8 @@ NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at
 - [x] **README:** a fresh GIF and screenshots, retaken by a script, and an architecture diagram
 - [x] **Live:** deployed to Cloudflare from CI, only after every check passes, with strict security headers
 - [x] **Case study:** what was built, what broke, and how the work was split
-- [ ] **Ship 1.0:** a `v1.0` tag
+- [x] **Ship 1.0:** tagged `v1.0`
+- [ ] **Predict-first questions:** guess what a snippet gives you before seeing any options, starting with TypeScript
 
 ## How this was built
 

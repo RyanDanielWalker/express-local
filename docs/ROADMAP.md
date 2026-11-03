@@ -14,9 +14,9 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 6. A pasted save code is validated before it is trusted, and one end-to-end test rides a line against the production build.
 7. The case study is written and `v1.0` is tagged ([ADR 0022](adr/0022-nothing-waits-on-ryan-learning-the-code.md)).
 
-**Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
+**Done, and tagged `v1.0` on 2026-11-03.** Until the tag, 1.0 was frozen: new findings went to Parked unless they were a security hole, a bug a visitor would hit, or embarrassing on the first screen. The freeze ended with the tag, and the next block was picked from Parked ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md)). The backend is still 2.0.
 
-Status: 34 lines across 4 divisions, 153 tests plus two end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-29, after the interface work (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 153 tests plus two end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-29, after the interface work (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -93,7 +93,24 @@ What a visitor notices first. In this order:
 - [x] **Deploy** the static build from `main`, with security headers ([ADR 0021](adr/0021-deploy-to-cloudflare-from-ci.md)). Live on 2026-11-02 at https://express-local.ryandanielwalker.workers.dev. The repo stays public, Cloudflare hosts it, and the last CI step runs `wrangler deploy` on a push to `main` once every check passes. Every path serves `index.html`, and the headers live in `src/lib/securityHeaders.ts`. The end-to-end test runs under the same Content-Security-Policy. Checked live: `/`, `/nest/life` and a ride URL answer 200 with every header, `_headers` itself is not served, and both end-to-end tests pass against the live URL. The meta description is fixed.
 - [x] **The case study**, [CASE-STUDY.md](CASE-STUDY.md), written by Claude in the third person and saying so: what was built, what broke, what was decided and why, and how Ryan worked with Claude. Ryan reviews it like any other commit ([ADR 0022](adr/0022-nothing-waits-on-ryan-learning-the-code.md)).
 - [x] **A fact-check before the tag.** Four content commits since the last inventory stop were proven in `probes/` but not reviewed by the `fact-checker` agent: `b1e8362`, `bf48b5f`, `a68578d` and `7fe685e` (one sort card and three questions that now show their code). Reviewed on 2026-11-03: no problems, with its own probes under TypeScript 5.9, 6.0 and 7.0 and React 19.3, each with a check that fails. Two wording nits from before those commits went to Parked.
-- [ ] Tag `v1.0`, then decide what's next from **Parked**, and record the decision in an ADR.
+- [x] **Tag `v1.0`, then decide what's next from Parked.** Tagged on 2026-11-03. Predict-first questions come next, at Ryan's call ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md)). The rest of Parked stays parked until this block's inventory stop.
+
+### 7. Predict-first questions: TypeScript
+
+Show a snippet and ask what it gives you before showing any options: the type of `x` here, what the button shows, what the handler returns. The player commits to a guess, then sees the answer and the explanation. It brings in the loop from Ryan's generics session on 2026-11-02. He guessed, then got corrected, and that taught more than reading questions did. It needs no AI ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md)).
+
+- [ ] **Decide how a guess is checked.** Stop for Ryan with the options: show the options after the guess, compare a typed answer to the proven one, or let the player mark their own guess. Decide at the same time whether these questions count toward the bar, and which tiers show them. Record it in an ADR.
+- [ ] **The engine and the screen.** A new question kind in the content types. The checking rule is a pure function in `src/engine/` with tests. The play screen asks for the guess before anything else shows. Saves keep working (`emptySave()` and `migrate()` if a field is added), and the end-to-end test covers a predict-first question. The README and `docs/ARCHITECTURE.md` say how to add one.
+- [ ] **Generic Line first.** Predict-first questions there, each with a probe in `probes/ts` that asserts the real type under TypeScript 5.9, 6.0 and 7.0, with one check that should fail.
+- [ ] **The other TypeScript lines,** one line per commit, proven the same way.
+
+### 8. Inventory stop
+
+- [ ] The full procedure in `docs/DEVELOPMENT.md` under "Inventory stops": the `fact-checker` on everything added, the sanity pass, and `/audit`. Then pick the next block from Parked and record it in an ADR. The early-ride bug is the likeliest pick, because it affects Ryan's own reviews.
+
+### 9. Predict-first questions: React and NestJS
+
+- [ ] What the button shows and what the request returns, proven in React 19.3 in jsdom and NestJS 12.1.3 with supertest. It comes after step 8, unless that stop picks something else first.
 
 ## The bar
 
@@ -157,7 +174,6 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 
 ## Parked for now
 
-- **Predict-first questions.** Show a snippet and ask what it gives you before showing any options: the type of `x` here, what the button shows, what the handler returns. The learner commits to a guess, then sees the answer and the explanation. It is the guess-then-get-corrected loop from Ryan's generics session on 2026-11-02, which taught more than reading questions did, without needing AI. Every snippet gets a probe in `probes/` that asserts the real type or output under `tsc` or the running code, so each answer is proven like any other. TypeScript first (Generic Line is the obvious start), then React and NestJS. Parked, not 1.0: it is a new question type, and 1.0 is frozen. Open question: how a typed guess is checked (pick from options after guessing, or compare the typed answer to the proven one).
 - **Algorithms question pools.** Eleven lines, no question pools, so they contribute almost nothing to cram and their readiness has no recall component. Worth fixing, explicitly not now.
 - **New divisions.** SQL and Postgres, GraphQL, Git as a train yard.
 - **Engineer's Cab.** After Rush Hour, write the algorithm yourself against in-browser tests.
@@ -273,3 +289,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-11-02** The ride clock pauses while the tab is hidden, so stepping away no longer costs a best time or par. A window that only loses focus keeps the clock running, since the question is still on screen. The clock moved to `src/engine/clock.ts` with tests, and tracks reading and a hidden tab as separate reasons, so coming back to the tab does not restart a clock paused for reading
 - **2026-11-03** The case study, `docs/CASE-STUDY.md`: what was built, what broke and what it taught, the decisions and who made them, how Ryan worked with Claude, and what is not done. Written by Claude in the third person, traced to the history, the decision records and the first audit
 - **2026-11-03** The fact-check before the tag: the four content commits since the last inventory stop that skipped review were checked by the `fact-checker` against TypeScript 5.9 to 7.0 and React 19.3. No problems; two older wording nits went to Parked
+- **2026-11-03** 1.0, tagged `v1.0`. Predict-first questions come next ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md))

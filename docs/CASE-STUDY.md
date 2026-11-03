@@ -119,4 +119,5 @@ Honest limits, all recorded on the [roadmap](ROADMAP.md) under **Parked**:
 - 34 lines. All 23 NestJS, React and TypeScript lines clear the bar, and the test suite keeps them there.
 - 394 questions and 56 puzzles in those divisions. Every claim is proven against the compiler or running code. Each division was independently reviewed before it counted as finished. Later changes are proven the same way and go to the same reviewer in batches.
 - 153 unit and content tests, two browser tests against the production build, and CI that deploys only on green.
-- 22 decision records explaining why the project is the way it is.
+- Tagged `v1.0` on 2026-11-03.
+- 23 decision records explaining why the project is the way it is.
