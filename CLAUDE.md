@@ -2,7 +2,7 @@
 
 A subway-themed practice app for technical interviews. Ryan built it to drill computer science and his stack until he can explain it out loud: NestJS, TypeScript and React, plus algorithms. He is the player, the owner, and the only user.
 
-Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line clears the quality bar, every claim was proven against real code and independently reviewed. Algorithms are parked. Live at https://express-local.ryandanielwalker.workers.dev, deployed by CI on every green push to `main`. Tagged `v1.0` on 2026-11-03. Predict-first questions are next ([ADR 0023](docs/adr/0023-predict-first-questions-after-1-0.md)).
+Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line clears the quality bar, every claim was proven against real code and independently reviewed. Algorithms are parked. Live at https://express-local.ryandanielwalker.workers.dev, deployed by CI on every green push to `main`. Tagged `v1.0` on 2026-11-03. Every TypeScript line has predict-first questions ([ADR 0024](docs/adr/0024-how-a-predict-first-guess-is-checked.md)). Next is the early-ride review bug, then predict-first questions for React and NestJS ([ADR 0026](docs/adr/0026-fix-early-rides-next.md)).
 
 ## Where things are
 

@@ -25,5 +25,5 @@ Option 3, at Ryan's call.
 ## Consequences
 
 - The 19 TypeScript questions are now defended like the rest of the bar. Moving one to another tier, or deleting it, fails `npm test` if it leaves a tier empty.
-- React and NestJS do not fail before step 9 gives them predict-first questions. When they have one per tier on every line, they go in `PREDICTS`, and step 9 is not done until they do.
+- React and NestJS do not fail before their own predict-first block gives them predict-first questions. When they have one per tier on every line, they go in `PREDICTS`, and that block is not done until they do.
 - A new TypeScript line needs three predict-first questions, one per tier, before it can count as finished.

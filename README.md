@@ -182,7 +182,7 @@ A predict-first question goes in a line's `questions` with `predict: 'type'`, a 
 
 ## Roadmap
 
-NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md), and it was tagged `v1.0` on 2026-11-03. The [case study](docs/CASE-STUDY.md) tells how it was built. Next are predict-first questions: the player sees a snippet, guesses its type or output before any options appear, then sees the proven answer. A NestJS and Postgres backend is 2.0.
+NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md), and it was tagged `v1.0` on 2026-11-03. The [case study](docs/CASE-STUDY.md) tells how it was built. Predict-first questions are on every TypeScript line: the player sees a snippet, types a guess before anything else appears, then sees the proven answer. Next is a fix to review scheduling, then predict-first questions for React and NestJS. A NestJS and Postgres backend is 2.0.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them

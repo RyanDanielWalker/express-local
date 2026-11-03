@@ -38,6 +38,7 @@ One short file per significant decision: the context, the options, what was deci
 | [0023](0023-predict-first-questions-after-1-0.md)       | After 1.0, predict-first questions come first                                                   | Accepted                                 |
 | [0024](0024-how-a-predict-first-guess-is-checked.md)    | How a predict-first guess is checked                                                            | Accepted, amended by 0025                |
 | [0025](0025-predict-first-questions-in-the-bar.md)      | Predict-first questions are required by the bar, not counted                                    | Accepted                                 |
+| [0026](0026-fix-early-rides-next.md)                    | After the predict-first TypeScript block, fix early rides                                       | Accepted                                 |
 
 ## Template
 
