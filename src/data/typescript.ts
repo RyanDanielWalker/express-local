@@ -325,6 +325,31 @@ export const TS_LINES: Line[] = [
         a: "`x == null`",
         why: "Loose `==` treats `null` and `undefined` as equal to each other, and to nothing else. So `x == null` catches both, and TypeScript narrows both away in the `else` branch. `x === null` misses `undefined`. `x !== undefined` is backwards: it is false for `undefined`, and true for `null` and for every real value.",
       },
+      // Predict-first: the player types the type before anything shows (ADR 0024).
+      {
+        t: 1,
+        predict: "type",
+        q: "What is the type of `a` inside the `if`?",
+        code: `function compare(a: string | number, b: string | boolean) {\n  if (a === b) {\n    // a is ???\n  }\n}`,
+        a: "string",
+        why: "`===` is only true when both sides are the same value. So they must be the same type too. `a` can be a `string` or a `number`. `b` can be a `string` or a `boolean`. The only type they share is `string`. So inside the `if`, TypeScript knows both are strings, and `a` is `string`. `b` narrows to `string` as well. The tempting guess is `string | number`, as if comparing with another variable taught TypeScript nothing. It narrows just like comparing with a literal does.",
+      },
+      {
+        t: 2,
+        predict: "type",
+        q: "`strict` is on. What is the type of `name` in the `else`?",
+        code: `function greet(name: string | undefined) {\n  if (name) {\n    // ...\n  } else {\n    // name is ???\n  }\n}`,
+        a: "string | undefined",
+        why: "`if (name)` is a truthiness check. It passes for any value JavaScript treats as true. The empty string `''` is falsy, which means `if` treats it as false. So `''` lands in the `else`, next to `undefined`. TypeScript does not shrink `string` down to just `''`, so the `else` keeps `string`. The tempting guess is `undefined`. That would only be right if no string could fail the check. To catch a missing name and nothing else, write `if (name === undefined)`.",
+      },
+      {
+        t: 3,
+        predict: "type",
+        q: "What is the type of `value` inside the `if`?",
+        code: `function show(value: string | number) {\n  const isString = typeof value === 'string';\n  if (isString) {\n    // value is ???\n  }\n}`,
+        a: "string",
+        why: "The `typeof` check is saved in a `const` first. TypeScript 4.4 and later remember what that `const` means. When `isString` is true, TypeScript knows `value` is a `string`. So this `if` narrows `value` just like `if (typeof value === 'string')` would. The tempting guess is `string | number`, which older versions gave. You still get it if `isString` is a `let`, or if `value` is assigned anywhere in the function, even after the `if`. TypeScript does not check whether anything really changed.",
+      },
     ],
   },
   {
