@@ -10,6 +10,7 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 - `docs/ARCHITECTURE.md`: how the app and its content are structured, and how to add a question, puzzle, line or division.
 - `docs/DEVELOPMENT.md`: setup, scripts, the working agreement, and the full procedure for checking content.
 - `docs/adr/`: why things are the way they are. Append-only.
+- `docs/CASE-STUDY.md`: the project's story for a reader, written by Claude: what broke, what was decided, how the work was split.
 - `e2e/`: two Playwright tests against the production build, one riding a line and one ending a drill (`npm run e2e`, not part of `npm test`), and `readme.shots.ts`, which retakes the README's screenshots and GIF (`npm run screenshots`, needs ffmpeg).
 - `probes/`: sandboxes that prove content against real React, NestJS and TypeScript. Not part of the app.
 - `.claude/skills/next/`: the `/next` command. `.claude/skills/audit/`: the `/audit` command, an outsider's review at the end of each phase, saved in `docs/audits/` (`/audit quiz` to rehearse the interview questions). `.claude/agents/fact-checker.md`: the independent content reviewer.

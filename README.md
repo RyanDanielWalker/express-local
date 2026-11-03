@@ -179,7 +179,7 @@ A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
 ## Roadmap
 
-NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md). What is left is a case study and a `v1.0` tag. A NestJS and Postgres backend is 2.0.
+NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md). The [case study](docs/CASE-STUDY.md) tells how it was built. What is left is a last fact-check and a `v1.0` tag. A NestJS and Postgres backend is 2.0.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
@@ -190,13 +190,16 @@ NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at
 - [x] **Reorganize the page:** a Today band, a play mode that takes over the screen, real URLs, and accessibility checks as tests
 - [x] **README:** a fresh GIF and screenshots, retaken by a script, and an architecture diagram
 - [x] **Live:** deployed to Cloudflare from CI, only after every check passes, with strict security headers
-- [ ] **Ship 1.0:** a case study and a `v1.0` tag
+- [x] **Case study:** what was built, what broke, and how the work was split
+- [ ] **Ship 1.0:** a `v1.0` tag
 
 ## How this was built
 
 Designed by Ryan Walker, who set the direction and made the calls recorded in [docs/adr/](docs/adr/). [Claude](https://claude.ai) wrote most of the code and content as a pair programmer, under the rules in [CLAUDE.md](CLAUDE.md): every content claim proven against running code in `probes/`, every wrong option proven wrong, and an independent review before a division counts as finished. Ryan reviewed every commit before pushing it.
 
-Commits up to `c1e7326` carry a Claude co-author trailer. Later ones do not, because the disclosure lives here instead ([ADR 0012](docs/adr/0012-disclose-ai-in-the-readme.md)).
+[docs/CASE-STUDY.md](docs/CASE-STUDY.md), written by Claude, tells the story in more detail: what broke, what was decided, and how the work was split.
+
+Most commits up to `c1e7326` carry a Claude co-author trailer. Later ones do not, because the disclosure lives here instead ([ADR 0012](docs/adr/0012-disclose-ai-in-the-readme.md)).
 
 ## License
 
