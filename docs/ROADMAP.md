@@ -99,14 +99,14 @@ What a visitor notices first. In this order:
 
 Show a snippet and ask what it gives you before showing any options: the type of `x` here, what the button shows, what the handler returns. The player commits to a guess, then sees the answer and the explanation. It brings in the loop from Ryan's generics session on 2026-11-02. He guessed, then got corrected, and that taught more than reading questions did. It needs no AI ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md)).
 
-- [ ] **Decide how a guess is checked.** Stop for Ryan with the options: show the options after the guess, compare a typed answer to the proven one, or let the player mark their own guess. Decide at the same time whether these questions count toward the bar, and which tiers show them. Record it in an ADR.
-- [ ] **The engine and the screen.** A new question kind in the content types. The checking rule is a pure function in `src/engine/` with tests. The play screen asks for the guess before anything else shows. Saves keep working (`emptySave()` and `migrate()` if a field is added), and the end-to-end test covers a predict-first question. The README and `docs/ARCHITECTURE.md` say how to add one.
+- [x] **Decide how a guess is checked.** The player types a guess. A match counts by itself, ignoring spacing and union order. Anything else shows the proven answer beside the guess, and the player marks "I had it" or "I missed it". A miss costs a heart and marks the question shaky. Not in the bar yet; revisit at step 8. Every tier, by each question's own tier. Ryan's call on 2026-11-03 ([ADR 0024](adr/0024-how-a-predict-first-guess-is-checked.md)).
+- [ ] **The engine and the screen.** A new question kind in the content types. The matching rule is a pure function in `src/engine/` with tests, including near misses that must stay unmatched. The bar's question counts leave predict-first questions out. The play screen asks for the guess before anything else shows. Saves keep working (`emptySave()` and `migrate()` if a field is added), and the end-to-end test covers a predict-first question. The README and `docs/ARCHITECTURE.md` say how to add one.
 - [ ] **Generic Line first.** Predict-first questions there, each with a probe in `probes/ts` that asserts the real type under TypeScript 5.9, 6.0 and 7.0, with one check that should fail.
 - [ ] **The other TypeScript lines,** one line per commit, proven the same way.
 
 ### 8. Inventory stop
 
-- [ ] The full procedure in `docs/DEVELOPMENT.md` under "Inventory stops": the `fact-checker` on everything added, the sanity pass, and `/audit`. Then pick the next block from Parked and record it in an ADR. The early-ride bug is the likeliest pick, because it affects Ryan's own reviews.
+- [ ] The full procedure in `docs/DEVELOPMENT.md` under "Inventory stops": the `fact-checker` on everything added, the sanity pass, and `/audit`. Decide whether predict-first questions should count toward the bar ([ADR 0024](adr/0024-how-a-predict-first-guess-is-checked.md)). Then pick the next block from Parked and record it in an ADR. The early-ride bug is the likeliest pick, because it affects Ryan's own reviews.
 
 ### 9. Predict-first questions: React and NestJS
 
@@ -290,3 +290,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-11-03** The case study, `docs/CASE-STUDY.md`: what was built, what broke and what it taught, the decisions and who made them, how Ryan worked with Claude, and what is not done. Written by Claude in the third person, traced to the history, the decision records and the first audit
 - **2026-11-03** The fact-check before the tag: the four content commits since the last inventory stop that skipped review were checked by the `fact-checker` against TypeScript 5.9 to 7.0 and React 19.3. No problems; two older wording nits went to Parked
 - **2026-11-03** 1.0, tagged `v1.0`. Predict-first questions come next ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md))
+- **2026-11-03** How a predict-first guess is checked: typed, auto-matched or self-marked, outside the bar for now, on every tier ([ADR 0024](adr/0024-how-a-predict-first-guess-is-checked.md))
