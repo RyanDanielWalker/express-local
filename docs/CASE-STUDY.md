@@ -50,7 +50,7 @@ Whether a line was good enough used to be judged by feel. Now `src/data/bar.ts` 
 
 ### Checks before features, the deploy last
 
-Formatting, lint, CI and an end-to-end test went in before the interface work, so every later change was checked the same way ([ADR 0013](adr/0013-ci-on-github-actions.md), [ADR 0016](adr/0016-end-to-end-test-in-ci.md)). CI now runs the format check, lint, typecheck, 153 unit and content tests, the TypeScript proofs, a production build and two browser tests on every push. The browser tests ride a real line against the production build, run an accessibility scanner (axe) on every screen they pass, and check text contrast in light and dark mode ([ADR 0020](adr/0020-accessibility-as-tests.md)).
+Formatting, lint, CI and an end-to-end test went in before the interface work, so every later change was checked the same way ([ADR 0013](adr/0013-ci-on-github-actions.md), [ADR 0016](adr/0016-end-to-end-test-in-ci.md)). At the `v1.0` tag, CI ran the format check, lint, typecheck, 153 unit and content tests, the TypeScript proofs, a production build and two browser tests on every push. The browser tests ride a real line against the production build, run an accessibility scanner (axe) on every screen they pass, and check text contrast in light and dark mode ([ADR 0020](adr/0020-accessibility-as-tests.md)).
 
 ## What broke, and what it taught
 
@@ -115,6 +115,8 @@ Honest limits, all recorded on the [roadmap](ROADMAP.md) under **Parked**:
 - **The bundle is over 700 kB**, with every question in one file.
 
 ## Results
+
+At the `v1.0` tag:
 
 - 34 lines. All 23 NestJS, React and TypeScript lines clear the bar, and the test suite keeps them there.
 - 394 questions and 56 puzzles in those divisions. Every claim is proven against the compiler or running code. Each division was independently reviewed before it counted as finished. Later changes are proven the same way and go to the same reviewer in batches.
