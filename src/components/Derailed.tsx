@@ -57,7 +57,9 @@ export function Derailed({
                   <Rich text={q.q} />
                 </p>
                 <p className="ra">
-                  <b>{q.a}</b>
+                  <b>
+                    <Rich text={q.a} />
+                  </b>
                 </p>
                 <p className="rw">
                   <Rich text={q.why} />

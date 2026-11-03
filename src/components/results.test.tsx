@@ -78,4 +78,41 @@ describe("results screen", () => {
       ).toContain("Service suspended");
     }
   });
+
+  // An answer like `string[]` is code. The recap shows it as code, not with
+  // its backticks.
+  it("shows a missed answer's code as code, without the backticks", () => {
+    const question = {
+      t: 1 as const,
+      q: "What is the type of `kv`?",
+      opts: ["`[string, number]`", "`string[]`"],
+      a: "`[string, number]`",
+      why: "A tuple.",
+    };
+    const derailed = renderToStaticMarkup(
+      <Derailed
+        line={LINES[0]}
+        missed={[question]}
+        onAgain={noop}
+        onMap={noop}
+      />,
+    );
+    const result = finishTrip(emptySave(), {
+      lineIdx: 0,
+      quizOk: true,
+      ...ride,
+    });
+    const results = renderToStaticMarkup(
+      <Results
+        {...props}
+        ride={{ ...ride, answers: [{ question, correct: false }] }}
+        line={LINES[0]}
+        result={result}
+      />,
+    );
+    for (const html of [derailed, results]) {
+      expect(html).toContain('<code class="solo">[string, number]</code>');
+      expect(html).not.toContain("`[string, number]`");
+    }
+  });
 });

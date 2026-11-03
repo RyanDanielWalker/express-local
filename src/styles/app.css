@@ -1939,6 +1939,11 @@ pre {
   font-size: 14px;
   color: var(--good);
 }
+/* The answer is already in the code font, so code in it needs no chip. */
+.recap .ra code {
+  background: none;
+  padding: 0;
+}
 .recap .rw {
   color: var(--muted);
   font-size: 14.5px;

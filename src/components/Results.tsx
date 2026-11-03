@@ -119,7 +119,9 @@ export function Results({
                   <Rich text={question.q} />
                 </p>
                 <p className="ra">
-                  <b>{question.a}</b>
+                  <b>
+                    <Rich text={question.a} />
+                  </b>
                 </p>
                 <p className="rw">
                   <Rich text={question.why} />
