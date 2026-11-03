@@ -409,7 +409,7 @@ export const TS_LINES: Line[] = [
             why: "With `strict` on, `null` alone gives a state type of just `null`, so `setUser(user)` is an error. Write `useState<User | null>(null)`.",
           },
         ],
-        note: "TypeScript works out the type from the arguments you pass. When there is nothing to work from, like an empty collection or a `null` placeholder, write the type yourself.",
+        note: "TypeScript works out the type from the arguments you pass. An empty `Map` becomes `Map<any, any>`, so TypeScript stops checking its keys and values. An empty `Set` becomes `Set<unknown>`, so you have to check each item before you use it. Unlike the empty collections, `useState(null)` gives TypeScript a value to infer from. With `strict` on, the state's type is just `null`, so setting a real user is an error. In all three cases, write the type yourself.",
       },
       {
         t: 1,
@@ -2149,7 +2149,7 @@ export const TS_GUIDE: Record<TsLineId, Guide> = {
     },
     say: [
       "A generic keeps the link between what goes in and what comes out. `any` throws that link away.",
-      "I let TypeScript infer the type argument. I only write it when there is nothing to infer from, like an empty `Set` or `useState(null)`.",
+      "I let TypeScript infer the type argument. I write it myself when the inferred type is too loose or too narrow. An empty `Map` gives `Map<any, any>`, and with `strict` on, `useState(null)` gives just `null`.",
       "A constraint is a minimum, not a conversion. Pass a `User` to a function that needs an `id`, and you still get a `User` back.",
       "A generic that only shows up in the return type, like `parse<T>(json): T`, is a cast in disguise. I check the data instead.",
     ],
