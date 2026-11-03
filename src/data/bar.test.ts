@@ -109,6 +109,26 @@ describe("the auditor", () => {
     expect(checks.find((c) => c.id === "tells")!.ok).toBe(true);
   });
 
+  // A division that has adopted them keeps one on each tier (ADR 0025), so a
+  // proven set cannot quietly shrink. Other divisions are not asked yet.
+  it("wants a predict-first question on every tier once a division has them", () => {
+    const predict = (t: 1 | 2 | 3): Question => ({
+      t,
+      predict: "type",
+      q: `p${t}`,
+      code: "const x = 1;",
+      a: "number",
+      why: "because",
+    });
+    const check = (division: Line["division"], extra: Question[]) =>
+      auditLine({ ...quiz([...full, ...extra]), division }, guide(3)).find(
+        (c) => c.id === "predict",
+      )!;
+    expect(check("ts", [predict(1)]).detail).toBe("none on T2 T3");
+    expect(check("ts", [predict(1), predict(2), predict(3)]).ok).toBe(true);
+    expect(check("nest", []).ok).toBe(true);
+  });
+
   it("fails a line whose pool is no bigger than a run, so every replay is the same", () => {
     const variety = auditLine(
       quiz([...q(1, 6), ...q(2, 2), ...q(3, 2)], { flows: [flow(), flow()] }),

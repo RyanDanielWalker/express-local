@@ -1,6 +1,6 @@
 # 0024. How a predict-first guess is checked
 
-Status: Accepted (2026-11-03).
+Status: Accepted (2026-11-03). Amended by [0025](0025-predict-first-questions-in-the-bar.md): the bar requires one per tier on every line of a division that has adopted them, without counting them.
 
 ## Context
 

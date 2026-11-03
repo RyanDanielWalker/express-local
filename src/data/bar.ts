@@ -16,8 +16,23 @@ import type {
  */
 export const FINISHED: Division[] = ["nest", "ts", "react"];
 
+/**
+ * Divisions that have adopted predict-first questions. Every quiz line in one
+ * of these needs at least one on each tier, so a proven set cannot quietly
+ * shrink. They still do not count toward the pool sizes (ADR 0025). React and
+ * NestJS join once they have their own.
+ */
+export const PREDICTS: Division[] = ["ts"];
+
 export interface BarCheck {
-  id: "runs" | "variety" | "rehearse" | "guide" | "judgment" | "tells";
+  id:
+    | "runs"
+    | "variety"
+    | "rehearse"
+    | "guide"
+    | "judgment"
+    | "tells"
+    | "predict";
   label: string;
   ok: boolean;
   /** What is missing, in a few words. */
@@ -123,6 +138,14 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
   ).sort((x, y) => y[1] - x[1])[0];
   const tilted = pool.length > 0 && hits / pool.length > MAX_POSITION_SHARE;
 
+  // A division that has adopted predict-first questions keeps one per tier.
+  const predicts =
+    line.kind === "quiz" && PREDICTS.includes(line.division)
+      ? TIERS.filter(
+          (t) => !(line.questions ?? []).some((q) => q.predict && q.t === t),
+        )
+      : [];
+
   return [
     {
       id: "runs",
@@ -169,6 +192,14 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
       ok: !tilted,
       detail: tilted
         ? `answer is the ${worst} option on ${hits}/${pool.length}`
+        : "",
+    },
+    {
+      id: "predict",
+      label: "A predict-first question at every tier",
+      ok: predicts.length === 0,
+      detail: predicts.length
+        ? `none on ${predicts.map((t) => `T${t}`).join(" ")}`
         : "",
     },
   ];

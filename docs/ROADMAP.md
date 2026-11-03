@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Done, and tagged `v1.0` on 2026-11-03.** Until the tag, 1.0 was frozen: new findings went to Parked unless they were a security hole, a bug a visitor would hit, or embarrassing on the first screen. The freeze ended with the tag, and the next block was picked from Parked ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md)). The backend is still 2.0.
 
-Status: 34 lines across 4 divisions, 161 tests plus three end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-29, after the interface work (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 162 tests plus three end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-10-29, after the interface work (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -122,10 +122,11 @@ A line is **done** when:
 4. Its field guide has the talking points and the gotcha
 5. It has at least one puzzle where order or judgment matters, not just recognition
 6. It passes the content tests: answers not guessable by length, no em dashes, every option set clean
+7. In a division that has adopted predict-first questions (TypeScript, so far), it has at least one on each tier. They do not count toward the numbers in check 1 ([ADR 0025](adr/0025-predict-first-questions-in-the-bar.md))
 
 A division is **done** when every line clears that, and the division could carry an interview on its own topic. That second half is the one that adds lines rather than questions: NestJS without testing or auth is not a division that could carry a NestJS interview, however deep its other six lines get.
 
-Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 5 and the length part of 6 (data tests cover the rest of 6), `npm run bar` prints where every line stands, and any division listed in `FINISHED` is enforced by the test suite from then on, so finished stays finished.
+Nothing here is measured by vibes. `src/data/bar.ts` encodes checks 1 to 5, the length part of 6 (data tests cover the rest of 6) and 7, `npm run bar` prints where every line stands, and any division listed in `FINISHED` is enforced by the test suite from then on, so finished stays finished.
 
 Algorithms shows 0 of 11 in `npm run bar` because the game lines have no rehearsal prompts or talking points yet. That is expected while the division is parked, not a regression.
 

@@ -176,7 +176,7 @@ npm run screenshots  # retake the README's screenshots and GIF (needs ffmpeg)
 
 A new division also needs an entry in `DIVISIONS` in `src/engine/questions.ts`.
 
-A predict-first question goes in a line's `questions` with `predict: 'type'`, a `code` snippet and the proven type as its answer, and no options. Its probe asserts that exact type under TypeScript 5.9, 6.0 and 7.0. It does not count toward the bar.
+A predict-first question goes in a line's `questions` with `predict: 'type'`, a `code` snippet and the proven type as its answer, and no options. Its probe asserts that exact type under TypeScript 5.9, 6.0 and 7.0. It does not count toward the bar's pool sizes, but every TypeScript line needs one on each tier.
 
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) covers the content shapes and how to add a question, puzzle, line or division. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) covers setup and how content gets checked.
 
