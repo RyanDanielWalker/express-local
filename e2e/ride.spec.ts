@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { LINES } from "../src/data";
-import { cramPool, DIVISIONS } from "../src/engine/questions";
+import { cramPool, DIVISIONS, qid } from "../src/engine/questions";
 import { isUnlocked } from "../src/engine/progression";
-import { emptySave } from "../src/engine/save";
+import { emptySave, STORAGE_KEY } from "../src/engine/save";
 import type { Question } from "../src/engine/types";
 import { SECURITY_HEADERS } from "../src/lib/securityHeaders";
 
@@ -376,6 +376,97 @@ test("a drill's ending runs the drill again, not the selected line", async ({
   await page.getByRole("button", { name: "Drill again" }).click();
   await expect(drillHeading).toBeVisible();
   await expect(page).toHaveURL("/drill");
+
+  expect(errors).toEqual([]);
+  expect(findings).toEqual([]);
+});
+
+/**
+ * A predict-first question asks for a typed guess before anything else
+ * shows. A guess that matches counts by itself. Any other guess shows beside
+ * the proven answer, and the player says whether they had it (ADR 0024).
+ *
+ * The shaky drill asks exactly the shaky questions, so a save with only this
+ * one shaky makes each drill ask it and nothing else.
+ */
+test("a predict-first question takes a guess before it shows anything", async ({
+  page,
+}) => {
+  const errors = watchConsole(page);
+  // The guesses below rewrite the answer's union, so it needs three members.
+  const isUnion3 = (x: Question) => !!x.predict && x.a.split(" | ").length >= 3;
+  const owner = LINES.find((l) => l.questions?.some(isUnion3))!;
+  const q = owner.questions!.find(isUnion3)!;
+  const save = emptySave();
+  save.questions[qid(owner.id, q)] = { seen: 1, missed: 1, last: Date.now() };
+  await page.goto("/");
+  await page.evaluate(([key, value]) => localStorage.setItem(key, value), [
+    STORAGE_KEY,
+    JSON.stringify(save),
+  ] as const);
+  await page.reload();
+
+  const today = page.getByRole("region", { name: "Today" });
+  const card = page.locator(".qcard");
+  const guess = card.getByRole("textbox", { name: "Your guess" });
+  const check = card.getByRole("button", { name: "Check" });
+  const done = page.getByRole("heading", { level: 2, name: "Drill done" });
+  await today.getByRole("button", { name: "Drill 1 shaky" }).click();
+
+  // Nothing about the answer shows before the guess: no options, no
+  // explanation, and the box has the focus.
+  await expect(card.locator(".eyebrow")).toHaveText(
+    "Question 1 of 1 · Predict it",
+  );
+  await expect(guess).toBeFocused();
+  await expect(check).toBeDisabled();
+  await expect(card.locator(".opts")).toHaveCount(0);
+  await expect(card.locator(".why")).toHaveCount(0);
+  await expect(page.getByText(q.a, { exact: true })).toHaveCount(0);
+  await audit(page, "Predict, the guess");
+
+  // A guess that does not match: both side by side, and the player decides.
+  // Marking it missed costs a heart, and the recap shows the answer.
+  await guess.fill("number | undefined");
+  await guess.press("Enter");
+  await expect(card.locator(".why b")).toHaveText("Compare them");
+  await expect(card.locator(".compare dd")).toHaveText([
+    "number | undefined",
+    q.a,
+  ]);
+  await audit(page, "Predict, comparing");
+  await card.getByRole("button", { name: "I missed it" }).click();
+  await expect(page.getByLabel("4 of 5 hearts left")).toBeVisible();
+  await expect(done).toBeVisible();
+  await expect(page.locator(".recap .ra")).toHaveText(q.a);
+  await audit(page, "Predict, the recap");
+
+  // The same answer with its union written in another order, and squashed
+  // together: it counts by itself.
+  await page.getByRole("button", { name: "Drill again" }).click();
+  const [a, b, ...rest] = q.a.split(" | ");
+  await guess.fill([b, a, ...rest].join("|"));
+  await check.click();
+  await expect(card.locator(".why b")).toHaveText("Right");
+  await card.getByRole("button", { name: "See how you did" }).click();
+  await expect(done).toBeVisible();
+  await expect(page.locator(".recap")).toHaveCount(0);
+
+  // A right answer written another way does not match, so the player marks
+  // it. That counts as right, and clears the last miss.
+  await page.getByRole("button", { name: "Drill again" }).click();
+  await guess.fill(`(${a} | ${b}) | ${rest.join(" | ")}`);
+  await check.click();
+  await expect(card.locator(".why b")).toHaveText("Compare them");
+  await card.getByRole("button", { name: "I had it" }).click();
+  await expect(done).toBeVisible();
+  await expect(page.locator(".recap")).toHaveCount(0);
+  await page
+    .locator(".result")
+    .getByRole("button", { name: "Map", exact: true })
+    .click();
+  await expect(today).toBeVisible();
+  await expect(today.getByRole("button", { name: /shaky$/ })).toHaveCount(0);
 
   expect(errors).toEqual([]);
   expect(findings).toEqual([]);

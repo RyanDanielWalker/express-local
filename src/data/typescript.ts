@@ -653,6 +653,15 @@ const kv = pair('id', 42);`,
         a: "`string`, from the default",
         why: "`T = string` gives `T` a default. Write `Box` with no type argument, and `T` is `string`. Without the default, a bare `Box` would be an error, because it needs its type argument. TypeScript never quietly fills in `unknown` here.",
       },
+      // Predict-first: the player types the type before anything shows (ADR 0024).
+      {
+        t: 2,
+        predict: "type",
+        q: "`strict` is on. What is the type of `x`?",
+        code: `declare function first<T>(items: T[]): T | undefined;\n\nconst x = first([1, 'a']);`,
+        a: "string | number | undefined",
+        why: "TypeScript looks at the whole array. It holds a number and a string. Here TypeScript widens `1` to `number` and `'a'` to `string`, so the array is a `(string | number)[]`. That makes `T` the union `string | number`. A value of that type can be either one. The signature adds `undefined`, because an empty array has no first item. With `strict` off, that `undefined` would be dropped. The tempting guess is `number | undefined`, as if the first element set `T`. It does not. Every element counts. Since TypeScript 5.0, writing `<const T>` would keep the exact values `1` and `'a'`.",
+      },
     ],
   },
   {

@@ -93,6 +93,8 @@ Use `// @ts-expect-error` where something should be an error. The runner judges 
 
 Folders match the lines: `narrow`, `generics`, `utility`, `unknown`, `shapes`, `reactts`, and `gaps` (the questions added after the review).
 
+Predict-first questions (the player types the type before seeing anything) are proven in a `predict.ts` in their line's folder, run by `tsconfig.predict.json`. It asserts the exact type the player has to guess, the likely wrong guesses as `false`, and anything the `why` says. `neg-predict.ts` holds a wrong guess asserted as right and must fail. `reveal-predict.ts` prints the type the way `tsc` writes it, which is how the answer should be spelled. When the answer depends on a setting, a second config proves the other result, and the question names the setting: `predict-loose.ts` shows `undefined` dropping out with `strict` off. `generics/predict.ts` is the first.
+
 ## Rules for every probe
 
 1. Prove the wrong options are wrong, not just that the right one is right. A wrong option someone could defend is a bug.
