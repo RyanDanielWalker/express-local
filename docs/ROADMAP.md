@@ -158,6 +158,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 ## Parked for now
 
 - **A piece of core code written by Ryan with `/next learn`.** Moved out of 1.0 at Ryan's call ([ADR 0018](adr/0018-learn-mode-after-1-0.md)). First in line once `v1.0` is tagged.
+- **Predict-first questions.** Show a snippet and ask what it gives you before showing any options: the type of `x` here, what the button shows, what the handler returns. The learner commits to a guess, then sees the answer and the explanation. It is the guess-then-get-corrected loop from Ryan's generics session on 2026-11-02, which taught more than reading questions did, without needing AI. Every snippet gets a probe in `probes/` that asserts the real type or output under `tsc` or the running code, so each answer is proven like any other. TypeScript first (Generic Line is the obvious start), then React and NestJS. Parked, not 1.0: it is a new question type, and 1.0 is frozen. Open question: how a typed guess is checked (pick from options after guessing, or compare the typed answer to the proven one).
 - **Algorithms question pools.** Eleven lines, no question pools, so they contribute almost nothing to cram and their readiness has no recall component. Worth fixing, explicitly not now.
 - **New divisions.** SQL and Postgres, GraphQL, Git as a train yard.
 - **Engineer's Cab.** After Rush Hour, write the algorithm yourself against in-browser tests.
@@ -185,6 +186,8 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 ## 2.0: a backend
 
 A NestJS and Postgres sync API, so phone and laptop share progress and the app shows the stack it drills. Decided against for 1.0 in [ADR 0010](adr/0010-a-portfolio-piece-with-a-1-0.md). If it happens, the backend half of the Snippr playbook is its plan.
+
+- **Tutor mode.** An AI tutor that works the way Ryan's generics session on 2026-11-02 did: start from his confusion in plain words, hand him a scaffold with specific blanks, let him guess, then say what was right, what was off, and show a call that would fail. Each round adds exactly one new idea and ends with real `any` code to fix. It needs a server to hold the API key, so it waits for this backend. Until then, the same format runs as tutoring sessions outside the app, and what works there becomes its design. The tutor's corrections cannot be proven ahead of time the way question content is, so it teaches alongside the proven questions, not in place of them.
 
 ## Principles
 
