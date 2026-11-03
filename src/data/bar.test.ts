@@ -89,6 +89,26 @@ describe("the auditor", () => {
     expect(runs.detail).toBe("T1 3/6");
   });
 
+  // Predict-first questions are extra on top of the bar (ADR 0024). A line
+  // short of choice questions does not clear it on predict-first ones.
+  it("leaves predict-first questions out of the counts", () => {
+    const predicts: Question[] = Array.from({ length: 6 }, (_, i) => ({
+      t: 1 as const,
+      predict: "type" as const,
+      q: `p${i}`,
+      code: "const x = 1;",
+      a: "number",
+      why: "because",
+    }));
+    const runs = auditLine(
+      quiz([...q(1, 3), ...q(2, 5), ...q(3, 2), ...predicts]),
+      guide(3),
+    ).find((c) => c.id === "runs")!;
+    expect(runs.detail).toBe("T1 3/6");
+    const checks = auditLine(quiz([...full, ...predicts]), guide(3));
+    expect(checks.find((c) => c.id === "tells")!.ok).toBe(true);
+  });
+
   it("fails a line whose pool is no bigger than a run, so every replay is the same", () => {
     const variety = auditLine(
       quiz([...q(1, 6), ...q(2, 2), ...q(3, 2)], { flows: [flow(), flow()] }),

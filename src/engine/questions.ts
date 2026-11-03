@@ -1,5 +1,6 @@
 import { shuffle } from "../lib/random";
 import type {
+  ChoiceQuestion,
   Division,
   Flow,
   Line,
@@ -32,6 +33,13 @@ export const DIVISIONS: { id: Division; name: string; blurb: string }[] = [
     blurb: "Narrowing, generics and the types you write all day.",
   },
 ];
+
+/**
+ * The multiple-choice questions in a pool, leaving out predict-first ones.
+ * Anything about options (the bar's counts, the length checks) reads these.
+ */
+export const choices = (pool: Question[]): ChoiceQuestion[] =>
+  pool.filter((q): q is ChoiceQuestion => !q.predict);
 
 /** How many questions a run asks at each tier. */
 export const QUESTIONS_PER_RUN: Record<Tier, number> = { 1: 6, 2: 8, 3: 10 };

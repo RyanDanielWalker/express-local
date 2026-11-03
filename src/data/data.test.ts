@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GUIDE, LINES } from "./index";
-import { DIVISIONS, qid } from "../engine/questions";
+import { choices, DIVISIONS, qid } from "../engine/questions";
+import { guessMatches } from "../engine/predict";
 import { shownLength } from "./bar";
 
 /** Content is data, and data goes stale quietly. These catch the typos. */
@@ -58,7 +59,7 @@ describe("line data", () => {
 
   it("only offers questions whose answer is one of the options", () => {
     for (const line of LINES) {
-      for (const q of line.questions ?? []) {
+      for (const q of choices(line.questions ?? [])) {
         expect(q.opts, `${line.id}: ${q.q}`).toContain(q.a);
         expect(q.opts.length, `${line.id}: ${q.q}`).toBeGreaterThanOrEqual(2);
         expect(new Set(q.opts).size, `${line.id}: ${q.q}`).toBe(q.opts.length);
@@ -86,9 +87,28 @@ describe("line data", () => {
     }
   });
 
+  // A predict-first question has no options, so it needs its own checks.
+  it("gives every predict-first question code and an answer a guess can match", () => {
+    for (const line of LINES) {
+      for (const q of line.questions ?? []) {
+        if (!q.predict) continue;
+        const at = `${line.id}: ${q.q}`;
+        expect(q.code.trim(), at).not.toBe("");
+        expect(q.a.trim(), at).not.toBe("");
+        // The answer shows in the code font as it is. Backticks around it
+        // would show, and no typed guess would ever match them. (A template
+        // literal type would need this check to change.)
+        expect(q.a, at).not.toMatch(/^`.*`$/);
+        expect(q.a, at).not.toContain("**");
+        // Typing the answer exactly has to count by itself.
+        expect(guessMatches(q, q.a), at).toBe(true);
+      }
+    }
+  });
+
   it("does not let option length give the answer away", () => {
     // Picking the longest option should not be a winning strategy.
-    const questions = LINES.flatMap((l) => l.questions ?? []);
+    const questions = LINES.flatMap((l) => choices(l.questions ?? []));
     let longest = 0;
     for (const q of questions) {
       const others = q.opts.filter((o) => o !== q.a).map(shownLength);
@@ -193,7 +213,12 @@ describe("line data", () => {
       l.hook,
       l.drill ?? "",
       ...l.rules,
-      ...(l.questions ?? []).flatMap((q) => [q.q, q.why, ...q.opts]),
+      ...(l.questions ?? []).flatMap((q) => [
+        q.q,
+        q.why,
+        q.a,
+        ...(q.opts ?? []),
+      ]),
       ...(l.flows ?? []).flatMap((f) => [
         f.title,
         f.note,
@@ -233,7 +258,9 @@ describe("line data", () => {
         l.hook,
         l.drill ?? "",
         ...l.rules,
-        ...(l.questions ?? []).flatMap((q) => [q.q, q.why, ...q.opts]),
+        // A predict-first answer is all code, shown in the code font, so it
+        // is not checked here.
+        ...(l.questions ?? []).flatMap((q) => [q.q, q.why, ...(q.opts ?? [])]),
         ...(l.flows ?? []).flatMap((f) => [f.title, f.note]),
         ...(l.sorts ?? []).flatMap((s) => [
           s.title,

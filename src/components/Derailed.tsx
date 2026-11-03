@@ -58,7 +58,8 @@ export function Derailed({
                 </p>
                 <p className="ra">
                   <b>
-                    <Rich text={q.a} />
+                    {/* A predict-first answer is all code, shown as written. */}
+                    {q.predict ? q.a : <Rich text={q.a} />}
                   </b>
                 </p>
                 <p className="rw">

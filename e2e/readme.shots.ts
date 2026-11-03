@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { LINES } from "../src/data";
 import { emptySave, STORAGE_KEY } from "../src/engine/save";
-import { qid } from "../src/engine/questions";
+import { choices, qid } from "../src/engine/questions";
 import type { SaveData } from "../src/engine/types";
 
 /**
@@ -69,14 +69,19 @@ async function load(page: Page, save: SaveData) {
   await expect(page.getByRole("region", { name: "Today" })).toBeVisible();
 }
 
-/** The question on screen, looked up in the line's data. */
+/**
+ * The question on screen, looked up in the line's data. The shots answer by
+ * clicking options, so only choice questions are looked up.
+ */
 async function current(page: Page) {
   const card = page.locator(".qcard");
   const asked = await card.locator(".q").textContent();
   const code = (await card.locator("pre.code").count())
     ? await card.locator("pre.code").textContent()
     : undefined;
-  return line.questions!.find((x) => plain(x.q) === asked && x.code === code)!;
+  return choices(line.questions!).find(
+    (x) => plain(x.q) === asked && x.code === code,
+  )!;
 }
 
 const option = (page: Page, text: string) =>

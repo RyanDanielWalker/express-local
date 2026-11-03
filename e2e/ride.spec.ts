@@ -78,23 +78,49 @@ const stop = (page: Page, cleared: number) =>
     name: `${line.name}, ${cleared} of 3 tiers cleared`,
   });
 
+/** The question on screen, found in a pool by its text and code. */
+async function onScreen(page: Page, pool: Question[]) {
+  const card = page.locator(".qcard");
+  const asked = await card.locator(".q").textContent();
+  const code = (await card.locator("pre.code").count())
+    ? await card.locator("pre.code").textContent()
+    : undefined;
+  return pool.find((x) => plain(x.q) === asked && x.code === code);
+}
+
+/**
+ * Answer the question on screen, right or wrong, whichever kind it is. A
+ * predict-first question takes a typed guess. A wrong one is marked missed,
+ * which moves straight on, so it says whether a Continue button follows.
+ */
+async function answer(page: Page, q: Question, right: boolean) {
+  const card = page.locator(".qcard");
+  if (q.predict) {
+    // "no idea" is not a type, so it can never match an answer.
+    await card
+      .getByRole("textbox", { name: "Your guess" })
+      .fill(right ? q.a : "no idea");
+    await card.getByRole("button", { name: "Check" }).click();
+    if (right) return "continue";
+    await card.getByRole("button", { name: "I missed it" }).click();
+    return "moved on";
+  }
+  const pick = right ? q.a : q.opts.find((o) => o !== q.a)!;
+  await card
+    .locator(".opts")
+    .getByRole("button", { name: plain(pick), exact: true })
+    .click();
+  return "continue";
+}
+
 async function answerQuestions(page: Page, where: string) {
   for (let i = 0; ; i++) {
     const card = page.locator(".qcard");
-    const asked = await card.locator(".q").textContent();
-    const code = (await card.locator("pre.code").count())
-      ? await card.locator("pre.code").textContent()
-      : undefined;
-    const q = line.questions!.find(
-      (x) => plain(x.q) === asked && x.code === code,
-    );
+    const q = await onScreen(page, line.questions!);
     expect(q, `question on screen not found in ${line.id}`).toBeDefined();
     if (i === 0) await audit(page, `${where}, a question`);
 
-    await card
-      .locator(".opts")
-      .getByRole("button", { name: plain(q!.a), exact: true })
-      .click();
+    await answer(page, q!, true);
     await expect(card.locator(".why b")).toHaveText("Right");
     if (i === 0) await audit(page, `${where}, an answer`);
 
@@ -271,19 +297,12 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
 async function answerDrill(page: Page, pool: Question[], right: boolean) {
   for (let i = 0; ; i++) {
     const card = page.locator(".qcard");
-    const asked = await card.locator(".q").textContent();
-    const code = (await card.locator("pre.code").count())
-      ? await card.locator("pre.code").textContent()
-      : undefined;
-    const q = pool.find((x) => plain(x.q) === asked && x.code === code);
+    const q = await onScreen(page, pool);
     expect(q, `drill question not found in the pool`).toBeDefined();
     if (i === 0) await audit(page, `Drill, a question`);
-    const pick = right ? q!.a : q!.opts.find((o) => o !== q!.a)!;
-    await card
-      .locator(".opts")
-      .getByRole("button", { name: plain(pick), exact: true })
-      .click();
+    const then = await answer(page, q!, right);
     if (!right && i === 4) return;
+    if (then === "moved on") continue;
     const next = card.locator(".decide button");
     const label = await next.textContent();
     await next.click();

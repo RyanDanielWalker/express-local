@@ -17,6 +17,7 @@ import {
   readinessOf,
 } from "./progression";
 import {
+  choices,
   cramPool,
   cramQuestions,
   CRAM_SIZE,
@@ -384,7 +385,9 @@ describe("cram drills", () => {
     const pool = cramPool(LINES, open);
     expect(pool.length).toBeGreaterThan(100);
     expect(cramQuestions(pool)).toHaveLength(CRAM_SIZE);
-    expect(cramQuestions(pool).every((q) => q.opts.includes(q.a))).toBe(true);
+    expect(
+      cramQuestions(pool).every((q) => q.predict || q.opts.includes(q.a)),
+    ).toBe(true);
   });
 
   it("can be filtered to one division", () => {
@@ -419,8 +422,7 @@ describe("weak spots", () => {
     why: "because",
   });
   const line = LINES.find((l) => l.questions?.length)!;
-  const first = line.questions![0];
-  const second = line.questions![1];
+  const [first, second] = choices(line.questions!);
 
   it("gives a question a stable id that survives a reshuffle", () => {
     expect(qid(line.id, first)).toBe(

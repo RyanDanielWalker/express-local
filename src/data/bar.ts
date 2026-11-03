@@ -1,5 +1,11 @@
-import { FLOWS_PER_RUN, QUESTIONS_PER_RUN } from "../engine/questions";
-import type { Division, Guide, Line, Question, Tier } from "../engine/types";
+import { choices, FLOWS_PER_RUN, QUESTIONS_PER_RUN } from "../engine/questions";
+import type {
+  ChoiceQuestion,
+  Division,
+  Guide,
+  Line,
+  Tier,
+} from "../engine/types";
 
 /**
  * Divisions declared finished. Every line in one of these has to clear the
@@ -40,7 +46,7 @@ export type LengthPosition = "longest" | "middle" | "shortest";
  * Where the answer sits when the options are sorted by length, or null when a
  * tie means no length rule could pick it out.
  */
-export function lengthPosition(q: Question): LengthPosition | null {
+export function lengthPosition(q: ChoiceQuestion): LengthPosition | null {
   const lens = q.opts.map(shownLength);
   const a = shownLength(q.a);
   const only = (n: number) => lens.filter((x) => x === n).length === 1;
@@ -76,10 +82,11 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
   const pools = game
     ? []
     : TIERS.map((t) => {
+        // Predict-first questions are extra on top of the bar (ADR 0024).
         const have =
           line.kind === "flow"
             ? (line.flows ?? []).filter((f) => f.t <= t).length
-            : (line.questions ?? []).filter((q) => q.t <= t).length;
+            : choices(line.questions ?? []).filter((q) => q.t <= t).length;
         const run =
           line.kind === "flow" ? FLOWS_PER_RUN[t] : QUESTIONS_PER_RUN[t];
         return { t, have, run, room: Math.ceil(run * VARIETY) };
@@ -101,7 +108,7 @@ export function auditLine(line: Line, guide: Guide | undefined): BarCheck[] {
 
   // Where the answer sits by length. If one position holds it on more than
   // half the questions, a length rule beats knowing the material.
-  const pool = line.questions ?? [];
+  const pool = choices(line.questions ?? []);
   const counts: Record<LengthPosition, number> = {
     longest: 0,
     middle: 0,

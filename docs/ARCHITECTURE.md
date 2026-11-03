@@ -9,7 +9,7 @@ A single-page React 19 app built with Vite. There is no backend. Everything the 
 ```
 src/
   algorithms/   pure game logic for the algorithm lines, as small state machines, with tests
-  engine/       types, save data, progression and scoring, question picking, readiness, what to do today, the ride clock, with tests
+  engine/       types, save data, progression and scoring, question picking, matching a typed guess, readiness, what to do today, the ride clock, with tests
   data/         all the content, one file per division, plus the quality bar and content tests
   games/        one component per algorithm line, plus QuizRun, QuizGame, FlowGame and SortGame
   components/   screens and shared UI: header, map, Today band, intro, play screen, results, rehearsal, badges
@@ -30,20 +30,21 @@ Three rules hold the code together:
 
 The subway theme runs through the names ([ADR 0001](adr/0001-subway-theme.md)), so here is the map:
 
-| Word                  | What it is                                                                                                                                              |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Division**          | A subject area: `algos`, `nest`, `react`, `ts`. Each has its own row on the map and unlocks on its own. Listed in `DIVISIONS` in `engine/questions.ts`. |
-| **Line**              | One topic inside a division, like Side Track (React effects). The `Line` type in `engine/types.ts`. Shown on the map as a stop with a bullet.           |
-| **Tier**              | How hard a ride is: 1 Local, 2 Express, 3 Rush Hour. Local asks 6 questions, Express 8, Rush Hour 10 and turns the helper panels off.                   |
-| **Ride, trip, run**   | One play of a line at a tier.                                                                                                                           |
-| **Question**          | A multiple-choice item in a line's pool. `t` is the lowest tier it can appear on.                                                                       |
-| **Puzzle, last stop** | The sort or flow a quiz run ends on.                                                                                                                    |
-| **Sort**              | Put each card in the right box.                                                                                                                         |
-| **Flow**              | Put steps in the order they actually run. Decoys are steps that do not happen in that scenario.                                                         |
-| **Field guide**       | The study notes for a line: plain intro, vocabulary, a code example, talking points, the gotcha, and rehearsal prompts. The `Guide` type.               |
-| **Rehearse**          | Answer a prompt out loud, then compare with the model answer.                                                                                           |
-| **Station**           | Only in the algorithm games: a node in a graph you click through.                                                                                       |
-| **The bar**           | The checks a line has to pass to count as done. See below.                                                                                              |
+| Word                  | What it is                                                                                                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Division**          | A subject area: `algos`, `nest`, `react`, `ts`. Each has its own row on the map and unlocks on its own. Listed in `DIVISIONS` in `engine/questions.ts`.                            |
+| **Line**              | One topic inside a division, like Side Track (React effects). The `Line` type in `engine/types.ts`. Shown on the map as a stop with a bullet.                                      |
+| **Tier**              | How hard a ride is: 1 Local, 2 Express, 3 Rush Hour. Local asks 6 questions, Express 8, Rush Hour 10 and turns the helper panels off.                                              |
+| **Ride, trip, run**   | One play of a line at a tier.                                                                                                                                                      |
+| **Question**          | A multiple-choice item in a line's pool. `t` is the lowest tier it can appear on.                                                                                                  |
+| **Predict-first**     | A question with no options: the player types what the code gives, like the type of `x`, before anything else shows ([ADR 0024](adr/0024-how-a-predict-first-guess-is-checked.md)). |
+| **Puzzle, last stop** | The sort or flow a quiz run ends on.                                                                                                                                               |
+| **Sort**              | Put each card in the right box.                                                                                                                                                    |
+| **Flow**              | Put steps in the order they actually run. Decoys are steps that do not happen in that scenario.                                                                                    |
+| **Field guide**       | The study notes for a line: plain intro, vocabulary, a code example, talking points, the gotcha, and rehearsal prompts. The `Guide` type.                                          |
+| **Rehearse**          | Answer a prompt out loud, then compare with the model answer.                                                                                                                      |
+| **Station**           | Only in the algorithm games: a node in a graph you click through.                                                                                                                  |
+| **The bar**           | The checks a line has to pass to count as done. See below.                                                                                                                         |
 
 ## How content is structured
 
@@ -82,6 +83,21 @@ The full type is `Line` in `engine/types.ts`. The fields that matter most:
 }
 ```
 
+A predict-first question has no options. It has `predict`, which says what kind of answer it is, and must have `code`:
+
+```ts
+{
+  t: 2,
+  predict: 'type',                       // the answer is a TypeScript type
+  q: '`strict` is on. What is the type of `x`?',
+  code: "const x = first([1, 'a']);",    // required: the thing to predict
+  a: 'string | number | undefined',      // the proven answer, as code, without backticks
+  why: '...',                            // why it is that, and why the tempting guess is not
+}
+```
+
+`Question` is a union of `ChoiceQuestion` and `PredictQuestion`, so code that reads `opts` has to check `predict` first. `choices()` in `engine/questions.ts` filters a pool down to the choice questions.
+
 A question's identity is its line id plus a hash of its `q` and `code` (`qid()` in `engine/questions.ts`). The player's history for a question (seen, missed, shaky) is keyed by it. So rewording `q` or `code`, or moving the question to another line, starts its history over. Editing options or `why` does not.
 
 ### Puzzles and guides
@@ -99,7 +115,7 @@ Copy supports `` `code` `` and `**bold**`, rendered by `<Rich />`, which wraps i
 Each screen is either deciding or doing (`isDoing()` in `lib/modes.ts`). Deciding screens (the intro, results and derailed) show the full header, the map, the badges and the save box; the intro also shows the Today band and the cram band. Doing screens (a ride, a drill, rehearsal, the code check) hide all of that, so the ride gets the page. The header shrinks to the name and a **Back to the map** button, which drops the ride at no cost, and the page scrolls to the top. A new screen kind has to be added to the table in `lib/modes.ts`, or the typecheck fails.
 
 1. **Pick.** `pickQuestions()` draws the tier's questions, putting unseen and shaky ones first. `pickPuzzle()` picks the last stop and rotates it from ride to ride.
-2. **Play.** `PlayScreen` owns hearts, XP and the clock. `QuizRun` plays the questions through `QuizGame`, then the puzzle through `SortGame` or `FlowGame`. Algorithm lines play their own component from `games/index.ts`. Every game gets a `GameApi` (`say`, `correct`, `wrong`, `record`, `hold`, `resume`, `finish`, `tier`, `assist`, `over`). The clock is `engine/clock.ts`. It pauses while a game holds it for reading and while the tab is hidden. Each reason is held and released on its own, so coming back to the tab does not restart a clock paused for reading. A window that only loses focus still shows the question, so the clock keeps running then.
+2. **Play.** `PlayScreen` owns hearts, XP and the clock. `QuizRun` plays the questions through `QuizGame`, then the puzzle through `SortGame` or `FlowGame`. `QuizGame` plays both kinds of question. A predict-first one shows a guess box and nothing else. `guessMatches()` in `engine/predict.ts` decides whether the guess counts by itself. For a type, it ignores spacing and the order of a top-level union's members, and compares anything with a `=>`, `extends` or `?` outside brackets as written, since reordering around those can change the type. A guess it does not match shows beside the proven answer, with "I had it" and "I missed it" buttons (or 1 and 2). Marking moves straight on, because the explanation was already on screen. A miss costs a heart like any wrong answer. Algorithm lines play their own component from `games/index.ts`. Every game gets a `GameApi` (`say`, `correct`, `wrong`, `record`, `hold`, `resume`, `finish`, `tier`, `assist`, `over`). The clock is `engine/clock.ts`. It pauses while a game holds it for reading and while the tab is hidden. Each reason is held and released on its own, so coming back to the tab does not restart a clock paused for reading. A window that only loses focus still shows the question, so the clock keeps running then.
 3. **Score.** `finishTrip()` returns the new save: tier cleared, the next review date (Leitner boxes at 1, 3, 7, 14 and 30 days), XP, streak, badges and personal bests. `recordAnswers()` updates per-question history.
 4. **Show.** `Results` renders what `finishTrip()` returned.
 
@@ -120,12 +136,12 @@ A save from `localStorage` or a pasted code is untrusted input, and `migrate()` 
 All of it runs on every `npm test`:
 
 - **TypeScript types.** `Line`, `Question`, `Sort`, `Flow` and `Guide` are typed, so a missing or misnamed field fails `npm run typecheck`. Each division's ids are a union type (`ReactLineId` and friends), so a typo in an id fails too.
-- **`data/data.test.ts`** checks every line: unique ids and bullets, a guide and par for every line, the content each kind needs, every answer among its options, no answer 1.35x longer than its distractors, flows solvable and varied, sorts solvable with no card named after its own box, no em dashes in player-facing copy or field guides, and question ids unique inside a line.
-- **`data/bar.ts` and `bar.test.ts`** are the quality bar from [the roadmap](ROADMAP.md#the-bar): every tier can fill a run with 1.5x room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha, a puzzle beyond recognition, and no length position (longest, middle or shortest) holding the answer on more than half a line's questions. Divisions in `FINISHED` fail the tests if any line slips. `npm run bar` prints where every line stands.
+- **`data/data.test.ts`** checks every line: unique ids and bullets, a guide and par for every line, the content each kind needs, every answer among its options, every predict-first question with code and an answer its own exact text matches (no backticks around it), no answer 1.35x longer than its distractors, flows solvable and varied, sorts solvable with no card named after its own box, no em dashes in player-facing copy or field guides, and question ids unique inside a line.
+- **`data/bar.ts` and `bar.test.ts`** are the quality bar from [the roadmap](ROADMAP.md#the-bar). Only choice questions count toward it; predict-first questions are extra ([ADR 0024](adr/0024-how-a-predict-first-guess-is-checked.md)). Every tier can fill a run with 1.5x room to vary, two puzzles on Local, three rehearsal prompts, talking points and a gotcha, a puzzle beyond recognition, and no length position (longest, middle or shortest) holding the answer on more than half a line's questions. Divisions in `FINISHED` fail the tests if any line slips. `npm run bar` prints where every line stands.
 - **`components/results.test.tsx`** renders the results screen for every line.
 - **`styles/contrast.test.ts`** reads `app.css` and checks every rule that puts text on a background against WCAG AA (4.5:1, or 3:1 for large text) in light and dark, using the color variables. A rule drawn in a line's color (`var(--c)`) is checked for every line, unless `LINE_RULES` narrows it. It also keeps the two copies of the dark theme identical, and fails if a component sets a color inline, where it cannot see it. See [ADR 0020](adr/0020-accessibility-as-tests.md).
 
-The end-to-end tests run outside `npm test`. The first in `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). Before the first ride it boards at phone width, checks the map and badges collapse and the ride starts at the top of the screen, and leaves by **Back to the map**. It checks the URL at each step, presses Back and Forward mid-ride, and at the end opens the line by its URL in the fresh browser. Along the way it runs axe (labels, button names, contrast and the rest of WCAG 2.2 AA) and checks nothing is wider than the screen: the first ride at 375px in light mode, the second at desktop width in dark mode. It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle. A second test opens a locked React line by its URL, runs a React-only cram drill out of hearts, and checks the ending is about the drill: no field guide, and **Try again** starts another drill. It checks the misses come back as shaky questions, then finishes a drill and checks **Drill again** starts another. It runs axe on a drill question and both endings. It opens that locked line with the same headers as the deploy (see "Deploy" below), so a file the Content-Security-Policy blocks shows up as a console error and fails both tests.
+The end-to-end tests run outside `npm test`. The first in `e2e/ride.spec.ts` rides Repaint Line twice on Local in Chromium, against the production build served by `vite preview`, then moves the save code into a fresh browser (`npm run e2e`, see [DEVELOPMENT.md](DEVELOPMENT.md#checking-the-app)). Before the first ride it boards at phone width, checks the map and badges collapse and the ride starts at the top of the screen, and leaves by **Back to the map**. It checks the URL at each step, presses Back and Forward mid-ride, and at the end opens the line by its URL in the fresh browser. Along the way it runs axe (labels, button names, contrast and the rest of WCAG 2.2 AA) and checks nothing is wider than the screen: the first ride at 375px in light mode, the second at desktop width in dark mode. It reads the right answers from `src/data`. It expects that line to have exactly one Local flow and one Local sort, so its two rides cover both kinds of puzzle. A second test opens a locked React line by its URL, runs a React-only cram drill out of hearts, and checks the ending is about the drill: no field guide, and **Try again** starts another drill. It checks the misses come back as shaky questions, then finishes a drill and checks **Drill again** starts another. It runs axe on a drill question and both endings. The answer helpers in both tests answer either kind of question. The second test opens that locked line with the same headers as the deploy (see "Deploy" below), so a file the Content-Security-Policy blocks shows up as a console error and fails both tests.
 
 What the tests cannot check is whether a claim is true. That is what `probes/` and the fact-check pass are for. See [DEVELOPMENT.md](DEVELOPMENT.md#checking-content).
 
@@ -146,6 +162,15 @@ Two things a plain file server would get wrong:
 2. Search the other lines for a question that already tests the same fact. If there is one, take a different angle.
 3. Add it to the line's `questions` array in its division file.
 4. Run `npm test` and `npm run bar`. If the length check complains, rewrite the options as parallel claims rather than padding the wrong ones.
+
+### A predict-first question
+
+1. Pick a snippet whose result a player should be able to work out, and prove that result in `probes/`. For a type: a `predict.ts` in the line's folder in `probes/ts`, asserting the exact type under TypeScript 5.9, 6.0 and 7.0, plus the likely wrong guesses as `false`, and a `neg-predict` config that must fail.
+2. Write `a` the way TypeScript prints the type, without backticks. A guess with different spacing or union order still matches it.
+3. Write `why` to say why it is that, and what the tempting wrong guess was.
+4. Add it to the line's `questions` with `predict: 'type'`. It does not count toward the bar, and has no options to balance.
+
+Only `'type'` exists so far. A React or NestJS question ("what the button shows", "what the request returns") needs a new `predict` kind and its own matching rule in `guessMatches()`, because reordering around a `|` is only safe for types.
 
 ### A puzzle
 

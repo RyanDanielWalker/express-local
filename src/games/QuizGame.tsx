@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { guessMatches } from "../engine/predict";
 import { pickQuestions, solidIn } from "../engine/questions";
 import type { Question } from "../engine/types";
 import { useKeys } from "../hooks/useKeys";
@@ -8,6 +9,9 @@ import { Panel } from "./parts";
 import type { GameProps } from "./types";
 
 const PROMPT = "Pick the answer you would give out loud in an interview.";
+const PREDICT_PROMPT = "No options on this one. Type what you think it is.";
+const promptFor = (q: Question | undefined) =>
+  q?.predict ? PREDICT_PROMPT : PROMPT;
 
 /**
  * Multiple choice drill. Wrong costs a heart, and every answer shows why.
@@ -15,6 +19,12 @@ const PROMPT = "Pick the answer you would give out loud in an interview.";
  * Nothing advances on a timer. The explanation is the teaching, and the old
  * 1.5 second auto-advance meant you never read it, least of all when you were
  * right, which is exactly when it catches you being right for a bad reason.
+ *
+ * A predict-first question has no options. The player types a guess before
+ * anything else shows. A guess `guessMatches()` accepts counts by itself;
+ * any other guess shows beside the proven answer, and the player says
+ * whether they had it (ADR 0024). Marking moves straight on, since the
+ * explanation was on screen while they decided.
  */
 export function QuizGame({ api, line, role, history }: GameProps) {
   const [items] = useState<Question[]>(() =>
@@ -31,17 +41,21 @@ export function QuizGame({ api, line, role, history }: GameProps) {
   const [opts, setOpts] = useState<string[]>(() =>
     shuffle([...(items[0]?.opts ?? [])]),
   );
+  /** The option picked, or the guess checked. Null while still deciding. */
   const [picked, setPicked] = useState<string | null>(null);
+  /** Whether the answer counted. Null until it is scored. */
+  const [right, setRight] = useState<boolean | null>(null);
+  const [draft, setDraft] = useState("");
   const [marks, setMarks] = useState<("ok" | "no")[]>([]);
-  useEffect(() => api.say(PROMPT), [api]);
+  useEffect(() => api.say(promptFor(items[0])), [api, items]);
 
   const q = items[i];
   const last = i + 1 >= items.length;
 
-  function choose(o: string) {
-    if (api.over || picked || !q) return;
-    const ok = o === q.a;
-    setPicked(o);
+  /** Score the answer: a heart and XP, the history, and the clock held for reading. */
+  function score(ok: boolean) {
+    if (!q) return;
+    setRight(ok);
     setMarks((m) => [...m, ok ? "ok" : "no"]);
     api.record(q, ok);
     if (ok) api.correct(10, "Correct. Read why before you move on.");
@@ -49,25 +63,61 @@ export function QuizGame({ api, line, role, history }: GameProps) {
     api.hold();
   }
 
-  function next() {
-    if (api.over || !picked) return;
-    api.resume();
-    if (last) return api.finish();
-    setI(i + 1);
-    setOpts(shuffle([...items[i + 1].opts]));
-    setPicked(null);
-    // Clear the last verdict, or "Not quite" sits over a question not yet answered.
-    api.say(PROMPT);
+  function choose(o: string) {
+    if (api.over || picked || !q || q.predict) return;
+    setPicked(o);
+    score(o === q.a);
   }
 
-  // Number keys pick, space or enter moves on, so a fast run never needs the mouse.
+  function check() {
+    const guess = draft.trim();
+    if (api.over || picked !== null || !q?.predict || !guess) return;
+    setPicked(guess);
+    if (guessMatches(q, guess)) return score(true);
+    // Not a match: the player compares, and the clock waits while they read.
+    api.say("Compare your guess with the answer, then say whether you had it.");
+    api.hold();
+  }
+
+  /** The player's own verdict on a guess that did not match. */
+  function mark(had: boolean) {
+    if (api.over || picked === null || right !== null) return;
+    score(had);
+    if (!api.over) advance();
+  }
+
+  function next() {
+    if (api.over || right === null) return;
+    advance();
+  }
+
+  function advance() {
+    api.resume();
+    if (last) return api.finish();
+    const upcoming = items[i + 1];
+    setI(i + 1);
+    setOpts(shuffle([...(upcoming.opts ?? [])]));
+    setPicked(null);
+    setRight(null);
+    setDraft("");
+    // Clear the last verdict, or "Not quite" sits over a question not yet answered.
+    api.say(promptFor(upcoming));
+  }
+
+  // Number keys pick (or mark a guess), space or enter moves on, so a fast
+  // run never needs the mouse. Keys typed into the guess box are left alone.
   useKeys((e) => {
     if (api.over) return;
-    if (picked) {
+    if (right !== null) {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         next();
       }
+      return;
+    }
+    if (q?.predict) {
+      if (picked !== null && (e.key === "1" || e.key === "2"))
+        mark(e.key === "1");
       return;
     }
     const n = Number(e.key);
@@ -75,6 +125,12 @@ export function QuizGame({ api, line, role, history }: GameProps) {
   });
 
   if (!q) return null;
+
+  const continueLabel = !last
+    ? "Continue"
+    : role === "opener"
+      ? "On to the last stop"
+      : "See how you did";
 
   return (
     <>
@@ -87,6 +143,7 @@ export function QuizGame({ api, line, role, history }: GameProps) {
           </div>
           <div className="eyebrow">
             Question {i + 1} of {items.length}
+            {q.predict && " · Predict it"}
           </div>
           <p className="q">
             <Rich text={q.q} />
@@ -96,46 +153,110 @@ export function QuizGame({ api, line, role, history }: GameProps) {
               {q.code}
             </pre>
           )}
-          <div className="opts stack">
-            {opts.map((o, k) => (
-              <button
-                key={o}
-                disabled={!!picked}
-                className={
-                  picked && o === q.a
-                    ? "right"
-                    : picked === o
-                      ? "wrongpick"
-                      : ""
-                }
-                onClick={() => choose(o)}
+          {q.predict ? (
+            picked === null ? (
+              <form
+                key={i}
+                className="guess"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  check();
+                }}
               >
-                <span className="kb" aria-hidden="true">
-                  {k + 1}
-                </span>
-                <Rich text={o} />
-              </button>
-            ))}
-          </div>
-          {picked && (
-            <>
+                <label htmlFor="guess">Your guess</label>
+                <div className="guess-row">
+                  <input
+                    id="guess"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    autoFocus
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                  <button className="btn" disabled={!draft.trim()}>
+                    Check
+                  </button>
+                </div>
+              </form>
+            ) : (
               <div className="why">
-                <b>{picked === q.a ? "Right" : "The answer is: " + q.a}</b>
+                <b>
+                  {right === true
+                    ? "Right"
+                    : right === false
+                      ? "Missed"
+                      : "Compare them"}
+                </b>
+                <dl className="compare">
+                  <dt>You typed</dt>
+                  <dd>
+                    <code className="solo">{picked}</code>
+                  </dd>
+                  <dt>The answer</dt>
+                  <dd>
+                    <code className="solo">{q.a}</code>
+                  </dd>
+                </dl>
                 <Rich text={q.why} />
               </div>
+            )
+          ) : (
+            <>
+              <div className="opts stack">
+                {opts.map((o, k) => (
+                  <button
+                    key={o}
+                    disabled={!!picked}
+                    className={
+                      picked && o === q.a
+                        ? "right"
+                        : picked === o
+                          ? "wrongpick"
+                          : ""
+                    }
+                    onClick={() => choose(o)}
+                  >
+                    <span className="kb" aria-hidden="true">
+                      {k + 1}
+                    </span>
+                    <Rich text={o} />
+                  </button>
+                ))}
+              </div>
+              {picked && (
+                <div className="why">
+                  <b>{picked === q.a ? "Right" : "The answer is: " + q.a}</b>
+                  <Rich text={q.why} />
+                </div>
+              )}
+            </>
+          )}
+          {q.predict && picked !== null && right === null && (
+            <>
+              <p className="hint" style={{ margin: 0 }}>
+                Same type written another way? That counts. The clock is paused.
+              </p>
               <div className="decide">
-                <button className="btn big" onClick={next} autoFocus>
-                  {!last
-                    ? "Continue"
-                    : role === "opener"
-                      ? "On to the last stop"
-                      : "See how you did"}
+                <button className="btn" onClick={() => mark(true)}>
+                  <kbd aria-hidden="true">1</kbd> I had it
                 </button>
-                <span className="hint" style={{ margin: 0 }}>
-                  or press space. The clock is paused.
-                </span>
+                <button className="btn ghost" onClick={() => mark(false)}>
+                  <kbd aria-hidden="true">2</kbd> I missed it
+                </button>
               </div>
             </>
+          )}
+          {right !== null && (
+            <div className="decide">
+              <button className="btn big" onClick={next} autoFocus>
+                {continueLabel}
+              </button>
+              <span className="hint" style={{ margin: 0 }}>
+                or press space. The clock is paused.
+              </span>
+            </div>
           )}
         </div>
       </div>

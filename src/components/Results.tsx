@@ -120,7 +120,8 @@ export function Results({
                 </p>
                 <p className="ra">
                   <b>
-                    <Rich text={question.a} />
+                    {/* A predict-first answer is all code, shown as written. */}
+                    {question.predict ? question.a : <Rich text={question.a} />}
                   </b>
                 </p>
                 <p className="rw">

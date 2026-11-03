@@ -29,18 +29,41 @@ export type LineKind =
   | "quiz" // multiple choice drilled from a question pool
   | "flow"; // put the steps of a process in the right order
 
-/** One multiple-choice question. `t` is the lowest tier it shows up on. */
-export interface Question {
+/** What every question has. `t` is the lowest tier it shows up on. */
+interface Asked {
   t: Tier;
   /** Set when a question is lifted out of its line (cram drills). */
   from?: string;
   q: string;
+  why: string;
+}
+
+/** One multiple-choice question. */
+export interface ChoiceQuestion extends Asked {
+  predict?: undefined;
   code?: string;
   opts: string[];
   /** The correct option, matched by exact text. */
   a: string;
-  why: string;
 }
+
+/**
+ * A predict-first question: the player types what the code gives before
+ * anything else shows. No options. `predict` says what kind of answer it is,
+ * which decides how a guess is matched (`guessMatches()` in `predict.ts`).
+ * See ADR 0024.
+ */
+export interface PredictQuestion extends Asked {
+  /** `type`: the answer is a TypeScript type, like `string[]`. */
+  predict: "type";
+  code: string;
+  opts?: undefined;
+  /** The proven answer, written as code but without backticks. Shown in the code font. */
+  a: string;
+}
+
+/** A question in a line's pool. Check `predict` before reading `opts`. */
+export type Question = ChoiceQuestion | PredictQuestion;
 
 /** One ordering puzzle: put `steps` back in order. */
 export interface Flow {
