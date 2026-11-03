@@ -1,6 +1,6 @@
 # 0018. Ryan's own piece of core code moves to after 1.0
 
-Status: Accepted (2026-10-27). Amends the written 1.0 from [0010](0010-a-portfolio-piece-with-a-1-0.md).
+Status: Accepted (2026-10-27). Amends the written 1.0 from [0010](0010-a-portfolio-piece-with-a-1-0.md). Amended by [0022](0022-nothing-waits-on-ryan-learning-the-code.md): the learn-mode piece leaves Parked, and the case study and `/audit quiz` are no longer Ryan's own work in 1.0.
 
 ## Context
 

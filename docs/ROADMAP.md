@@ -12,7 +12,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 4. NestJS, TypeScript and React have no near-duplicate questions.
 5. The interface a visitor notices first: play mode takes the screen, a Today band says what to do now, and a router makes Back work and gives every line a URL.
 6. A pasted save code is validated before it is trusted, and one end-to-end test rides a line against the production build.
-7. Ryan passed an `/audit quiz`, wrote the case study in his own words, and tagged `v1.0`.
+7. The case study is written and `v1.0` is tagged ([ADR 0022](adr/0022-nothing-waits-on-ryan-learning-the-code.md)).
 
 **Frozen.** New findings go to Parked unless they are a security hole, a bug a visitor would hit, or embarrassing on the first screen. The backend is 2.0, not 1.0.
 
@@ -91,8 +91,7 @@ What a visitor notices first. In this order:
 
 - [x] **Drill ending screens act on the drill, not the selected line.** Found by the first audit. A drill's screen now remembers which drill it is (cram, or shaky on one line or all), so its derailed and results screens show the drill, not the selected line's field guide or talking point, and **Try again** and **Drill again** start the same drill. A shaky drill with nothing left hides **Drill again**. `board()` refuses a locked line. A drill that runs out of hearts saves each answer under the line it came from (`ownerOf()` in `engine/questions.ts`), so its misses show as shaky. Tested by `ownerOf()`'s unit test and a second end-to-end test that derails a drill with a locked line selected. The results screen's "twice in a row" (finding 3) is fixed too: one right answer cancels one miss.
 - [x] **Deploy** the static build from `main`, with security headers ([ADR 0021](adr/0021-deploy-to-cloudflare-from-ci.md)). Live on 2026-11-02 at https://express-local.ryandanielwalker.workers.dev. The repo stays public, Cloudflare hosts it, and the last CI step runs `wrangler deploy` on a push to `main` once every check passes. Every path serves `index.html`, and the headers live in `src/lib/securityHeaders.ts`. The end-to-end test runs under the same Content-Security-Policy. Checked live: `/`, `/nest/life` and a ride URL answer 200 with every header, `_headers` itself is not served, and both end-to-end tests pass against the live URL. The meta description is fixed.
-- [ ] `/audit quiz`: Ryan answers the likely interview questions about the app, one at a time.
-- [ ] **The case study**, `docs/CASE-STUDY.md`, written by Ryan in his own words: what was built, what broke, what was decided and why, and how he worked with Claude. Claude can review it, not write it.
+- [ ] **The case study**, `docs/CASE-STUDY.md`, written by Claude in the third person and saying so: what was built, what broke, what was decided and why, and how Ryan worked with Claude. Ryan reviews it like any other commit ([ADR 0022](adr/0022-nothing-waits-on-ryan-learning-the-code.md)).
 - [ ] Tag `v1.0`, then decide what's next from **Parked**, and record the decision in an ADR.
 
 ## The bar
@@ -157,7 +156,6 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 
 ## Parked for now
 
-- **A piece of core code written by Ryan with `/next learn`.** Moved out of 1.0 at Ryan's call ([ADR 0018](adr/0018-learn-mode-after-1-0.md)). First in line once `v1.0` is tagged.
 - **Predict-first questions.** Show a snippet and ask what it gives you before showing any options: the type of `x` here, what the button shows, what the handler returns. The learner commits to a guess, then sees the answer and the explanation. It is the guess-then-get-corrected loop from Ryan's generics session on 2026-11-02, which taught more than reading questions did, without needing AI. Every snippet gets a probe in `probes/` that asserts the real type or output under `tsc` or the running code, so each answer is proven like any other. TypeScript first (Generic Line is the obvious start), then React and NestJS. Parked, not 1.0: it is a new question type, and 1.0 is frozen. Open question: how a typed guess is checked (pick from options after guessing, or compare the typed answer to the proven one).
 - **Algorithms question pools.** Eleven lines, no question pools, so they contribute almost nothing to cram and their readiness has no recall component. Worth fixing, explicitly not now.
 - **New divisions.** SQL and Postgres, GraphQL, Git as a train yard.
