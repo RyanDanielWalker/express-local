@@ -46,3 +46,90 @@ export const thirdCounts: Expect<typeof later, string | number | undefined> = tr
 declare function both<T>(a: T, b: T): T;
 // @ts-expect-error  Argument of type '"a"' is not assignable to parameter of type '1'.
 both(1, "a");
+
+// ---------------------------------------------------------------------------
+// "`strict` is on. What is the type of `n`?" (Local) Answer: number | undefined.
+// Map's own declaration: get(key: K): V | undefined. predict-loose.ts shows
+// that with `strict` off, the undefined drops out.
+const scores = new Map<string, number>();
+scores.set("ann", 10);
+const n = scores.get("ann");
+export const mapRight: Expect<typeof n, number | undefined> = true;
+export const mapNotNumber: Expect<typeof n, number> = false;
+export const mapNotNull: Expect<typeof n, number | null> = false;
+// Expect cannot tell `any` apart (it is assignable both ways), so check it directly.
+type IsAny<T> = 0 extends 1 & T ? true : false;
+export const mapNotAny: IsAny<typeof n> = false;
+export const mapNotKeyAndValue: Expect<typeof n, string | number | undefined> = false;
+// TypeScript does not track what was set. Even a has() check does not help.
+export function afterHas() {
+  if (scores.has("ann")) {
+    const v = scores.get("ann");
+    const stillMaybe: Expect<typeof v, number | undefined> = true;
+    return stillMaybe;
+  }
+}
+// So the why's "set() first does not change it" holds: a fresh map gives the same type.
+const fresh = new Map<string, number>();
+const n2 = fresh.get("ann");
+export const sameWithoutSet: Expect<typeof n2, typeof n> = true;
+
+// ---------------------------------------------------------------------------
+// "What is the type of `results`?" (Express) Answer: [User, number].
+type User = { name: string };
+declare function getUser(): Promise<User>;
+declare function getCount(): Promise<number>;
+const results = await Promise.all([getUser(), getCount()]);
+export const allRight: Expect<typeof results, [User, number]> = true;
+export const allNotArray: Expect<typeof results, (User | number)[]> = false;
+export const allNotPromises: Expect<typeof results, [Promise<User>, Promise<number>]> = false;
+export const allNotPromiseOfTuple: Expect<typeof results, Promise<[User, number]>> = false;
+export const allNotReadonly: Expect<typeof results, readonly [User, number]> = false;
+// So each position keeps its own type.
+const [u, c] = results;
+export const firstIsUser: Expect<typeof u, User> = true;
+export const secondIsNumber: Expect<typeof c, number> = true;
+// Why: the `| []` in Promise.all's constraint makes TypeScript read an array
+// literal as a tuple. The same signature without it gives a plain array.
+declare function asTuple<T extends readonly unknown[] | []>(values: T): T;
+declare function asArray<T extends readonly unknown[]>(values: T): T;
+const tup = asTuple([1, "a"]);
+const arr = asArray([1, "a"]);
+export const withEmptyTupleIsTuple: Expect<typeof tup, [number, string]> = true;
+export const withoutIsArray: Expect<typeof arr, (string | number)[]> = true;
+// Put the promises in a variable first, and the positions are gone.
+const pending = [getUser(), getCount()];
+const lost = await Promise.all(pending);
+export const variableLosesPositions: Expect<typeof lost, (User | number)[]> = true;
+// Only a plain array variable loses them. `as const` or a tuple type keeps them,
+// so the why names the plain `const list = [...]` case, not "any variable".
+const pendingConst = [getUser(), getCount()] as const;
+const kept = await Promise.all(pendingConst);
+export const asConstKeeps: Expect<typeof kept, [User, number]> = true;
+const pendingTuple: [Promise<User>, Promise<number>] = [getUser(), getCount()];
+const keptToo = await Promise.all(pendingTuple);
+export const tupleTypeKeeps: Expect<typeof keptToo, [User, number]> = true;
+
+// ---------------------------------------------------------------------------
+// "What is the type of `values`?" (Rush Hour) Answer: (string | number)[].
+declare function pluck<T, K extends keyof T>(obj: T, keys: K[]): T[K][];
+const user = { id: "1", age: 38 };
+const values = pluck(user, ["id", "age"]);
+export const pluckRight: Expect<typeof values, (string | number)[]> = true;
+export const pluckSameAsArrayOf: Expect<typeof values, Array<number | string>> = true;
+export const pluckNotTuple: Expect<typeof values, [string, number]> = false;
+export const pluckNotKeys: Expect<typeof values, ("id" | "age")[]> = false;
+export const pluckNotStrings: Expect<typeof values, string[]> = false;
+export const pluckNotUnknown: Expect<typeof values, unknown[]> = false;
+export const pluckNotOneOrOther: Expect<typeof values, string[] | number[]> = false;
+// K is the union of the two keys, and T[K] with a union key is the union of their values.
+declare function keysOf<T, K extends keyof T>(obj: T, keys: K[]): K;
+const k = keysOf(user, ["id", "age"]);
+export const kIsUnion: Expect<typeof k, "id" | "age"> = true;
+export const indexedByUnion: Expect<(typeof user)["id" | "age"], string | number> = true;
+// One key gives that key's value type: the existing `get` question's fact, not this one.
+const justAge = pluck(user, ["age"]);
+export const oneKey: Expect<typeof justAge, number[]> = true;
+// Reversing the keys gives the same type: the order is not recorded.
+const reversed = pluck(user, ["age", "id"]);
+export const orderIgnored: Expect<typeof reversed, typeof values> = true;
