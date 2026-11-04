@@ -223,17 +223,6 @@ export function cramQuestions(
   return shuffle([...weak, ...rest.slice(0, count - weak.length)]);
 }
 
-/** Lines that are due for review today, in map order. */
-export const dueLines = (
-  lines: Line[],
-  save: SaveData,
-  now = Date.now(),
-): Line[] =>
-  lines.filter((l) => {
-    const p = save.levels[l.id];
-    return !!p?.cleared && now >= p.due;
-  });
-
 /* ---------- per-question history ---------- */
 
 /** Stable id for a question, derived from its text so it survives edits elsewhere. */

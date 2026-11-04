@@ -111,7 +111,7 @@ Honest limits, all recorded on the [roadmap](ROADMAP.md) under **Parked**:
 - **The algorithm lines are behind.** They were not written to the clarity standard, do not clear the bar, and six of the games keep their helper panels on at Rush Hour.
 - **`App.tsx` has no tests of its own.** The drill-ending bug lived there. Splitting it into smaller pieces that can be tested is parked.
 - **Keyboard focus does not move to new content** when a screen changes, which slows a keyboard player down in flow puzzles.
-- **Riding a line every day can keep its review from ever coming due**, because an early ride resets the timer without moving the line up a box.
+- **Riding a line every day can keep its review from ever coming due**, because an early ride resets the timer without moving the line up a box. Fixed on 2026-11-04 ([ADR 0027](adr/0027-early-rides-and-calendar-days.md)).
 - **The bundle is over 700 kB**, with every question in one file.
 
 ## Results

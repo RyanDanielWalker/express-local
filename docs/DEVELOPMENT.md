@@ -60,7 +60,7 @@ Every push and pull request runs `.github/workflows/ci.yml` on GitHub Actions, o
 2. `npm run format:check`
 3. `npm run lint`
 4. `npm run typecheck`
-5. `npm test`, which includes the bar
+5. `npm test`, which includes the bar, in New York time (`TZ: America/New_York`), so a test can catch a review pushed a day late by daylight saving
 6. `npm run check` in `probes/ts`
 7. `npm run build`
 8. Download Chromium, then run the end-to-end tests against that build (`npx playwright test`, see "Checking the app")

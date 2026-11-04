@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Done, and tagged `v1.0` on 2026-11-03.** Until the tag, 1.0 was frozen: new findings went to Parked unless they were a security hole, a bug a visitor would hit, or embarrassing on the first screen. The freeze ended with the tag, and the next block was picked from Parked ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md)). The backend is still 2.0.
 
-Status: 34 lines across 4 divisions, 162 tests plus three end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-11-03, after the predict-first TypeScript block (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 166 tests plus three end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-11-03, after the predict-first TypeScript block (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -112,10 +112,10 @@ Show a snippet and ask what it gives you before showing any options: the type of
 
 ### 9. Early rides
 
-Riding a line before it is due resets its due date, but only a due ride moves it up a box (`finishTrip()` in `src/engine/progression.ts`). Clear a line at 8pm, ride it at 7pm each day after, and it stays in the first box with no review ever counted. The Daily Ride can lead there, since it picks from every unlocked line. Found by the first audit, ranked first by the second ([ADR 0026](adr/0026-fix-early-rides-next.md)).
+Riding a line before it is due resets its due date, but only a due ride moves it up a box (`finishTrip()` in `src/engine/progression.ts`). Clear a line at 8pm and ride it at 7pm each day after. The first ride is an hour early and counts for nothing. The second lands exactly on time and moves it up to the 3-day box. After that, each daily ride pushes the review back again, and no ride ever counts. The Daily Ride can lead there, since it picks from every unlocked line. Found by the first audit, ranked first by the second ([ADR 0026](adr/0026-fix-early-rides-next.md)).
 
 - [x] **Decide the fix.** Both: a review is due from the start of its due day, and an early ride leaves the box and the due date alone. Ryan's call on 2026-11-04 ([ADR 0027](adr/0027-early-rides-and-calendar-days.md)).
-- [ ] **Fix it** in `src/engine/`, with a test that replays the 8pm-then-7pm example and fails before the fix. No save field. Update the Today band's tests if what counts as due changes, and the README if it describes reviews.
+- [x] **Fix it** in `src/engine/`, on 2026-11-04. `isDue()` compares calendar days, a new due date is a whole number of calendar days later (`addDays()`), and only a first clear or a due ride moves the box or the due date. A test replays ten days of 8pm-then-7pm rides: two reviews now, one before. The intro and results screens count days the same way. A test schedules a review from 11:30pm on every day of a year, which catches a review pushed a day late by a 23-hour day, so CI now runs the tests in New York time (UTC has no daylight saving). The Today band's tests needed no change. The unused `dueLines()`, a second copy of the due check, was removed.
 
 ### 10. Predict-first questions: React and NestJS
 
@@ -309,3 +309,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-11-03** Predict-first questions on the other five TypeScript lines, three each, one per tier: Narrow Gauge, Utility Yard, Unknown Territory, Shape Yard and Typed Components
 - **2026-11-03** Inventory stop after the predict-first TypeScript block: a fresh fact-check of all 19, the second audit, and the bar now requires a predict-first question on every tier of a TypeScript line ([ADR 0025](adr/0025-predict-first-questions-in-the-bar.md)). Early rides come next ([ADR 0026](adr/0026-fix-early-rides-next.md))
 - **2026-11-04** How early rides are fixed: due by calendar day, and an early ride leaves the review alone ([ADR 0027](adr/0027-early-rides-and-calendar-days.md))
+- **2026-11-04** Early rides fixed: a review counts any time on its due day, and riding a line early no longer pushes its review back. CI runs the tests in New York time so a daylight saving bug can fail them

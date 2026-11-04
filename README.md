@@ -92,7 +92,7 @@ Every claim is proven with the compiler, with `strict` on, under TypeScript 5.9,
 
 - **A Today band.** The top of the page says what to do right now, most urgent first: a review that is due, the shaky questions, the daily ride, then the next line not yet cleared. Below it, each division is a collapsed header with its readiness bar, and only the division in play starts open.
 - **Readiness.** The headline number is a 0 to 100 score per division, built from what has been cleared, at which tier, how far along its review schedule, and how much of the question pool is solid. It falls on its own as reviews go overdue, so it reflects what would come back today rather than what was done once.
-- **Spaced repetition.** Clearing a line schedules a review at 1, 3, 7, 14, then 30 days, using a Leitner box. An on-time review with at most one mistake grows the gap; a rougher one shrinks it.
+- **Spaced repetition.** Clearing a line schedules a review at 1, 3, 7, 14, then 30 days, using a Leitner box. An on-time review with at most one mistake grows the gap; a rougher one shrinks it. A review counts any time on its due day, and riding a line early is extra practice that leaves its review date alone.
 - **Shaky questions come back.** Every question is tracked. Missed ones are flagged, weighted into cram drills, and drillable on their own.
 - **Say it out loud.** Every stack line has rehearsal prompts: answer in full sentences, then compare against a model answer. Anything marked shaky is asked first next time.
 - **Cram drill.** Twelve mixed questions from every opened line, five hearts, filterable by division.
@@ -182,7 +182,7 @@ A predict-first question goes in a line's `questions` with `predict: 'type'`, a 
 
 ## Roadmap
 
-NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md), and it was tagged `v1.0` on 2026-11-03. The [case study](docs/CASE-STUDY.md) tells how it was built. Predict-first questions are on every TypeScript line: the player sees a snippet, types a guess before anything else appears, then sees the proven answer. Next is a fix to review scheduling, then predict-first questions for React and NestJS. A NestJS and Postgres backend is 2.0.
+NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md), and it was tagged `v1.0` on 2026-11-03. The [case study](docs/CASE-STUDY.md) tells how it was built. Predict-first questions are on every TypeScript line: the player sees a snippet, types a guess before anything else appears, then sees the proven answer. Next is predict-first questions for React and NestJS. A NestJS and Postgres backend is 2.0.
 
 - [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them

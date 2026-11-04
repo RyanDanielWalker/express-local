@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LINES } from "../data";
 import {
   DAY,
+  daysUntil,
   fmtTime,
   isUnlocked,
   maxTier,
@@ -59,7 +60,7 @@ export function Intro({
   const [now] = useState(() => Date.now());
   let status = "New line";
   if (p?.cleared) {
-    const d = Math.ceil((p.due - now) / DAY);
+    const d = daysUntil(p.due, now);
     status =
       d <= 0
         ? "Due for review today"

@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  addDays,
   DAY,
   dayKey,
+  daysUntil,
   DERAIL_COST,
   ensureDailyPick,
   finishCram,
   finishDerail,
   finishRehearsal,
   finishTrip,
+  isDue,
   isUnlocked,
   lineReadiness,
   maxTier,
@@ -50,6 +53,14 @@ import {
 import type { SaveData } from "./types";
 
 const NOW = new Date("2026-09-21T15:00:00").getTime();
+/** `days` calendar days after `base`, at `hour`:`min` local time. */
+function clock(base: number, days: number, hour: number, min = 0): number {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  d.setHours(hour, min, 0, 0);
+  return d.getTime();
+}
+
 const outcome = {
   lineIdx: 0,
   tier: 1 as const,
@@ -264,6 +275,60 @@ describe("finishing a trip", () => {
     expect(r.save.levels.sq?.box).toBe(1);
     expect(r.ledger.some(([k]) => k === "On-time review")).toBe(true);
     expect(r.reviewInDays).toBe(3);
+  });
+
+  it("counts a 7pm review of a line cleared at 8pm, ten days running", () => {
+    // Clear at 8pm, then ride at 7pm every day after: an hour earlier in the
+    // day than the ride that set the due date. Before the fix this counted
+    // one review (day 2, exactly on time) and then none.
+    let save = finishTrip(emptySave(), outcome, clock(NOW, 0, 20)).save;
+    for (let day = 1; day <= 10; day++)
+      save = finishTrip(save, outcome, clock(NOW, day, 19)).save;
+    // Day 1 is due (box 0 to 1, next due day 4). Days 2 and 3 are early.
+    // Day 4 is due (box 1 to 2, next due day 11). Days 5 to 10 are early.
+    expect(save.levels.sq?.box).toBe(2);
+    expect(save.stats.reviews).toBe(2);
+    expect(dayKey(save.levels.sq!.due)).toBe(dayKey(clock(NOW, 11, 19)));
+  });
+
+  it("leaves the box and the due date alone on an early ride", () => {
+    const first = finishTrip(emptySave(), outcome, NOW).save;
+    const review = finishTrip(first, outcome, NOW + DAY).save;
+    const due = review.levels.sq!.due;
+    // Box 1 is a 3-day gap. Ride again the next day, with mistakes.
+    const early = finishTrip(
+      review,
+      { ...outcome, mistakes: 3 },
+      NOW + 2 * DAY,
+    );
+    expect(early.save.levels.sq?.box).toBe(1);
+    expect(early.save.levels.sq?.due).toBe(due);
+    expect(early.save.stats.reviews).toBe(1);
+    expect(early.ledger.some(([k]) => k === "On-time review")).toBe(false);
+    expect(early.reviewInDays).toBe(2);
+    // The ride still counts as a trip.
+    expect(early.save.levels.sq?.trips).toBe(3);
+  });
+
+  it("makes a line due from the start of its due day", () => {
+    const p = { ...emptyProgress(), cleared: true, due: clock(NOW, 1, 20) };
+    expect(isDue(p, clock(NOW, 0, 23, 59))).toBe(false);
+    expect(isDue(p, clock(NOW, 1, 0, 1))).toBe(true);
+    expect(isDue(p, clock(NOW, 1, 19))).toBe(true);
+    expect(isDue(p, clock(NOW, 5, 9))).toBe(true);
+    expect(isDue({ ...p, cleared: false }, clock(NOW, 5, 9))).toBe(false);
+  });
+
+  it("schedules whole calendar days, even across a clock change", () => {
+    // Every day of a year at 11:30pm, so a daylight saving change in the
+    // local time zone (if it has one) cannot push a review a day late.
+    for (let d = 0; d < 366; d++) {
+      const now = new Date(2026, 0, 1 + d, 23, 30).getTime();
+      for (const gap of [1, 3, 30]) {
+        expect(daysUntil(addDays(now, gap), now)).toBe(gap);
+        expect(new Date(addDays(now, gap)).getHours()).toBe(23);
+      }
+    }
   });
 
   it("tracks personal bests by fewest mistakes, then time", () => {

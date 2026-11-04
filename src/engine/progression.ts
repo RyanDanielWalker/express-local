@@ -95,8 +95,26 @@ export const isUnlocked = (save: SaveData, idx: number): boolean => {
   return !!progressOf(save, idx - 1)?.cleared;
 };
 
+/**
+ * The same local clock time, `n` calendar days later. Adding `n * DAY` instead
+ * would land a day late after a ride at 11:30pm before a 23-hour day.
+ */
+export function addDays(t: number, n: number): number {
+  const d = new Date(t);
+  d.setDate(d.getDate() + n);
+  return d.getTime();
+}
+
+/** Calendar days from `now` until `t`: 0 is today, 1 tomorrow, negative is past. */
+export function daysUntil(t: number, now = Date.now()): number {
+  // Both at noon, then rounded, so a 23- or 25-hour day still counts as one.
+  const noon = (x: number) => new Date(x).setHours(12, 0, 0, 0);
+  return Math.round((noon(t) - noon(now)) / DAY);
+}
+
+/** Due from the start of its due day, whatever time it was last ridden. */
 export const isDue = (p: LineProgress | undefined, now = Date.now()): boolean =>
-  !!p && p.cleared && now >= p.due;
+  !!p && p.cleared && daysUntil(p.due, now) <= 0;
 
 /** Highest tier the player may pick on a line. */
 export const maxTier = (p: LineProgress | undefined): Tier =>
@@ -477,16 +495,18 @@ export function finishTrip(
   }
   const total = ledger.reduce((a, [, v]) => a + v, 0);
 
-  // Spaced repetition: an on-time review with 0-1 mistakes moves up a box, a rough one moves down.
+  // Spaced repetition. A review on or after its due day with 0-1 mistakes
+  // moves up a box, a rough one moves down. An early ride is extra practice:
+  // it leaves the box and the due date alone, so it can't delay the review.
   if (first) p.box = 0;
   else if (wasDue)
     p.box =
       o.mistakes <= 1
         ? Math.min(p.box + 1, BOX_DAYS.length - 1)
         : Math.max(p.box - 1, 0);
+  if (first || wasDue) p.due = addDays(now, BOX_DAYS[p.box]);
   p.cleared = true;
   p.trips++;
-  p.due = now + BOX_DAYS[p.box] * DAY;
   p.tier = Math.max(prevTier, o.tier) as Tier;
 
   const secs = Math.round(o.time);
@@ -515,6 +535,6 @@ export function finishTrip(
     beatPar,
     newBest,
     unlockedTier,
-    reviewInDays: BOX_DAYS[p.box],
+    reviewInDays: daysUntil(p.due, now),
   };
 }
