@@ -85,11 +85,34 @@ In the same commits as the work, not after:
 
 ## 7. Report, then stop
 
-Tell Ryan, in plain English and briefly:
+Tell Ryan, in plain English and briefly.
+
+**Start with the "Needs you" block, before anything else.** Ryan has missed notes buried in the report body, then found the problem later. So anything that needs him goes here, first, every time. Use only the groups that have something in them:
+
+```
+## Needs you
+
+🛑 **Do before you push**
+- ...
+
+❓ **Waiting on your answer** (I won't move on until you reply)
+- ...
+
+👀 **Not fixed. Say so now or it stays this way**
+- <what>, and where it's recorded (roadmap Parked, an ADR's consequences)
+```
+
+- 🛑 is anything he must do himself: run a command, check something in a browser, review before pushing because a step was skipped or couldn't be verified.
+- ❓ is any open question. Ask it here, not mid-paragraph. If it has options, give them with a recommendation.
+- 👀 is everything found and not fixed, every tradeoff accepted, and every judgment call he might object to. That includes anything that went to Parked or into an ADR's consequences this session. One line each, plain English, saying what he'd notice.
+- If no group has anything, write the line `**Needs you:** nothing.` so its absence is never ambiguous.
+- Never put any of these only in the body below. The body can repeat them with more detail.
+
+Then the rest:
 
 - **What shipped:** the commits, one line each.
 - **Read this one closely:** the commit most worth his review, and why.
-- **Decisions I made for you:** anything routine you decided without asking.
+- **Decisions I made for you:** anything routine you decided without asking. Anything here he might reasonably push back on also goes in 👀.
 - **How it was checked:** the docs and probes behind the content, what the fact-checker found and what changed because of it, and anything you could not verify.
 - **One concept, simply:** one idea from this work, explained the way you'd explain it to a smart friend who's new to it, with a small example. Pick something he'd be asked about in an interview.
 - **Pull request:** only if Ryan asked for a branch. Then give the branch name and a draft description filled in from `.github/pull_request_template.md`, including the **Who wrote what** line, ready for Ryan to paste.
