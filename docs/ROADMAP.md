@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Done, and tagged `v1.0` on 2026-11-03.** Until the tag, 1.0 was frozen: new findings went to Parked unless they were a security hole, a bug a visitor would hit, or embarrassing on the first screen. The freeze ended with the tag, and the next block was picked from Parked ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md)). The backend is still 2.0.
 
-Status: 34 lines across 4 divisions, 170 tests plus three end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-11-03, after the predict-first TypeScript block (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 176 tests plus three end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-11-04, after the early-ride block (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -124,7 +124,7 @@ Riding a line before it is due resets its due date, but only a due ride moves it
   - The intro says "Last done today", "yesterday" or "N days ago", counted in app days.
   - A ride that climbs a tier is not called early on the results screen. It still leaves the review alone.
 - [x] **Finding 6.** The first end-to-end test starts the browser's clock at noon, so its two rides always share an app day. Started at 3:59:50am instead, it failed: the second ride counted as a review.
-- [ ] **Inventory stop.** Everything but closing it, on 2026-11-04. A fresh `fact-checker` re-checked the one content change since the last stop (`e193530`, Generic Line's sort note and a talking point) under TypeScript 5.9, 6.0 and 7.0: clean, and its probes pass when re-run. Every check passed: the tests, lint, format, typecheck, the bar, the build, the TypeScript probes and the three end-to-end tests. The changed note was seen in Chromium at phone width in dark mode, with no console errors. `/audit` ran in a fresh context and is saved in [audits/2026-11-04.md](audits/2026-11-04.md). The stop closes with a `docs: inventory stop` commit once the items above are settled.
+- [x] **Inventory stop,** on 2026-11-04. A fresh `fact-checker` re-checked the one content change since the last stop (`e193530`, Generic Line's sort note and a talking point) under TypeScript 5.9, 6.0 and 7.0: clean, and its probes pass when re-run. The changed note was seen in Chromium at phone width in dark mode, with no console errors. `/audit` ran in a fresh context and is saved in [audits/2026-11-04.md](audits/2026-11-04.md). Its findings 1 to 6 are fixed above. After the fixes, every check passed again: the tests, lint, format, typecheck, the bar, the build, the TypeScript probes and the three end-to-end tests. Its one note left open, the readiness weights, went to Parked.
 
 ### 10. Predict-first questions: React and NestJS
 
@@ -212,6 +212,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **A drill's side panel says "Answer out loud before you click"** (`App.tsx`), which reads oddly on a predict-first question, where the player types. Seen in the browser check at the second inventory stop.
 - **Generic Line's `Promise.all` snippet does not compile pasted on its own.** It uses `await` at the top level and never declares `User`, so a file holding just that snippet stops with TS1375. The type it asks about is right. Wrapping it in an `async function` and declaring `User` would make it complete, but rewording the code resets the question's history. Found by the fact-checker at the second inventory stop.
 - **The algorithm code check moves on by itself after 2.2 seconds, with no number keys** (`Quiz.tsx:31`), unlike every other screen and the README's "You advance, not a timer". Found by the first audit. Parked with the algorithms.
+- **Why readiness weighs what it does.** `lineReadiness()` mixes tier, review step and recall as 0.45, 0.2, 0.2 and 0.15 (`src/engine/progression.ts`), and nothing says why. An interviewer who reads it could ask. A comment or a short ADR would do. Found by the third audit.
 
 ## Later: engine ideas
 
@@ -320,3 +321,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-11-04** How early rides are fixed: due by calendar day, and an early ride leaves the review alone ([ADR 0027](adr/0027-early-rides-and-calendar-days.md))
 - **2026-11-04** Early rides fixed: a review counts any time on its due day, and riding a line early no longer pushes its review back. The tests run in New York time, so a daylight saving bug can fail them
 - **2026-11-04** The app's day starts at 4am, readiness is not late until the due day ends, and the results screen says when a ride was early ([ADR 0028](adr/0028-the-day-starts-at-4am.md))
+- **2026-11-04** Inventory stop after the early-ride block: a clean fact-check, the third audit, and its date findings fixed. Due dates sit at noon, a due date no ride could set is due now, the Daily Ride turns over at 4am in an open tab, and the first end-to-end test starts its clock at noon ([ADR 0029](adr/0029-date-edges-from-the-third-audit.md)). Predict-first questions for React and NestJS come next
