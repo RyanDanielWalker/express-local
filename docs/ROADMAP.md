@@ -114,7 +114,7 @@ Show a snippet and ask what it gives you before showing any options: the type of
 
 Riding a line before it is due resets its due date, but only a due ride moves it up a box (`finishTrip()` in `src/engine/progression.ts`). Clear a line at 8pm, ride it at 7pm each day after, and it stays in the first box with no review ever counted. The Daily Ride can lead there, since it picks from every unlocked line. Found by the first audit, ranked first by the second ([ADR 0026](adr/0026-fix-early-rides-next.md)).
 
-- [ ] **Decide the fix.** An early ride leaves the due date alone, due is compared by calendar day, or both. Ryan's call. The second audit recommends both.
+- [x] **Decide the fix.** Both: a review is due from the start of its due day, and an early ride leaves the box and the due date alone. Ryan's call on 2026-11-04 ([ADR 0027](adr/0027-early-rides-and-calendar-days.md)).
 - [ ] **Fix it** in `src/engine/`, with a test that replays the 8pm-then-7pm example and fails before the fix. No save field. Update the Today band's tests if what counts as due changes, and the README if it describes reviews.
 
 ### 10. Predict-first questions: React and NestJS
@@ -308,3 +308,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-11-03** Three more predict-first questions on Generic Line, one per tier: `Map.get` gives `number | undefined`, `Promise.all` gives a tuple, and `T[K]` with a union of keys gives a union
 - **2026-11-03** Predict-first questions on the other five TypeScript lines, three each, one per tier: Narrow Gauge, Utility Yard, Unknown Territory, Shape Yard and Typed Components
 - **2026-11-03** Inventory stop after the predict-first TypeScript block: a fresh fact-check of all 19, the second audit, and the bar now requires a predict-first question on every tier of a TypeScript line ([ADR 0025](adr/0025-predict-first-questions-in-the-bar.md)). Early rides come next ([ADR 0026](adr/0026-fix-early-rides-next.md))
+- **2026-11-04** How early rides are fixed: due by calendar day, and an early ride leaves the review alone ([ADR 0027](adr/0027-early-rides-and-calendar-days.md))
