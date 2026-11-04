@@ -70,7 +70,7 @@ function appNoon(t: number): Date {
 }
 
 /** The 4am that starts the app day after the one `t` falls in. */
-function nextDayStart(t: number): number {
+export function nextDayStart(t: number): number {
   const d = appNoon(t);
   d.setDate(d.getDate() + 1);
   d.setHours(DAY_STARTS, 0, 0, 0);
@@ -119,11 +119,14 @@ export const isUnlocked = (save: SaveData, idx: number): boolean => {
 };
 
 /**
- * The same local clock time, `n` calendar days later. Adding `n * DAY` instead
- * would land a day late after a ride at 11:30pm before a 23-hour day.
+ * Noon on the app day `n` days after the one `t` falls in. Adding `n * DAY`
+ * would land a day late after a ride at 11:30pm before a 23-hour day. Keeping
+ * the clock time would too, from 3:30am on a night the clocks jump from 3am to
+ * 4am: 3:30am does not exist, so it becomes 4:30am, the next app day. No clock
+ * change skips noon.
  */
 export function addDays(t: number, n: number): number {
-  const d = new Date(t);
+  const d = appNoon(t);
   d.setDate(d.getDate() + n);
   return d.getTime();
 }
@@ -134,12 +137,26 @@ export function daysUntil(t: number, now = Date.now()): number {
   return Math.round((appNoon(t).getTime() - appNoon(now).getTime()) / DAY);
 }
 
+/** How long ago `t` was, in app days: "today", "yesterday" or "3 days ago". */
+export function daysAgo(t: number, now = Date.now()): string {
+  const n = Math.max(0, -daysUntil(t, now));
+  return n === 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`;
+}
+
 /** The app day before the one `now` falls in. */
 const yesterday = (now: number): string => dayKey(addDays(now, -1));
 
-/** Due from the start (4am) of its due day, whatever time it was last ridden. */
-export const isDue = (p: LineProgress | undefined, now = Date.now()): boolean =>
-  !!p && p.cleared && daysUntil(p.due, now) <= 0;
+/**
+ * Due from the start (4am) of its due day, whatever time it was last ridden.
+ * A due date further off than its box's gap cannot have been set by a ride.
+ * It came from a wrong device clock or an edited save code, so it is due now.
+ * Otherwise an early ride, which leaves the date alone, could never fix it.
+ */
+export function isDue(p: LineProgress | undefined, now = Date.now()): boolean {
+  if (!p?.cleared) return false;
+  const d = daysUntil(p.due, now);
+  return d <= 0 || d > BOX_DAYS[p.box];
+}
 
 /** Highest tier the player may pick on a line. */
 export const maxTier = (p: LineProgress | undefined): Tier =>
@@ -173,10 +190,25 @@ export function ensureDailyPick(save: SaveData, now = Date.now()): number {
   return idx;
 }
 
-/** Where today's Daily Ride sits in LINES, or null when there is no pick. */
-export function dailyIndex(save: SaveData): number | null {
+/**
+ * Where today's Daily Ride sits in LINES, or null when there is no pick for
+ * today. A pick from yesterday is not shown: riding it would not pay.
+ */
+export function dailyIndex(save: SaveData, now = Date.now()): number | null {
+  if (save.dailyPick?.day !== dayKey(now)) return null;
   const i = LINES.findIndex((l) => l.id === save.dailyPick?.id);
   return i > -1 ? i : null;
+}
+
+/**
+ * The save with today's Daily Ride picked. The same save when the pick is
+ * already today's, so a caller can hand it to `setState` without a re-render.
+ */
+export function withDailyPick(save: SaveData, now = Date.now()): SaveData {
+  if (save.dailyPick?.day === dayKey(now)) return save;
+  const next = structuredClone(save);
+  ensureDailyPick(next, now);
+  return next;
 }
 
 export const dailyDone = (save: SaveData, now = Date.now()): boolean =>
@@ -471,7 +503,11 @@ export interface TripResult {
   /** Tier that just opened on this line, if any. */
   unlockedTier: Tier | null;
   reviewInDays: number;
-  /** Ridden before its review was due, so the box and the due date did not move. */
+  /**
+   * A repeat of a tier already cleared, ridden before its review was due, so
+   * the box and the due date did not move. A ride that climbs a tier leaves
+   * them alone too, but is not called early.
+   */
   early: boolean;
 }
 
@@ -567,6 +603,8 @@ export function finishTrip(
     newBest,
     unlockedTier,
     reviewInDays: daysUntil(p.due, now),
-    early: !first && !wasDue,
+    // Climbing a tier is not called early, even before the review is due.
+    // It is progress on the line, not a repeat of it.
+    early: !first && !wasDue && o.tier <= prevTier,
   };
 }

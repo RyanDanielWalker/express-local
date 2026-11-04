@@ -11,6 +11,8 @@ import {
   isDue,
   isUnlocked,
   maxTier,
+  nextDayStart,
+  withDailyPick,
   type TripResult,
 } from "./engine/progression";
 import {
@@ -109,6 +111,22 @@ export default function App() {
   ]);
 
   useEffect(() => persistSave(save), [save]);
+
+  // A tab left open past 4am would keep yesterday's Daily Ride. Pick again
+  // when the day turns, and when the tab comes back, since a hidden tab's
+  // timer can fire late. The new pick re-renders what is due today too.
+  const pickedFor = save.dailyPick?.day;
+  useEffect(() => {
+    const repick = () => setSave((s) => withDailyPick(s));
+    // A second past 4am, so the clock has surely turned when it runs.
+    const wait = nextDayStart(Date.now()) - Date.now() + 1000;
+    const id = window.setTimeout(repick, wait);
+    document.addEventListener("visibilitychange", repick);
+    return () => {
+      window.clearTimeout(id);
+      document.removeEventListener("visibilitychange", repick);
+    };
+  }, [pickedFor]);
 
   // Riding collapses the map, cram band, badges and save box. See lib/modes.ts.
   const doing = isDoing(screen.kind);

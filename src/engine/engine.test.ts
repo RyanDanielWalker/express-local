@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   addDays,
   DAY,
   dayKey,
+  dailyIndex,
+  daysAgo,
   daysUntil,
   DERAIL_COST,
   ensureDailyPick,
@@ -18,6 +20,7 @@ import {
   rankFor,
   RANKS,
   readinessOf,
+  withDailyPick,
 } from "./progression";
 import {
   choices,
@@ -50,7 +53,7 @@ import {
   loadSave,
   migrate,
 } from "./save";
-import type { SaveData } from "./types";
+import type { LineProgress, SaveData } from "./types";
 
 const NOW = new Date("2026-09-21T15:00:00").getTime();
 /** `days` calendar days after `base`, at `hour`:`min` local time. */
@@ -123,6 +126,17 @@ describe("damaged saves", () => {
       ...emptySave(),
       rehearsal: { di: { last: 1, shaky: [] } },
     });
+  });
+
+  it("makes a due date a Date cannot hold due now", () => {
+    // 1e300 is a finite number, but no Date reaches it. Every day count on it
+    // came out NaN, so readiness did too.
+    const s = migrate({
+      levels: { sq: { cleared: true, box: 0, due: 1e300, trips: 1, tier: 1 } },
+    });
+    expect(s.levels.sq?.due).toBe(0);
+    expect(isDue(s.levels.sq, NOW)).toBe(true);
+    expect(Number.isNaN(lineReadiness(LINES[0], s, NOW))).toBe(false);
   });
 
   it("drops entries it cannot read and keeps the rest", () => {
@@ -346,16 +360,106 @@ describe("finishing a trip", () => {
 
   it("schedules whole calendar days, even across a clock change", () => {
     // Every day of a year at 11:30pm and 3:30am, so a daylight saving change
-    // cannot push a review a day late. The tests run in New York time.
-    for (let d = 0; d < 366; d++) {
-      for (const hour of [23, 3]) {
-        const now = new Date(2026, 0, 1 + d, hour, 30).getTime();
-        for (const gap of [1, 3, 30]) {
-          expect(daysUntil(addDays(now, gap), now)).toBe(gap);
-          expect(dayKey(addDays(now, -gap))).not.toBe(dayKey(now));
+    // cannot push a review a day late. New York's clocks change at 2am.
+    // Helsinki's jump from 3am to 4am, so 3:30am is skipped there once a
+    // year: keeping that clock time would land on the next app day. Lord
+    // Howe moves by half an hour, and Santiago changes at midnight.
+    const zones = [
+      "America/New_York",
+      "Europe/Helsinki",
+      "Australia/Lord_Howe",
+      "America/Santiago",
+    ];
+    try {
+      for (const zone of zones) {
+        vi.stubEnv("TZ", zone);
+        for (let d = 0; d < 366; d++) {
+          for (const hour of [23, 3]) {
+            const now = new Date(2026, 0, 1 + d, hour, 30).getTime();
+            for (const gap of [-1, 1, 3, 7, 14, 30]) {
+              const at = `${zone}, ${gap} days from ${new Date(now)}`;
+              expect(daysUntil(addDays(now, gap), now), at).toBe(gap);
+            }
+          }
         }
       }
+    } finally {
+      vi.unstubAllEnvs();
     }
+  });
+
+  it("keeps a streak across a night the clocks jump from 3am to 4am", () => {
+    try {
+      vi.stubEnv("TZ", "Europe/Helsinki");
+      // 8pm on 28 March, then 3:30am on 30 March, still the app day of the
+      // 29th. Helsinki skipped 3am to 4am on the 29th.
+      const sat = new Date(2026, 2, 28, 20).getTime();
+      const b = finishTrip(emptySave(), outcome, sat).save;
+      const c = finishTrip(
+        b,
+        outcome,
+        new Date(2026, 2, 30, 3, 30).getTime(),
+      ).save;
+      expect(dayKey(new Date(2026, 2, 30, 3, 30).getTime())).toBe("2026-03-29");
+      expect(c.streak.count).toBe(b.streak.count + 1);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("does not call a ride early when it climbs a tier", () => {
+    // Clear Local, then Express ten minutes later. The review is still
+    // tomorrow, but the results screen should not call the climb early.
+    const local = finishTrip(emptySave(), outcome, NOW);
+    const express = finishTrip(
+      local.save,
+      { ...outcome, tier: 2 },
+      NOW + 600_000,
+    );
+    expect(express.early).toBe(false);
+    expect(express.save.levels.sq?.due).toBe(local.save.levels.sq?.due);
+    expect(express.save.stats.reviews).toBe(0);
+    // Express again: that one is a repeat, so it is early.
+    const again = finishTrip(
+      express.save,
+      { ...outcome, tier: 2 },
+      NOW + 1_200_000,
+    );
+    expect(again.early).toBe(true);
+  });
+
+  it("treats a due date further off than its gap as due now", () => {
+    // A wrong device clock or an edited save code can put the due date in
+    // 2030. An early ride leaves the date alone, so without this check the
+    // line would never be reviewed again.
+    const far = new Date(2030, 0, 1, 12).getTime();
+    const p: LineProgress = {
+      ...emptyProgress(),
+      cleared: true,
+      box: 0,
+      due: far,
+      tier: 1,
+    };
+    expect(isDue(p, NOW)).toBe(true);
+    // The longest real gap is still not due.
+    const box4 = { ...p, box: 4, due: addDays(NOW, 30) };
+    expect(isDue(box4, NOW)).toBe(false);
+    let save: SaveData = { ...emptySave(), levels: { sq: p } };
+    for (let day = 0; day < 30; day++)
+      save = finishTrip(save, outcome, clock(NOW, day, 19)).save;
+    expect(save.stats.reviews).toBeGreaterThan(0);
+    expect(daysUntil(save.levels.sq!.due, NOW)).toBeLessThan(60);
+  });
+
+  it("says how long ago something was in app days", () => {
+    expect(daysAgo(clock(NOW, 0, 9), clock(NOW, 0, 22))).toBe("today");
+    // 11pm, then 9am: one app day, though only ten hours.
+    expect(daysAgo(clock(NOW, 0, 23), clock(NOW, 1, 9))).toBe("yesterday");
+    // 1am still belongs to the day before.
+    expect(daysAgo(clock(NOW, 0, 20), clock(NOW, 1, 1))).toBe("today");
+    expect(daysAgo(clock(NOW, 0, 9), clock(NOW, 3, 9))).toBe("3 days ago");
+    // A time in the future, from a wrong clock, is not "-2 days ago".
+    expect(daysAgo(clock(NOW, 2, 9), NOW)).toBe("today");
   });
 
   it("tracks personal bests by fewest mistakes, then time", () => {
@@ -833,6 +937,27 @@ describe("daily ride pick", () => {
     expect(save.dailyPick).toEqual({ day: dayKey(NOW), id: LINES[idx].id });
     // same day, same answer
     expect(ensureDailyPick(save, NOW)).toBe(idx);
+  });
+
+  it("shows no Daily Ride from yesterday, so it never promises a bonus it won't pay", () => {
+    const save = emptySave();
+    const night = clock(NOW, 0, 23);
+    const idx = ensureDailyPick(save, night);
+    expect(dailyIndex(save, night)).toBe(idx);
+    // 1am is still the same app day.
+    expect(dailyIndex(save, clock(NOW, 1, 1))).toBe(idx);
+    // 9am the next morning: the pick is stale.
+    const morning = clock(NOW, 1, 9);
+    expect(dailyIndex(save, morning)).toBeNull();
+    // Picking again gives today's ride, and riding it pays.
+    const fresh = withDailyPick(save, morning);
+    expect(fresh).not.toBe(save);
+    expect(fresh.dailyPick?.day).toBe(dayKey(morning));
+    const today = dailyIndex(fresh, morning)!;
+    const r = finishTrip(fresh, { ...outcome, lineIdx: today }, morning);
+    expect(r.ledger.some(([k]) => k === "Daily Ride")).toBe(true);
+    // Already today's pick: the same object back, so React skips a render.
+    expect(withDailyPick(fresh, morning)).toBe(fresh);
   });
 
   it("drops an old index-based pick instead of trusting it", () => {

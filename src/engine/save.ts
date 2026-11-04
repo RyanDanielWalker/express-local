@@ -87,7 +87,9 @@ function readProgress(raw: unknown): LineProgress | null {
       Number.isInteger(raw.box) && num(raw.box) < BOX_DAYS.length
         ? num(raw.box)
         : 0,
-    due: num(raw.due),
+    // A time a Date cannot hold (past the year 275760) breaks every day count.
+    // Zero instead: a cleared line is then due now.
+    due: num(raw.due) <= MAX_DATE ? num(raw.due) : 0,
     trips: num(raw.trips),
     // Saves from before tiers only say a line was cleared.
     tier: cleared && !tier ? 1 : tier,
@@ -106,6 +108,9 @@ const isNum = (v: unknown): v is number =>
   typeof v === "number" && Number.isFinite(v) && v >= 0;
 
 const num = (v: unknown): number => (isNum(v) ? v : 0);
+
+/** The latest time a JavaScript Date can hold, in milliseconds. */
+const MAX_DATE = 8.64e15;
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 
 /** Keep the entries `read` can make sense of. It returns null for the rest. */

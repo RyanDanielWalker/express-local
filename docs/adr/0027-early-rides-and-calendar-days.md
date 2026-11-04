@@ -1,6 +1,6 @@
 # 0027. A review is due by calendar day, and an early ride leaves it alone
 
-Status: Accepted (2026-11-04), amended by [0028](0028-the-day-starts-at-4am.md). Makes the design call that [ADR 0026](0026-fix-early-rides-next.md) left open.
+Status: Accepted (2026-11-04), amended by [0028](0028-the-day-starts-at-4am.md) and [0029](0029-date-edges-from-the-third-audit.md). Makes the design call that [ADR 0026](0026-fix-early-rides-next.md) left open.
 
 ## Context
 

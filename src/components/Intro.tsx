@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { LINES } from "../data";
 import {
-  DAY,
+  daysAgo,
   daysUntil,
   fmtTime,
   isUnlocked,
@@ -108,7 +108,7 @@ export function Intro({
                   {rehearseCount} prompts to answer in full sentences, then
                   check yourself.
                   {lastRehearsed
-                    ? ` Last done ${Math.max(0, Math.round((now - lastRehearsed) / DAY))} days ago.`
+                    ? ` Last done ${daysAgo(lastRehearsed, now)}.`
                     : " This is the one that gets you through the phone screen."}
                 </p>
               </div>

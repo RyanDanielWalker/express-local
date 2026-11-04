@@ -39,8 +39,9 @@ One short file per significant decision: the context, the options, what was deci
 | [0024](0024-how-a-predict-first-guess-is-checked.md)    | How a predict-first guess is checked                                                            | Accepted, amended by 0025                |
 | [0025](0025-predict-first-questions-in-the-bar.md)      | Predict-first questions are required by the bar, not counted                                    | Accepted                                 |
 | [0026](0026-fix-early-rides-next.md)                    | After the predict-first TypeScript block, fix early rides                                       | Accepted                                 |
-| [0027](0027-early-rides-and-calendar-days.md)           | A review is due by calendar day, and an early ride leaves it alone                              | Accepted, amended by 0028                |
+| [0027](0027-early-rides-and-calendar-days.md)           | A review is due by calendar day, and an early ride leaves it alone                              | Accepted, amended by 0028 and 0029       |
 | [0028](0028-the-day-starts-at-4am.md)                   | The app's day starts at 4am                                                                     | Accepted                                 |
+| [0029](0029-date-edges-from-the-third-audit.md)         | Due dates sit at noon, and a due date no ride could set is due now                              | Accepted                                 |
 
 ## Template
 

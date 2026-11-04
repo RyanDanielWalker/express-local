@@ -47,7 +47,7 @@ export function todayPlan(
   const shaky = shakyQuestions(save, LINES).length;
   if (shaky) items.push({ kind: "shaky", count: shaky });
 
-  const daily = dailyIndex(save);
+  const daily = dailyIndex(save, now);
   const showDaily =
     daily !== null &&
     isUnlocked(save, daily) &&
