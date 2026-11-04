@@ -310,5 +310,5 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-11-03** Predict-first questions on the other five TypeScript lines, three each, one per tier: Narrow Gauge, Utility Yard, Unknown Territory, Shape Yard and Typed Components
 - **2026-11-03** Inventory stop after the predict-first TypeScript block: a fresh fact-check of all 19, the second audit, and the bar now requires a predict-first question on every tier of a TypeScript line ([ADR 0025](adr/0025-predict-first-questions-in-the-bar.md)). Early rides come next ([ADR 0026](adr/0026-fix-early-rides-next.md))
 - **2026-11-04** How early rides are fixed: due by calendar day, and an early ride leaves the review alone ([ADR 0027](adr/0027-early-rides-and-calendar-days.md))
-- **2026-11-04** Early rides fixed: a review counts any time on its due day, and riding a line early no longer pushes its review back. the tests run in New York time so a daylight saving bug can fail them
+- **2026-11-04** Early rides fixed: a review counts any time on its due day, and riding a line early no longer pushes its review back. The tests run in New York time, so a daylight saving bug can fail them
 - **2026-11-04** The app's day starts at 4am, readiness is not late until the due day ends, and the results screen says when a ride was early ([ADR 0028](adr/0028-the-day-starts-at-4am.md))

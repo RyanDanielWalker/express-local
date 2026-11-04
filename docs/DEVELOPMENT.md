@@ -27,18 +27,18 @@ The app is live at https://express-local.ryandanielwalker.workers.dev. CI deploy
 
 ## Scripts
 
-| Command               | What it does                                                                                                                                                        |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`         | Dev server with hot reload                                                                                                                                          |
-| `npm test`            | Every test: algorithms, engine, content, the bar, screens, routes, contrast. Run before every commit.                                                               |
-| `npm run typecheck`   | `tsc --noEmit` over `src`, `e2e` and the three configs                                                                                                              |
-| `npm run build`       | Typecheck, then a production build into `dist/`                                                                                                                     |
-| `npm run preview`     | Serve the production build locally                                                                                                                                  |
-| `npm run bar`         | Where every line stands against the quality bar, division by division                                                                                               |
-| `npm run e2e`         | Builds, then rides a line, runs a drill and answers a predict-first question in Chromium against the production build (`e2e/ride.spec.ts`). Not part of `npm test`. |
-| `npm run screenshots` | Builds, then retakes the README's screenshots and GIF (`e2e/readme.shots.ts`). Needs ffmpeg. See below.                                                             |
-| `npm run lint`        | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.                                                            |
-| `npm run format`      | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit.                                                           |
+| Command               | What it does                                                                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`         | Dev server with hot reload                                                                                                                                                            |
+| `npm test`            | Every test: algorithms, engine, content, the bar, screens, routes, contrast. Runs in New York time (`vite.config.ts`), so date tests match on every machine. Run before every commit. |
+| `npm run typecheck`   | `tsc --noEmit` over `src`, `e2e` and the three configs                                                                                                                                |
+| `npm run build`       | Typecheck, then a production build into `dist/`                                                                                                                                       |
+| `npm run preview`     | Serve the production build locally                                                                                                                                                    |
+| `npm run bar`         | Where every line stands against the quality bar, division by division                                                                                                                 |
+| `npm run e2e`         | Builds, then rides a line, runs a drill and answers a predict-first question in Chromium against the production build (`e2e/ride.spec.ts`). Not part of `npm test`.                   |
+| `npm run screenshots` | Builds, then retakes the README's screenshots and GIF (`e2e/readme.shots.ts`). Needs ffmpeg. See below.                                                                               |
+| `npm run lint`        | ESLint: the recommended JavaScript and TypeScript rules, the React hooks rules. Run before every commit.                                                                              |
+| `npm run format`      | Prettier on its default settings. `npm run format:check` only reports. Run the check before every commit.                                                                             |
 
 Lint and format both skip `probes/`. Those are sandboxes with their own packages, and some depend on exact line placement, like a `@ts-expect-error` on the line above an error.
 
