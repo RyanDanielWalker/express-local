@@ -50,10 +50,6 @@ jobs:
 
       - name: Tests, the bar included
         run: npm test
-        env:
-          # A zone with daylight saving, so the review-scheduling test can
-          # catch a review pushed a day late by a 23-hour day. UTC has none.
-          TZ: America/New_York
 
       - name: TypeScript probes on 5.9, 6.0 and 7.0
         run: npm run check

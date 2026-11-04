@@ -243,6 +243,7 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   // The first ride is at phone width in light mode, the second on a desktop
   // screen in dark mode, so the checks along the way see both.
   const first = await ride(page, "Phone");
+  await expect(page.locator(".result")).toContainText("Next review in 1 day.");
   await expect(stop(page, 1)).toBeVisible();
 
   // Puzzles rotate from ride to ride. This line has one flow and one sort on
@@ -252,6 +253,11 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   await audit(page, "Dark, the results");
   await page.getByRole("button", { name: "Ride again" }).click();
   const second = await ride(page, "Dark");
+  // The same day as the clear, so the review is not due yet.
+  await expect(page.locator(".result")).toContainText(
+    "This ride was early, so it did not count as a review.",
+  );
+  await audit(page, "Dark, the results of an early ride");
   expect([first, second].sort()).toEqual(["flow", "sort"]);
 
   await expect(stop(page, 1)).toBeVisible();

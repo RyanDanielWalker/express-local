@@ -54,9 +54,24 @@ export function rankFloor(xp: number): number {
 /** What a derailed ride costs. Drills are exempt: being wrong there is the point. */
 export const DERAIL_COST = 50;
 
-/** Local calendar day as YYYY-MM-DD. */
-export function dayKey(t = Date.now()): string {
+/**
+ * The app's day starts at 4am, not midnight. A session at 1am counts toward
+ * the day it started in, and a line cleared at 11:58pm is not due two minutes
+ * later. Reviews, the streak and the Daily Ride all use this one day.
+ */
+export const DAY_STARTS = 4;
+
+/** Noon on the app day `t` falls in. Before 4am still belongs to the day before. */
+function appNoon(t: number): Date {
   const d = new Date(t);
+  if (d.getHours() < DAY_STARTS) d.setDate(d.getDate() - 1);
+  d.setHours(12, 0, 0, 0);
+  return d;
+}
+
+/** The app day as YYYY-MM-DD, in local time, starting at 4am. */
+export function dayKey(t = Date.now()): string {
+  const d = appNoon(t);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
@@ -105,14 +120,16 @@ export function addDays(t: number, n: number): number {
   return d.getTime();
 }
 
-/** Calendar days from `now` until `t`: 0 is today, 1 tomorrow, negative is past. */
+/** App days from `now` until `t`: 0 is today, 1 tomorrow, negative is past. */
 export function daysUntil(t: number, now = Date.now()): number {
   // Both at noon, then rounded, so a 23- or 25-hour day still counts as one.
-  const noon = (x: number) => new Date(x).setHours(12, 0, 0, 0);
-  return Math.round((noon(t) - noon(now)) / DAY);
+  return Math.round((appNoon(t).getTime() - appNoon(now).getTime()) / DAY);
 }
 
-/** Due from the start of its due day, whatever time it was last ridden. */
+/** The app day before the one `now` falls in. */
+const yesterday = (now: number): string => dayKey(addDays(now, -1));
+
+/** Due from the start (4am) of its due day, whatever time it was last ridden. */
 export const isDue = (p: LineProgress | undefined, now = Date.now()): boolean =>
   !!p && p.cleared && daysUntil(p.due, now) <= 0;
 
@@ -123,7 +140,7 @@ export const maxTier = (p: LineProgress | undefined): Tier =>
 export function streakStatus(save: SaveData, now = Date.now()) {
   const { count, last } = save.streak;
   const today = dayKey(now);
-  const alive = last === today || last === dayKey(now - DAY);
+  const alive = last === today || last === yesterday(now);
   if (!alive || !count) return "No streak yet. Ride today to start one.";
   return last === today
     ? `${count}-day streak. You rode today.`
@@ -198,7 +215,9 @@ export function lineReadiness(
       : 0.45 + 0.2 * tier + 0.2 * depth + 0.15 * recall;
   // Going stale costs you half of it, never all of it. You do not forget a line
   // you once cleared, you just would not want to be asked about it cold.
-  const late = Math.max(0, now - p.due) / (BOX_DAYS[p.box] * DAY);
+  // Counted in whole days from the due day, so a line is not late on the day
+  // it is due, matching what the map says.
+  const late = Math.max(0, -daysUntil(p.due, now)) / BOX_DAYS[p.box];
   return proven * (1 - 0.5 * Math.min(1, late));
 }
 
@@ -337,7 +356,7 @@ export function finishCram(
   if (o.asked > 0 && o.right === o.asked) ledger.push(["Clean sweep", 50]);
   if (save.streak.last !== today) {
     save.streak.count =
-      save.streak.last === dayKey(now - DAY) ? save.streak.count + 1 : 1;
+      save.streak.last === yesterday(now) ? save.streak.count + 1 : 1;
     save.streak.last = today;
     ledger.push([
       `Day ${save.streak.count} of your streak`,
@@ -358,6 +377,7 @@ export function finishCram(
     newBest: false,
     unlockedTier: null,
     reviewInDays: 0,
+    early: false,
   };
 }
 
@@ -378,7 +398,7 @@ export function finishRehearsal(
     ledger.push(["Said every one cleanly", 40]);
   if (save.streak.last !== today) {
     save.streak.count =
-      save.streak.last === dayKey(now - DAY) ? save.streak.count + 1 : 1;
+      save.streak.last === yesterday(now) ? save.streak.count + 1 : 1;
     save.streak.last = today;
     ledger.push([
       `Day ${save.streak.count} of your streak`,
@@ -401,6 +421,7 @@ export function finishRehearsal(
     newBest: false,
     unlockedTier: null,
     reviewInDays: 0,
+    early: false,
   };
 }
 
@@ -442,6 +463,8 @@ export interface TripResult {
   /** Tier that just opened on this line, if any. */
   unlockedTier: Tier | null;
   reviewInDays: number;
+  /** Ridden before its review was due, so the box and the due date did not move. */
+  early: boolean;
 }
 
 /**
@@ -482,7 +505,7 @@ export function finishTrip(
 
   if (save.streak.last !== today) {
     save.streak.count =
-      save.streak.last === dayKey(now - DAY) ? save.streak.count + 1 : 1;
+      save.streak.last === yesterday(now) ? save.streak.count + 1 : 1;
     save.streak.last = today;
     ledger.push([
       `Day ${save.streak.count} of your streak`,
@@ -536,5 +559,6 @@ export function finishTrip(
     newBest,
     unlockedTier,
     reviewInDays: daysUntil(p.due, now),
+    early: !first && !wasDue,
   };
 }

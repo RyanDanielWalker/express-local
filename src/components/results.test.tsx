@@ -38,6 +38,22 @@ describe("results screen", () => {
     }
   });
 
+  it("says when a ride was early and did not count as a review", () => {
+    const lineIdx = 0;
+    const out = { lineIdx, quizOk: true, ...ride };
+    const now = new Date(2026, 8, 21, 15).getTime();
+    const first = finishTrip(emptySave(), out, now);
+    const early = finishTrip(first.save, out, now + 60_000);
+    const render = (result: typeof first) =>
+      renderToStaticMarkup(
+        <Results {...props} line={LINES[lineIdx]} result={result} />,
+      );
+    expect(render(first)).toContain("Next review in 1 day.");
+    expect(render(first)).not.toContain("was early");
+    expect(render(early)).toContain("This ride was early");
+    expect(render(early)).toContain("still due in 1 day.");
+  });
+
   it("renders a cram drill result without a line to review", () => {
     const result = finishCram(emptySave(), { right: 9, asked: 12, time: 140 });
     const cramLine = {

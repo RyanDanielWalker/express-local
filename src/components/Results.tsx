@@ -40,6 +40,7 @@ export function Results({
     newBest,
     unlockedTier,
     reviewInDays,
+    early,
   } = result;
   const g = GUIDE[line.id] as (typeof GUIDE)[keyof typeof GUIDE] | undefined;
   const prompts = (g?.famous ?? g?.say ?? []) as string[];
@@ -156,6 +157,12 @@ export function Results({
         <p className="hint" style={{ margin: 0 }}>
           Drills do not change line progress or review dates. They keep your
           streak alive and show you what is shaky.
+        </p>
+      ) : early ? (
+        <p className="hint" style={{ margin: 0 }}>
+          This ride was early, so it did not count as a review. The review is
+          still due in {reviewInDays} day{reviewInDays === 1 ? "" : "s"}. Come
+          back when the map says <b>Review</b>.
         </p>
       ) : (
         <p className="hint" style={{ margin: 0 }}>

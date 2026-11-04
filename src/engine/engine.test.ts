@@ -306,27 +306,54 @@ describe("finishing a trip", () => {
     expect(early.save.stats.reviews).toBe(1);
     expect(early.ledger.some(([k]) => k === "On-time review")).toBe(false);
     expect(early.reviewInDays).toBe(2);
+    expect(early.early).toBe(true);
+    expect(review.levels.sq?.box).toBe(1);
+    expect(finishTrip(first, outcome, NOW + DAY).early).toBe(false);
     // The ride still counts as a trip.
     expect(early.save.levels.sq?.trips).toBe(3);
   });
 
-  it("makes a line due from the start of its due day", () => {
+  it("makes a line due from 4am on its due day", () => {
     const p = { ...emptyProgress(), cleared: true, due: clock(NOW, 1, 20) };
     expect(isDue(p, clock(NOW, 0, 23, 59))).toBe(false);
-    expect(isDue(p, clock(NOW, 1, 0, 1))).toBe(true);
+    expect(isDue(p, clock(NOW, 1, 3, 59))).toBe(false);
+    expect(isDue(p, clock(NOW, 1, 4))).toBe(true);
     expect(isDue(p, clock(NOW, 1, 19))).toBe(true);
     expect(isDue(p, clock(NOW, 5, 9))).toBe(true);
     expect(isDue({ ...p, cleared: false }, clock(NOW, 5, 9))).toBe(false);
   });
 
+  it("does not make a line cleared at 11:58pm due two minutes later", () => {
+    const r = finishTrip(emptySave(), outcome, clock(NOW, 0, 23, 58));
+    expect(r.reviewInDays).toBe(1);
+    expect(isDue(r.save.levels.sq, clock(NOW, 1, 0, 0))).toBe(false);
+    expect(isDue(r.save.levels.sq, clock(NOW, 1, 3, 59))).toBe(false);
+    expect(isDue(r.save.levels.sq, clock(NOW, 1, 4, 0))).toBe(true);
+  });
+
+  it("counts a ride before 4am toward the day before", () => {
+    expect(dayKey(clock(NOW, 1, 1))).toBe(dayKey(NOW));
+    expect(dayKey(clock(NOW, 1, 4))).not.toBe(dayKey(NOW));
+    // Ride at 3pm, then again at 1am that night: the same day, so the
+    // streak does not tick twice.
+    const first = finishTrip(emptySave(), outcome, NOW).save;
+    const night = finishTrip(first, outcome, clock(NOW, 1, 1)).save;
+    expect(night.streak.count).toBe(1);
+    // At 1am the night after next, it is the next day: the streak grows.
+    const next = finishTrip(night, outcome, clock(NOW, 2, 1)).save;
+    expect(next.streak.count).toBe(2);
+  });
+
   it("schedules whole calendar days, even across a clock change", () => {
-    // Every day of a year at 11:30pm, so a daylight saving change in the
-    // local time zone (if it has one) cannot push a review a day late.
+    // Every day of a year at 11:30pm and 3:30am, so a daylight saving change
+    // cannot push a review a day late. The tests run in New York time.
     for (let d = 0; d < 366; d++) {
-      const now = new Date(2026, 0, 1 + d, 23, 30).getTime();
-      for (const gap of [1, 3, 30]) {
-        expect(daysUntil(addDays(now, gap), now)).toBe(gap);
-        expect(new Date(addDays(now, gap)).getHours()).toBe(23);
+      for (const hour of [23, 3]) {
+        const now = new Date(2026, 0, 1 + d, hour, 30).getTime();
+        for (const gap of [1, 3, 30]) {
+          expect(daysUntil(addDays(now, gap), now)).toBe(gap);
+          expect(dayKey(addDays(now, -gap))).not.toBe(dayKey(now));
+        }
       }
     }
   });
@@ -666,6 +693,15 @@ describe("readiness", () => {
         NOW,
       ),
     ).toBeLessThanOrEqual(1);
+  });
+
+  it("is not late on the day a review is due", () => {
+    const save = cleared({ box: 1, due: clock(NOW, 0, 8) });
+    const morning = lineReadiness(LINES[0], save, clock(NOW, 0, 7));
+    expect(lineReadiness(LINES[0], save, clock(NOW, 0, 23))).toBe(morning);
+    expect(lineReadiness(LINES[0], save, clock(NOW, 1, 5))).toBeLessThan(
+      morning,
+    );
   });
 
   it("slides as a review goes overdue, but never to zero", () => {

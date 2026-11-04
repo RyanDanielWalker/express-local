@@ -30,5 +30,9 @@ export default defineConfig({
     // Vitest blanks CSS files unless told otherwise. The contrast test reads
     // app.css as text, so let that one file through.
     css: { include: [/app\.css/] },
+    // Every run, here and in CI, in one zone with daylight saving. The
+    // scheduling tests then mean the same everywhere, and can catch a review
+    // pushed a day late by a 23-hour day. UTC, CI's default, has none.
+    env: { TZ: "America/New_York" },
   },
 });
