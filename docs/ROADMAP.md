@@ -123,7 +123,7 @@ Riding a line before it is due resets its due date, but only a due ride moves it
   - The Daily Ride turns over at 4am in an open tab, and when the tab comes back into view. A pick from an earlier day is never shown. Checked in Chromium with Playwright's clock.
   - The intro says "Last done today", "yesterday" or "N days ago", counted in app days.
   - A ride that climbs a tier is not called early on the results screen. It still leaves the review alone.
-- [ ] **Finding 6.** The first end-to-end test expects its second ride to be early, so it fails if the two rides fall either side of 4am. Pin the clock in the test, or note it in `CLAUDE.md`'s traps.
+- [x] **Finding 6.** The first end-to-end test starts the browser's clock at noon, so its two rides always share an app day. Started at 3:59:50am instead, it failed: the second ride counted as a review.
 - [ ] **Inventory stop.** Everything but closing it, on 2026-11-04. A fresh `fact-checker` re-checked the one content change since the last stop (`e193530`, Generic Line's sort note and a talking point) under TypeScript 5.9, 6.0 and 7.0: clean, and its probes pass when re-run. Every check passed: the tests, lint, format, typecheck, the bar, the build, the TypeScript probes and the three end-to-end tests. The changed note was seen in Chromium at phone width in dark mode, with no console errors. `/audit` ran in a fresh context and is saved in [audits/2026-11-04.md](audits/2026-11-04.md). The stop closes with a `docs: inventory stop` commit once the items above are settled.
 
 ### 10. Predict-first questions: React and NestJS

@@ -192,6 +192,10 @@ test("ride a line twice on Local, then carry the save to a new browser", async (
   browser,
 }) => {
   const errors = watchConsole(page);
+  // The second ride must land on the same app day as the first, or it counts
+  // as a review instead of an early ride. The app's day turns at 4am, so start
+  // the browser's clock at noon. It keeps running from there.
+  await page.clock.install({ time: new Date(2026, 10, 4, 12) });
   // Phone width first: on a short page the browser lands at the top anyway,
   // so only a phone shows whether boarding scrolls the ride into view.
   await page.setViewportSize({ width: 375, height: 760 });
