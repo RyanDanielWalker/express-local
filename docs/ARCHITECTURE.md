@@ -123,7 +123,7 @@ What to do right now comes from `todayPlan()` in `engine/today.ts`, and the Toda
 
 Every screen has a URL. `lib/route.ts` turns a path into a route and back: `/` is the map, `/nest/life` a line, `/nest/life/ride` riding it (through to results or derailed), `/nest/life/rehearse` rehearsing it, and `/drill` a cram or shaky drill. The screen state in `App.tsx` stays the source of truth: it works out the route for what is on screen with `screenRoute()`, and `useUrl()` in `hooks/useUrl.ts` keeps the address bar on it with `pushState`. Back and Forward fire `popstate`, and `App.tsx` shows the line or the map that URL names. A ride lives only in memory, so a ride URL opened fresh, or reached with Forward, shows its line. Each history entry remembers the page it was opened from, and leaving a page for that one steps back instead of pushing, so "Back to the map" does not leave the ride behind in history. A path that names nothing is replaced with `/`. See [ADR 0019](adr/0019-a-small-router-of-our-own.md).
 
-Readiness (the headline number per division) comes from `readinessReport()`: what is cleared, at which tier, how far along its reviews, and how much of the question pool is solid. It decays as reviews go overdue, counted in whole days from the due day, so a line is not late on the day it is due.
+Readiness (the headline number per division) comes from `readinessReport()`: what is cleared, at which tier, how far along its reviews, and how much of the question pool is solid. It decays as reviews go overdue, starting when the due day ends (4am the next morning), so a line is not late on the day it is due.
 
 ## Saves
 

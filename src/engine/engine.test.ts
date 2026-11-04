@@ -699,9 +699,13 @@ describe("readiness", () => {
     const save = cleared({ box: 1, due: clock(NOW, 0, 8) });
     const morning = lineReadiness(LINES[0], save, clock(NOW, 0, 7));
     expect(lineReadiness(LINES[0], save, clock(NOW, 0, 23))).toBe(morning);
-    expect(lineReadiness(LINES[0], save, clock(NOW, 1, 5))).toBeLessThan(
-      morning,
-    );
+    // Lateness starts at 4am the next morning and slides from there. An hour
+    // late costs a little, not a whole day's worth at once.
+    const hourLate = lineReadiness(LINES[0], save, clock(NOW, 1, 5));
+    expect(hourLate).toBeLessThan(morning);
+    expect(hourLate).toBeGreaterThan(morning * 0.99);
+    const dayLate = lineReadiness(LINES[0], save, clock(NOW, 2, 4));
+    expect(dayLate).toBeLessThan(hourLate);
   });
 
   it("slides as a review goes overdue, but never to zero", () => {

@@ -69,6 +69,14 @@ function appNoon(t: number): Date {
   return d;
 }
 
+/** The 4am that starts the app day after the one `t` falls in. */
+function nextDayStart(t: number): number {
+  const d = appNoon(t);
+  d.setDate(d.getDate() + 1);
+  d.setHours(DAY_STARTS, 0, 0, 0);
+  return d.getTime();
+}
+
 /** The app day as YYYY-MM-DD, in local time, starting at 4am. */
 export function dayKey(t = Date.now()): string {
   const d = appNoon(t);
@@ -215,9 +223,9 @@ export function lineReadiness(
       : 0.45 + 0.2 * tier + 0.2 * depth + 0.15 * recall;
   // Going stale costs you half of it, never all of it. You do not forget a line
   // you once cleared, you just would not want to be asked about it cold.
-  // Counted in whole days from the due day, so a line is not late on the day
-  // it is due, matching what the map says.
-  const late = Math.max(0, -daysUntil(p.due, now)) / BOX_DAYS[p.box];
+  // Late starts when the due day ends (4am the next morning), so a line is
+  // not late on the day the map says it is due. Then it slides by the hour.
+  const late = Math.max(0, now - nextDayStart(p.due)) / (BOX_DAYS[p.box] * DAY);
   return proven * (1 - 0.5 * Math.min(1, late));
 }
 
