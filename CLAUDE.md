@@ -20,11 +20,12 @@ Four divisions, 34 lines. NestJS, TypeScript and React are finished: every line 
 ## How we work
 
 - **Ryan owns it, Claude is the senior engineer.** Claude writes the code and content; Ryan makes the calls, reviews every commit, and pushes. Explaining the work in plain English is part of the deliverable.
+- **Nothing is left for Ryan to fill in.** No `TODO(ryan)` markers, exercises, or work held until he writes a piece himself, unless he asks for that (`/next learn`, `/audit quiz`, or in words). He learns by building with Claude, reading the docs, and studying on his own ([ADR 0022](docs/adr/0022-nothing-waits-on-ryan-learning-the-code.md), [ADR 0030](docs/adr/0030-docs-to-learn-from.md)).
 - **Commit, never push.** Small Conventional Commits as the work goes (`feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`, and `style:` for a commit that only reformats). Subject says what, body says why. Content commits end with what they were checked against. Never push, never rewrite a pushed commit. No Claude co-author trailer: the README's How this was built section carries the disclosure instead ([ADR 0012](docs/adr/0012-disclose-ai-in-the-readme.md)).
 - **Work on `main`.** Commit straight to `main` by default. Ryan decides when something gets its own branch and pull request, and says so; don't create one or draft a pull request unless he asks ([ADR 0017](docs/adr/0017-main-by-default.md)).
 - **Stop for real decisions** with two or three options and a recommendation. Make routine choices and mention them.
 - **Every report at the end of a task opens with a "Needs you" block:** what Ryan must do before pushing, questions waiting on him, and anything noticed but not fixed. Or one line saying there is nothing. Never only in the body. Format: `.claude/skills/next/SKILL.md`, step 7.
-- **Keep the docs true** in the same commit. A significant decision gets an ADR.
+- **Keep the docs true and thorough** in the same commit. Ryan learns what was built by reading them later, so they say what each piece does and why, not just that it exists. A significant decision gets an ADR, as long as it needs to be to explain the decision ([ADR 0030](docs/adr/0030-docs-to-learn-from.md)).
 - **No loose threads.** A roadmap item is done when everything it touched is done, proven and documented. Anything found and not fixed goes on the roadmap.
 - **The repo carries the context, not the chat.** Sessions get cleared between tasks. Anything a future session needs (a decision, a trap, a half-finished thread) goes in the docs or the roadmap before the session ends.
 
@@ -118,4 +119,4 @@ NestJS, TypeScript and React are written to it. Algorithm lines are not yet.
 
 - **In the app:** direct, a little funny, plain English, and clear before clever. The subway theme goes in names and headings, never in the teaching. **No em dashes** anywhere (a test enforces it in player-facing copy, and the rule holds for docs and commit messages too).
 - **README:** professional, third person, no "I" or "we".
-- **To Ryan:** plain English, short, no jargon without a definition. He would rather read one clear sentence than three clever ones.
+- **To Ryan:** plain English and short. A new term gets a plain definition and a small example the first time it comes up, never a compressed one-liner. He would rather read one clear sentence than three clever ones. Docs and ADRs are the place for the full story; a report points to them.

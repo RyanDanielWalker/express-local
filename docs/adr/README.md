@@ -1,11 +1,11 @@
 # Architecture decision records
 
-One short file per significant decision: the context, the options, what was decided, and what follows from it. They explain why the project is the way it is, so nobody has to dig through old chats.
+One file per significant decision: the context, the options, what was decided, and what follows from it. They explain why the project is the way it is, so nobody has to dig through old chats.
 
 ## Rules
 
 - **Append-only.** Never rewrite a decision. If it changes, write a new ADR that says which one it amends or replaces, and add a line to the old one's status pointing at the new one.
-- **Short.** A page at most. Link to the roadmap or the code for detail.
+- **Thorough, not padded.** Long enough that someone who wasn't there understands the decision: what forced it, each option with its real cost, what was picked, and what follows. A new term gets a plain definition and a small example. Link to the roadmap or the code for detail rather than copying it ([0030](0030-docs-to-learn-from.md)).
 - **Numbered in order.** `NNNN-short-title.md`, next free number.
 - Decisions made before this folder existed are marked "Decided earlier, recorded 2026-10-17".
 
@@ -42,6 +42,7 @@ One short file per significant decision: the context, the options, what was deci
 | [0027](0027-early-rides-and-calendar-days.md)           | A review is due by calendar day, and an early ride leaves it alone                              | Accepted, amended by 0028 and 0029       |
 | [0028](0028-the-day-starts-at-4am.md)                   | The app's day starts at 4am                                                                     | Accepted                                 |
 | [0029](0029-date-edges-from-the-third-audit.md)         | Due dates sit at noon, and a due date no ride could set is due now                              | Accepted                                 |
+| [0030](0030-docs-to-learn-from.md)                      | Docs are written to be learned from, and nothing is left for Ryan to fill in                    | Accepted                                 |
 
 ## Template
 

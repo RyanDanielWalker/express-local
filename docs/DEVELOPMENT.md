@@ -83,8 +83,9 @@ Ryan owns the project and makes the calls. Claude is the senior engineer: it wri
 - **Conventional Commits.** `feat:`, `fix:`, `content:`, `docs:`, `chore:`, `test:`, `refactor:`, and `style:` for a commit that only reformats, with an optional scope like `fix(react):`. The subject says what changed. The body says why, in plain sentences.
 - **Content commits say what they were checked against.** The body ends with a `Checked against:` line naming the docs page (as a URL path) and the probe that proved it, for example: `Checked against: react.dev/reference/react/useActionState; probes/react/forms.tsx.`
 - **Stop for real decisions.** Anything about scope, product direction, or a tradeoff Ryan would care about gets two or three options and a recommendation before work starts. Routine choices get made, then mentioned in the report.
-- **Plain English.** Explanations to Ryan follow the same clarity standard as the content: one idea per sentence, the example before the name, every term defined.
-- **Keep the docs true.** A change that makes `README.md`, `CLAUDE.md`, or anything in `docs/` untrue fixes it in the same commit. A significant decision gets an ADR in `docs/adr/`.
+- **Plain English.** Explanations to Ryan follow the same clarity standard as the content: one idea per sentence, the example before the name, and every new term defined in plain words with a small example ([ADR 0030](adr/0030-docs-to-learn-from.md)).
+- **Keep the docs true and thorough.** A change that makes `README.md`, `CLAUDE.md`, or anything in `docs/` untrue fixes it in the same commit. Reading the docs later is how Ryan learns what was built, so they say what each piece does, why it is that way, and what was weighed against it. A significant decision gets an ADR in `docs/adr/`.
+- **Nothing waits on Ryan writing it.** Claude finishes the work: no `TODO(ryan)` markers, exercises, or pieces held for him, unless he asks with `/next learn`, `/audit quiz`, or in words ([ADR 0022](adr/0022-nothing-waits-on-ryan-learning-the-code.md), [ADR 0030](adr/0030-docs-to-learn-from.md)).
 - **No loose threads.** A roadmap item is done when everything it touched is done, verified and documented. Anything found along the way that isn't getting fixed now goes on the roadmap, not into a mental note.
 
 A commit message looks like this:

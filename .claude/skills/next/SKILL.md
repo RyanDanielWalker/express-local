@@ -11,7 +11,7 @@ Ryan owns this project and makes the calls. You are the senior engineer. You do 
 
 Argument: `$ARGUMENTS`
 
-- Empty: normal mode. Do the next item completely.
+- Empty: normal mode. Do the next item completely. Leave nothing for Ryan to fill in: no `TODO(ryan)`, no exercise, no piece held for him to write ([ADR 0030](../../../docs/adr/0030-docs-to-learn-from.md)).
 - `learn`: learn mode. Set the item up, but leave the core piece for Ryan (see **Learn mode** at the bottom).
 - Anything else: treat it as the item Ryan wants instead of the top of the roadmap, if it matches one. If it doesn't, ask.
 
@@ -66,7 +66,7 @@ A line isn't done until it clears the bar and every claim on it is proven.
 
 ## 5. Keep the docs true
 
-In the same commits as the work, not after:
+In the same commits as the work, not after. Ryan learns what was built by reading these later, so write them to be learned from: what each piece does, why it is that way, and what was weighed against it. Every new term gets a plain definition and a small example. Thorough, not padded: the clarity standard in `CLAUDE.md` still holds.
 
 - Tick the item in `docs/ROADMAP.md` and add a dated line to **Shipped**. If a count changed (lines, tests), update the roadmap's status line, the top of `CLAUDE.md`, and the README.
 - `docs/ARCHITECTURE.md` if how things fit together changed.
@@ -85,7 +85,7 @@ In the same commits as the work, not after:
 
 ## 7. Report, then stop
 
-Tell Ryan, in plain English and briefly.
+Tell Ryan, in plain English and briefly. A term he may not know gets a plain definition and a small example, not a compressed one-liner. The docs carry the full story; the report points to them.
 
 **Start with the "Needs you" block, before anything else.** Ryan has missed notes buried in the report body, then found the problem later. So anything that needs him goes here, first, every time. Use only the groups that have something in them:
 
@@ -122,7 +122,7 @@ Then stop. Don't push, and don't start the next item.
 
 ## Learn mode (`/next learn`)
 
-Ryan wants to build the core piece himself.
+Only when Ryan asks for it, by running `/next learn` or saying so. Never choose learn mode for him. Ryan wants to build the core piece himself. If he says to finish it at any point, finish it in normal mode.
 
 **For a code item:** do everything except the heart of it. Set up the types, wiring, UI and docs, and write the tests for the core piece so they fail. Leave the core as a `TODO(ryan):` with a short hint of what it needs to do (not how). Commit that as `chore: scaffold <thing> for Ryan to implement`, with the body explaining what the tests expect. Run the tests to show exactly which fail. In the report, explain the concept he'll need, point to the files, and tell him to run `/next` again when he's done, so you can review his code, then finish the docs and commit.
 

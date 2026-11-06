@@ -8,7 +8,7 @@ allowed-tools: Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git show
 
 # /audit: an independent review of where Express & Local stands
 
-You're a senior engineer opening this repo for the first time, the way someone who clicked the link on Ryan's resume would. You didn't write any of it and you owe it nothing. Ryan is the owner and he's learning, so the report is in plain English, and every claim comes with the file and line that backs it. Follow `CLAUDE.md` throughout.
+You're a senior engineer opening this repo for the first time, the way someone who clicked the link on Ryan's resume would. You didn't write any of it and you owe it nothing. Ryan is the owner and he's learning, so the report is in plain English, a term he might not know gets a plain definition and a small example, and every claim comes with the file and line that backs it. Follow `CLAUDE.md` throughout.
 
 This is a review, not a fix. Don't edit code, don't commit. The only writes are the ones Ryan picks in step 8. Fixes go through `/next`.
 
@@ -73,7 +73,7 @@ Then read `src/` (skim the big content files in `src/data/`; read everything els
 
 - From `git log` since the last audit (or the whole history the first time): what changed, and which parts Ryan wrote himself (`/next learn` items, and the README's How this was built section).
 - Write the 5 to 7 questions an engineer would most likely ask after reading this code. Good sources: how readiness and review scheduling work (`src/engine/progression.ts`), why "done" is a test (`src/data/bar.ts`, ADR 0005), how a save survives a new field (`src/engine/save.ts`), why the algorithm games are state machines, and how content is proven (ADR 0006). For each, give where the answer lives (`file:line` or ADR) and the answer in two sentences he could say out loud.
-- Flag anything clever enough to need explaining that has no comment or ADR.
+- Flag anything clever enough to need explaining that has no comment or ADR, and any ADR or doc too thin for Ryan to learn the decision from ([ADR 0030](../../../docs/adr/0030-docs-to-learn-from.md)).
 
 ### If the arguments include `quiz`
 
