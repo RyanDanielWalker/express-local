@@ -184,10 +184,10 @@ A predict-first question goes in a line's `questions` with `predict: 'type'`, a 
 
 NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at the top of [docs/ROADMAP.md](docs/ROADMAP.md), and it was tagged `v1.0` on 2026-11-03. The [case study](docs/CASE-STUDY.md) tells how it was built. Predict-first questions are on every TypeScript line: the player sees a snippet, types a guess before anything else appears, then sees the proven answer. Next is predict-first questions for React and NestJS. A NestJS and Postgres backend is 2.0.
 
-- [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and independently reviewed
+- [x] **NestJS:** nine lines, all clearing the bar, enforced by the test suite, and reviewed by separate Claude agents
 - [x] **Matching puzzles:** sort jobs and signatures into the building block that handles them
-- [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and independently reviewed
-- [x] **React:** eight lines clearing the bar, every claim run against React 19.3, and independently reviewed
+- [x] **TypeScript:** six lines clearing the bar, every claim checked with the compiler, and reviewed by separate Claude agents
+- [x] **React:** eight lines clearing the bar, every claim run against React 19.3, and reviewed by separate Claude agents
 - [x] **Foundation:** formatting and lint, CI on every push, and an end-to-end test
 - [x] **No repeats:** questions that tested the same fact as another were given new angles
 - [x] **Reorganize the page:** a Today band, a play mode that takes over the screen, real URLs, and accessibility checks as tests
@@ -199,7 +199,7 @@ NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at
 
 ## How this was built
 
-Designed by Ryan Walker, who set the direction and made the calls recorded in [docs/adr/](docs/adr/). [Claude](https://claude.ai) wrote most of the code and content as a pair programmer, under the rules in [CLAUDE.md](CLAUDE.md): every content claim proven against running code in `probes/`, every wrong option proven wrong, and an independent review before a division counts as finished. Ryan reviewed every commit before pushing it.
+Designed by Ryan Walker, who set the direction and made the calls recorded in [docs/adr/](docs/adr/). [Claude](https://claude.ai) wrote most of the code and content as a pair programmer, under the rules in [CLAUDE.md](CLAUDE.md): every content claim proven against running code in `probes/`, every wrong option proven wrong, and a review by separate Claude agents, which did not write the content, before a division counts as finished. Ryan reviewed every commit before pushing it.
 
 [docs/CASE-STUDY.md](docs/CASE-STUDY.md), written by Claude, tells the story in more detail: what broke, what was decided, and how the work was split.
 

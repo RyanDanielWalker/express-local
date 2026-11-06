@@ -34,7 +34,7 @@ One file per significant decision: the context, the options, what was decided, a
 | [0019](0019-a-small-router-of-our-own.md)               | A small router of our own, with path URLs                                                       | Accepted                                 |
 | [0020](0020-accessibility-as-tests.md)                  | Accessibility is checked by tests: axe in the end-to-end test, and contrast from the stylesheet | Accepted                                 |
 | [0021](0021-deploy-to-cloudflare-from-ci.md)            | Deploy to Cloudflare from CI, from a public repo                                                | Accepted                                 |
-| [0022](0022-nothing-waits-on-ryan-learning-the-code.md) | Nothing waits on Ryan learning the code or writing it himself                                   | Accepted                                 |
+| [0022](0022-nothing-waits-on-ryan-learning-the-code.md) | Nothing waits on Ryan learning the code or writing it himself                                   | Accepted, amended by 0031                |
 | [0023](0023-predict-first-questions-after-1-0.md)       | After 1.0, predict-first questions come first                                                   | Accepted                                 |
 | [0024](0024-how-a-predict-first-guess-is-checked.md)    | How a predict-first guess is checked                                                            | Accepted, amended by 0025                |
 | [0025](0025-predict-first-questions-in-the-bar.md)      | Predict-first questions are required by the bar, not counted                                    | Accepted                                 |
@@ -43,6 +43,8 @@ One file per significant decision: the context, the options, what was decided, a
 | [0028](0028-the-day-starts-at-4am.md)                   | The app's day starts at 4am                                                                     | Accepted                                 |
 | [0029](0029-date-edges-from-the-third-audit.md)         | Due dates sit at noon, and a due date no ride could set is due now                              | Accepted                                 |
 | [0030](0030-docs-to-learn-from.md)                      | Docs are written to be learned from, and nothing is left for Ryan to fill in                    | Accepted                                 |
+| [0031](0031-reviews-named-for-who-ran-them.md)          | Reviews are named for who ran them                                                              | Accepted                                 |
+| [0032](0032-block-git-push-with-a-permission-rule.md)   | Stop Claude from pushing with a permission rule                                                 | Accepted                                 |
 
 ## Template
 

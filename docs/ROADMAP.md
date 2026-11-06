@@ -16,7 +16,7 @@ Express & Local 1.0 is done when a visitor or reviewer can check each of these (
 
 **Done, and tagged `v1.0` on 2026-11-03.** Until the tag, 1.0 was frozen: new findings went to Parked unless they were a security hole, a bug a visitor would hit, or embarrassing on the first screen. The freeze ended with the tag, and the next block was picked from Parked ([ADR 0023](adr/0023-predict-first-questions-after-1-0.md)). The backend is still 2.0.
 
-Status: 34 lines across 4 divisions, 176 tests plus three end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were independently reviewed against the compiler or running code, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-11-04, after the early-ride block (find it with `git log --grep '^docs: inventory stop'`).
+Status: 34 lines across 4 divisions, 176 tests plus three end-to-end tests, no backend, live at https://express-local.ryandanielwalker.workers.dev, tagged `v1.0` on 2026-11-03. NestJS, TypeScript and React all clear the bar, were reviewed against the compiler or running code by separate Claude agents, and have their gaps closed. Algorithms are parked. Last inventory stop: 2026-11-04, after the early-ride block (find it with `git log --grep '^docs: inventory stop'`).
 
 ## Next, in order
 
@@ -163,7 +163,7 @@ Nine lines, all clearing the bar, listed in `FINISHED` so the suite fails if any
 - [x] **More flows.** The validation pipeline on the DTO line, DI resolution order on Wiring Yard, an exception's trip to the client on Fault Line, and an interceptor wrapping a handler on Tool Shed.
 - [x] **A clarity pass, line by line.** All nine lines rewritten to the clarity standard in [CLAUDE.md](../CLAUDE.md): one idea per sentence, terms defined where they appear, and explanations that say why the tempting wrong answer is wrong. Three reviewers then ran all 201 changed fields against Nest 12.1.3 and flagged 19, all fixed.
 - [x] **Replays that differ.** Every Local ride on Wiring Yard was identical: pools were exactly the size of a run, with one puzzle. Now 9 Local questions and 2 Local puzzles per line, unseen and shaky questions first, puzzles rotating ride by ride.
-- [x] **Independent review.** Three reviewers that had not seen the content ran its claims as real code against Nest 12.1.3. They found wrong answers or explanations on most lines, and many more misleading ones. The worst: a missing `@Injectable()` listed as a cause of "can't resolve dependencies" (it boots, with an undefined dependency), `overrideGuard` advised for a global `APP_GUARD` it cannot reach, `transform: true` said to convert DTO fields, and a catch-all filter example that dropped every error message. Each finding was checked against the Nest source or a probe, fixed line by line, then a second set of reviewers re-checked all 122 changed fields and flagged 16 more, also fixed.
+- [x] **Review by separate agents.** Three reviewers that had not seen the content ran its claims as real code against Nest 12.1.3. They found wrong answers or explanations on most lines, and many more misleading ones. The worst: a missing `@Injectable()` listed as a cause of "can't resolve dependencies" (it boots, with an undefined dependency), `overrideGuard` advised for a global `APP_GUARD` it cannot reach, `transform: true` said to convert DTO fields, and a catch-all filter example that dropped every error message. Each finding was checked against the Nest source or a probe, fixed line by line, then a second set of reviewers re-checked all 122 changed fields and flagged 16 more, also fixed.
 - [x] **Gaps the reviewers flagged.** 13 new questions: dynamic modules (`forRoot`, `forFeature`, `forRootAsync`) and lifecycle and shutdown hooks on Wiring Yard, an `APP_FILTER` filter with dependencies on Fault Line, custom decorators (`Reflector.createDecorator`, `applyDecorators`, `createParamDecorator`) on Tool Shed, GraphQL guards and token storage on Turnstile, and global pipes in e2e tests on Test Track. Each was run against Nest 12.1.3, then checked by an independent reviewer.
 
 ## Done: TypeScript
@@ -176,7 +176,7 @@ All six lines clear the bar, listed in `FINISHED` so the suite enforces it. Ever
 - [x] **Unknown Territory:** any vs unknown, how any spreads, as and ! as claims not checks, satisfies (fixed: it does not keep literals, it keeps exact keys)
 - [x] **Shape Yard:** structural typing, the excess property check, declaration merging, extends vs &, branded types
 - [x] **Typed Components:** props, children, events, refs and hook type arguments on React 19 types. Found along the way: the global JSX namespace is gone, FormEvent is deprecated in favor of SubmitEvent, and ref is a normal prop
-- [x] **Independent review.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in [CLAUDE.md](../CLAUDE.md): prove the wrong options, not just the right one.
+- [x] **Review by separate agents.** Three reviewers that had not seen the content checked about 360 claims with the compiler and current docs. Every marked answer held up, but they found 8 wrong items (two wrong options that were actually true, React.FC's history backwards, a Map claim, an Omit claim in a model answer) and about 20 misleading ones. All fixed, then a second pair re-checked every changed field: no wrong answers, and the remaining overstatements fixed too. The lesson is in [CLAUDE.md](../CLAUDE.md): prove the wrong options, not just the right one.
 - [x] **Gaps the reviewers flagged.** 8 new questions: assertion functions and `x == null` on Narrow Gauge, generic type aliases and defaults on Generic Line, Omit on a union on Utility Yard, `.catch()` callbacks on Unknown Territory, and context and `ComponentProps<'button'>` on Typed Components. Each was proved with `tsc`, then checked by an independent reviewer.
 
 ## Done: React
@@ -188,7 +188,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - [x] **Rehearsal to three prompts a line**, and a drill for every side panel.
 - [x] **No more length giveaways.** Memo Yard had the answer as the longest option on 8 of 9 questions. Every line now spreads it across longest, middle and shortest.
 - [x] **The clarity standard**, on every explanation, field guide and note.
-- [x] **Independent review.** Three reviewers ran all 325 items against React 19.3 and flagged 55. The worst: an effect loop React was said to stop (it only warns, and the loop runs on), StrictMode described as a real remount, state updates said to apply before the next render instead of during it, and a conditional-hook question whose code never actually threw. All fixed, then a fresh reviewer re-checked the 75 changed fields and flagged 14 more, also fixed.
+- [x] **Review by separate agents.** Three reviewers ran all 325 items against React 19.3 and flagged 55. The worst: an effect loop React was said to stop (it only warns, and the loop runs on), StrictMode described as a real remount, state updates said to apply before the next render instead of during it, and a conditional-hook question whose code never actually threw. All fixed, then a fresh reviewer re-checked the 75 changed fields and flagged 14 more, also fixed.
 - [x] **Gaps the reviewers flagged.** Two new lines: Fare Machine, on controlled and uncontrolled inputs and React 19 form Actions, and Arrivals Board, on Suspense, `use()`, error boundaries and request waterfalls. Side Track gained three questions on the React 19.2 additions, `useEffectEvent` and `<Activity>`. Three fresh reviewers ran the new content against React 19.3 and flagged 14 items. The biggest: error boundaries were said to catch only rendering errors, but they also catch errors in effects and in Actions, like a form action. All fixed, then a fresh reviewer re-checked the changed fields and flagged 5 wording points, also fixed.
 
 ## Parked for now
@@ -213,6 +213,8 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **Generic Line's `Promise.all` snippet does not compile pasted on its own.** It uses `await` at the top level and never declares `User`, so a file holding just that snippet stops with TS1375. The type it asks about is right. Wrapping it in an `async function` and declaring `User` would make it complete, but rewording the code resets the question's history. Found by the fact-checker at the second inventory stop.
 - **The algorithm code check moves on by itself after 2.2 seconds, with no number keys** (`Quiz.tsx:31`), unlike every other screen and the README's "You advance, not a timer". Found by the first audit. Parked with the algorithms.
 - **Why readiness weighs what it does.** `lineReadiness()` mixes tier, review step and recall as 0.45, 0.2, 0.2 and 0.15 (`src/engine/progression.ts`), and nothing says why. An interviewer who reads it could ask. A comment or a short ADR would do. Found by the third audit.
+
+- [ ] **Delete the merged branches.** `content/near-duplicates-nest` locally, and `chore/ci`, `content/near-duplicates`, `content/near-duplicates-across`, `content/near-duplicates-nest`, `feat/e2e` and `feat/validate-saves` on GitHub, are all merged into `main`. Deleting them is harmless. It is a push, so Ryan does it.
 
 ## Later: engine ideas
 
@@ -279,15 +281,15 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-10-15** Generic Line clears the bar, every claim checked with tsc
 - **2026-10-15** The bar checks for any length giveaway (longest, middle or shortest), not just the longest. Tool Shed and Test Track rebalanced
 - **2026-10-15** Utility Yard clears the bar. TypeScript at 3 of 6
-- **2026-10-15** Unknown Territory, Shape Yard and Typed Components clear the bar. TypeScript at 6 of 6, pending independent review
-- **2026-10-15** Independent review of TypeScript: 8 wrong and about 20 misleading items found and fixed, re-checked, and TypeScript added to `FINISHED`
-- **2026-10-15** Independent review of NestJS against running Nest 12.1.3 code: wrong and misleading items fixed across all nine lines, then re-checked
+- **2026-10-15** Unknown Territory, Shape Yard and Typed Components clear the bar. TypeScript at 6 of 6, pending review by separate agents
+- **2026-10-15** Separate-agent review of TypeScript: 8 wrong and about 20 misleading items found and fixed, re-checked, and TypeScript added to `FINISHED`
+- **2026-10-15** Separate-agent review of NestJS against running Nest 12.1.3 code: wrong and misleading items fixed across all nine lines, then re-checked
 - **2026-10-15** NestJS clarity pass: all nine lines rewritten to the clarity standard, then reviewed against running code
 - **2026-10-15** NestJS gaps closed: 13 questions on dynamic modules, lifecycle hooks, custom decorators, GraphQL guards, token storage and e2e pipes
 - **2026-10-15** TypeScript gaps closed: 8 questions, each proved with tsc. NestJS and TypeScript have no open items
 - **2026-10-16** Flow puzzles say where a missed step goes and what you tried instead
 - **2026-10-16** React clears the bar on all six lines: 37 new Local questions, 12 puzzles, the clarity standard, every claim run against React 19.3
-- **2026-10-16** Independent review of React: 55 items fixed, re-checked, and React added to `FINISHED`
+- **2026-10-16** Separate-agent review of React: 55 items fixed, re-checked, and React added to `FINISHED`
 - **2026-10-16** React gaps closed: Fare Machine (forms and Actions), Arrivals Board (Suspense and error boundaries), and `useEffectEvent` and `<Activity>` on Side Track. React has no open items
 - **2026-10-16** Consistency pass across all 34 lines: older React answers updated for `<Activity>`, Actions and `useEffectEvent`, two React questions that repeated others replaced, stale comments and docs fixed, and the new lines played end to end in a browser
 - **2026-10-17** Moved to a terminal workflow: `CLAUDE.md` rewritten for Claude Code, `docs/` (this roadmap, architecture, development, decision records), the `/next` command, a `fact-checker` agent, the fact-check sandboxes committed under `probes/`, and a test that keeps question ids unique within a line
@@ -323,3 +325,4 @@ Learned the hard way, mostly by getting them wrong first.
 - **2026-11-04** The app's day starts at 4am, readiness is not late until the due day ends, and the results screen says when a ride was early ([ADR 0028](adr/0028-the-day-starts-at-4am.md))
 - **2026-11-04** Inventory stop after the early-ride block: a clean fact-check, the third audit, and its date findings fixed. Due dates sit at noon, a due date no ride could set is due now, the Daily Ride turns over at 4am in an open tab, and the first end-to-end test starts its clock at noon ([ADR 0029](adr/0029-date-edges-from-the-third-audit.md)). Predict-first questions for React and NestJS come next
 - **2026-11-06** Docs written to be learned from: ADRs thorough rather than a page at most, every new term explained with an example, and nothing left for Ryan to fill in unless he asks ([ADR 0030](adr/0030-docs-to-learn-from.md))
+- **2026-11-06** Reviews named for who ran them ([ADR 0031](adr/0031-reviews-named-for-who-ran-them.md)), and a permission rule stops Claude from pushing ([ADR 0032](adr/0032-block-git-push-with-a-permission-rule.md))

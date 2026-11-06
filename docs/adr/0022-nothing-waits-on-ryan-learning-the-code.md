@@ -1,6 +1,6 @@
 # 0022. Nothing waits on Ryan learning the code or writing it himself
 
-Status: Accepted (2026-11-03). Amends [0010](0010-a-portfolio-piece-with-a-1-0.md) and [0018](0018-learn-mode-after-1-0.md).
+Status: Accepted (2026-11-03). Amends [0010](0010-a-portfolio-piece-with-a-1-0.md) and [0018](0018-learn-mode-after-1-0.md). Amended by [0031](0031-reviews-named-for-who-ran-them.md).
 
 ## Context
 

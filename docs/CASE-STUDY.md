@@ -65,7 +65,7 @@ Most of the rules in this repo exist because something went wrong first.
 - A claim that StrictMode remounts a component for real. It runs the effect's setup, cleanup and setup again, but keeps the state.
 - In NestJS, a missing `@Injectable()` listed as a cause of a startup error. The app actually starts, with the dependency undefined, and the first request that uses it fails.
 
-The independent reviews then found 8 wrong and about 20 misleading items in TypeScript, and 55 items to fix in React. Each was re-proven and re-checked before the division counted as finished.
+The separate agents' reviews then found 8 wrong and about 20 misleading items in TypeScript, and 55 items to fix in React. Each was re-proven and re-checked before the division counted as finished.
 
 **The puzzles answered themselves.** A flow puzzle showed the correct step after a wrong click, so a wrong click became the cheapest hint in the app. A hint panel printed the answer to the puzzle beside it. Red meant correct in one place. Each was fixed, and each became a rule: never answer the question for the player, a hint must never contain the answer, and red always means wrong.
 
@@ -97,7 +97,7 @@ The split was set out in [ADR 0009](adr/0009-terminal-workflow.md) and held for 
 - **Ryan owned the project.** He set the direction, made the product calls and tradeoffs, reviewed every commit, and pushed every one himself. He is the author of the commits because the author is the person responsible for them.
 - **Claude was the senior engineer.** It wrote the code and the content, proved the content, kept the docs true in the same commits, and explained each piece of work in plain English. It committed but never pushed.
 - **A command ran the loop.** `/next` took the top item off the roadmap, planned it, stopped to ask when a decision was Ryan's, built and proved it, and reported what shipped and which commit most needed his review.
-- **Review came from outside the author.** A separate fact-checker agent reviewed content it had not written. An `/audit` command gave an outsider's review of the whole project at the end of a phase.
+- **Review came from a Claude agent that was not the author.** A separate fact-checker agent reviewed content it had not written. An `/audit` command gave a fresh-session review by Claude of the whole project at the end of a phase.
 - **The repo carried the context.** Anything a later session needed (a decision, a trap, an unfinished thread) went into the docs before the session ended. The **Known traps** section of `CLAUDE.md` is the record of that habit.
 
 The use of AI is disclosed in the README's **How this was built** section rather than in commit trailers ([ADR 0012](adr/0012-disclose-ai-in-the-readme.md)). Most commits up to `c1e7326` carry a Claude co-author trailer from before that decision.
@@ -119,7 +119,7 @@ Honest limits, all recorded on the [roadmap](ROADMAP.md) under **Parked**:
 At the `v1.0` tag:
 
 - 34 lines. All 23 NestJS, React and TypeScript lines clear the bar, and the test suite keeps them there.
-- 394 questions and 56 puzzles in those divisions. Every claim is proven against the compiler or running code. Each division was independently reviewed before it counted as finished. Later changes are proven the same way and go to the same reviewer in batches.
+- 394 questions and 56 puzzles in those divisions. Every claim is proven against the compiler or running code. Each division was reviewed by separate Claude agents before it counted as finished. Later changes are proven the same way and go to the same reviewer in batches.
 - 153 unit and content tests, two browser tests against the production build, and CI that deploys only on green.
 - Tagged `v1.0` on 2026-11-03.
 - 23 decision records explaining why the project is the way it is.
