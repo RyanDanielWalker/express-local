@@ -1,6 +1,6 @@
 # 0012. AI use is disclosed in the README, not in commit trailers
 
-Status: Accepted (2026-10-26).
+Status: Accepted (2026-10-26). Amended by [0033](0033-correct-the-record-on-the-2026-11-06-app-sessions.md).
 
 ## Context
 

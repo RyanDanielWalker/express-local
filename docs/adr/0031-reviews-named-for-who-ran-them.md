@@ -1,6 +1,6 @@
 # 0031. Reviews are named for who ran them
 
-Status: Accepted (2026-11-06). Amends [0022](0022-nothing-waits-on-ryan-learning-the-code.md).
+Status: Accepted (2026-11-06). Amends [0022](0022-nothing-waits-on-ryan-learning-the-code.md). Corrected by [0033](0033-correct-the-record-on-the-2026-11-06-app-sessions.md).
 
 ## Context
 

@@ -71,7 +71,7 @@ Then read `src/` (skim the big content files in `src/data/`; read everything els
 
 ## 6. Can Ryan answer for it?
 
-- From `git log` since the last audit (or the whole history the first time): what changed, and which parts Ryan wrote himself (`/next learn` items, and the README's How this was built section).
+- From `git log` since the last audit (or the whole history the first time): what changed, and which parts Ryan wrote himself (`/next learn` items, named in `docs/CASE-STUDY.md` under How Ryan worked with Claude).
 - Write the 5 to 7 questions an engineer would most likely ask after reading this code. Good sources: how readiness and review scheduling work (`src/engine/progression.ts`), why "done" is a test (`src/data/bar.ts`, ADR 0005), how a save survives a new field (`src/engine/save.ts`), why the algorithm games are state machines, and how content is proven (ADR 0006). For each, give where the answer lives (`file:line` or ADR) and the answer in two sentences he could say out loud.
 - Flag anything clever enough to need explaining that has no comment or ADR, and any ADR or doc too thin for Ryan to learn the decision from ([ADR 0030](../../../docs/adr/0030-docs-to-learn-from.md)).
 

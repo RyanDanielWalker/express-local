@@ -102,7 +102,7 @@ The split was set out in [ADR 0009](adr/0009-terminal-workflow.md) and held for 
 
 The use of AI is disclosed in the README's **How this was built** section rather than in commit trailers ([ADR 0012](adr/0012-disclose-ai-in-the-readme.md)). Most commits up to `c1e7326` carry a Claude co-author trailer from before that decision.
 
-What this arrangement did not give Ryan is a line-by-line understanding of the app's own code. Almost none of the code in the history is his own. His review was of what each commit did and why. The material the app teaches is what he studies, by playing it.
+What this arrangement did not give Ryan is a line-by-line understanding of the app's own code. Almost none of the code in the history is his own. His review was of what each commit did and why. The material the app teaches is what he studies, by playing it. A piece he writes himself with `/next learn` gets named here ([ADR 0033](adr/0033-correct-the-record-on-the-2026-11-06-app-sessions.md)).
 
 ## What is not done
 

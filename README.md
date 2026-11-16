@@ -199,11 +199,7 @@ NestJS, TypeScript and React are finished, gaps included. 1.0 is a short list at
 
 ## How this was built
 
-Designed by Ryan Walker, who set the direction and made the calls recorded in [docs/adr/](docs/adr/). [Claude](https://claude.ai) wrote most of the code and content as a pair programmer, under the rules in [CLAUDE.md](CLAUDE.md): every content claim proven against running code in `probes/`, every wrong option proven wrong, and a review by separate Claude agents, which did not write the content, before a division counts as finished. Ryan reviewed every commit before pushing it.
-
-[docs/CASE-STUDY.md](docs/CASE-STUDY.md), written by Claude, tells the story in more detail: what broke, what was decided, and how the work was split.
-
-Most commits up to `c1e7326` carry a Claude co-author trailer. Later ones do not, because the disclosure lives here instead ([ADR 0012](docs/adr/0012-disclose-ai-in-the-readme.md)).
+Express & Local is built with [Claude Code](https://claude.com/claude-code). Commits up to `c1e7326` name Claude as a co-author. Later ones don't, because this section says it once ([ADR 0012](docs/adr/0012-disclose-ai-in-the-readme.md), [ADR 0033](docs/adr/0033-correct-the-record-on-the-2026-11-06-app-sessions.md)).
 
 ## License
 

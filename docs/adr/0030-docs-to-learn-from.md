@@ -1,6 +1,6 @@
 # 0030. Docs are written to be learned from, and nothing is left for Ryan to fill in
 
-Status: Accepted (2026-11-06). Changes the "Short" rule in the [ADR rules](README.md). Makes [0022](0022-nothing-waits-on-ryan-learning-the-code.md) a standing rule for every session, without changing what it decided.
+Status: Accepted (2026-11-06). Changes the "Short" rule in the [ADR rules](README.md). Makes [0022](0022-nothing-waits-on-ryan-learning-the-code.md) a standing rule for every session, without changing what it decided. Corrected by [0033](0033-correct-the-record-on-the-2026-11-06-app-sessions.md).
 
 ## Context
 
