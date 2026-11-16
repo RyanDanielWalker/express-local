@@ -214,7 +214,7 @@ All eight lines clear the bar, listed in `FINISHED` so the suite enforces it. Ev
 - **The algorithm code check moves on by itself after 2.2 seconds, with no number keys** (`Quiz.tsx:31`), unlike every other screen and the README's "You advance, not a timer". Found by the first audit. Parked with the algorithms.
 - **Why readiness weighs what it does.** `lineReadiness()` mixes tier, review step and recall as 0.45, 0.2, 0.2 and 0.15 (`src/engine/progression.ts`), and nothing says why. An interviewer who reads it could ask. A comment or a short ADR would do. Found by the third audit.
 
-- [ ] **Delete the merged branches.** `content/near-duplicates-nest` locally, and `chore/ci`, `content/near-duplicates`, `content/near-duplicates-across`, `content/near-duplicates-nest`, `feat/e2e` and `feat/validate-saves` on GitHub, are all merged into `main`. Deleting them is harmless. It is a push, so Ryan does it.
+- [x] **Delete the merged branches.** `content/near-duplicates-nest` locally, and `chore/ci`, `content/near-duplicates`, `content/near-duplicates-across`, `content/near-duplicates-nest`, `feat/e2e` and `feat/validate-saves` on GitHub, were all merged into `main`. Ryan deleted the local one on 2026-11-16. The six on GitHub were already gone, and only this repo's stale copies of them remained, so `git fetch --prune` cleared those.
 
 ## Later: engine ideas
 
